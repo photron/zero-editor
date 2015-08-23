@@ -14,13 +14,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
-    connect(ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
-    connect(ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
-    connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
-    connect(ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
-    connect(ui->widgetFindAndReplace, &FindAndReplaceWidget::hideClicked, ui->widgetStackedSearches, &QStackedWidget::hide);
-    connect(ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, ui->widgetStackedSearches, &QStackedWidget::hide);
+    connect(ui->actionExit, QAction::triggered, this, close);
+    connect(ui->actionFindAndReplace, QAction::triggered, this, showFindAndReplaceWidget);
+    connect(ui->actionFindInFiles, QAction::triggered, this, showFindInFilesWidget);
+    connect(ui->actionTerminal, QAction::triggered, this, openTerminal);
+    connect(ui->actionTerminal_Tool, QAction::triggered, this, openTerminal);
+    connect(ui->widgetFindAndReplace, FindAndReplaceWidget::hideClicked, ui->widgetStackedSearches, QStackedWidget::hide);
+    connect(ui->widgetFindInFiles, FindInFilesWidget::hideClicked, ui->widgetStackedSearches, QStackedWidget::hide);
 
     ui->widgetOpenFiles->installLineEditEventFilter(this);
     ui->widgetFindAndReplace->installLineEditEventFilter(this);
