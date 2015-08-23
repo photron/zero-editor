@@ -1,0 +1,798 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>738</width>
+    <height>559</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Zero Editor</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout_6">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="handleWidth">
+       <number>6</number>
+      </property>
+      <widget class="QWidget" name="widgetLeftPanel" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QSplitter" name="splitterLeftPanel">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="handleWidth">
+           <number>6</number>
+          </property>
+          <widget class="OpenFilesWidget" name="widgetOpenFiles" native="true"/>
+          <widget class="RecentFilesWidget" name="widgetRecentFiles" native="true"/>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="widgetRightPanel" native="true">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QSplitter" name="splitterRightPanel">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="handleWidth">
+           <number>6</number>
+          </property>
+          <widget class="QStackedWidget" name="widgetStackedTextEditors">
+           <widget class="QWidget" name="page">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QPlainTextEdit" name="plainTextEdit"/>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_2"/>
+          </widget>
+          <widget class="QStackedWidget" name="widgetStackedSearches">
+           <widget class="FindInFilesWidget" name="widgetFindInFiles"/>
+           <widget class="FindAndReplaceWidget" name="widgetFindAndReplace"/>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>738</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="actionSaveAll"/>
+    <addaction name="separator"/>
+    <addaction name="actionRevert"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
+    <addaction name="actionCut"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
+    <addaction name="actionDelete"/>
+    <addaction name="separator"/>
+    <addaction name="actionSelectAll"/>
+    <addaction name="separator"/>
+    <addaction name="actionToggleCase"/>
+   </widget>
+   <widget class="QMenu" name="menuFind">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionFindQuick"/>
+    <addaction name="separator"/>
+    <addaction name="actionFindAndReplace"/>
+    <addaction name="actionFindInFiles"/>
+   </widget>
+   <widget class="QMenu" name="menuEditor">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <widget class="QMenu" name="menuIndentation">
+     <property name="title">
+      <string>Indentation</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icons/icons.qrc">
+       <normaloff>:/icons/16x16/indentation.png</normaloff>:/icons/16x16/indentation.png</iconset>
+     </property>
+     <addaction name="actionTabs"/>
+     <addaction name="actionTwoSpaces"/>
+     <addaction name="actionFourSpaces"/>
+    </widget>
+    <widget class="QMenu" name="menuSyntax">
+     <property name="title">
+      <string>Syntax</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icons/icons.qrc">
+       <normaloff>:/icons/16x16/syntax.png</normaloff>:/icons/16x16/syntax.png</iconset>
+     </property>
+     <addaction name="actionC"/>
+     <addaction name="actionJava"/>
+     <addaction name="actionPython"/>
+    </widget>
+    <widget class="QMenu" name="menuLineEnding">
+     <property name="title">
+      <string>Line Ending</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icons/icons.qrc">
+       <normaloff>:/icons/16x16/line-ending.png</normaloff>:/icons/16x16/line-ending.png</iconset>
+     </property>
+     <addaction name="actionLF"/>
+     <addaction name="actionCR"/>
+     <addaction name="actionCRLF"/>
+    </widget>
+    <addaction name="menuIndentation"/>
+    <addaction name="separator"/>
+    <addaction name="menuSyntax"/>
+    <addaction name="separator"/>
+    <addaction name="menuLineEnding"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionSpellChecker"/>
+    <addaction name="actionGitDiff"/>
+    <addaction name="actionTerminal"/>
+   </widget>
+   <widget class="QMenu" name="menuNavigation">
+    <property name="title">
+     <string>Navigate</string>
+    </property>
+    <addaction name="actionGoToLine"/>
+    <addaction name="separator"/>
+    <addaction name="actionGoToPreviousFile"/>
+    <addaction name="actionGoToNextFile"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuNavigation"/>
+   <addaction name="menuFind"/>
+   <addaction name="menuEditor"/>
+   <addaction name="menuTools"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="contextMenuPolicy">
+    <enum>Qt::PreventContextMenu</enum>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>24</width>
+     <height>24</height>
+    </size>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionNew_Tool"/>
+   <addaction name="actionOpen_Tool"/>
+   <addaction name="actionSave_Tool"/>
+   <addaction name="actionSaveAll_Tool"/>
+   <addaction name="actionRevert_Tool"/>
+   <addaction name="actionClose_Tool"/>
+   <addaction name="separator"/>
+   <addaction name="actionToogleCase_Tool"/>
+   <addaction name="separator"/>
+   <addaction name="actionGoToLine_Tool"/>
+   <addaction name="actionGoToPreviousFile_Tool"/>
+   <addaction name="actionGoToNextFile_Tool"/>
+   <addaction name="separator"/>
+   <addaction name="actionFindQuick_Tool"/>
+   <addaction name="separator"/>
+   <addaction name="actionTerminal_Tool"/>
+  </widget>
+  <action name="actionNew">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/new.png</normaloff>:/icons/16x16/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/open.png</normaloff>:/icons/16x16/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/save.png</normaloff>:/icons/16x16/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/save-as.png</normaloff>:/icons/16x16/save-as.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save As...</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/exit.png</normaloff>:/icons/16x16/exit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionSaveAll">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/save-all.png</normaloff>:/icons/16x16/save-all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/undo.png</normaloff>:/icons/16x16/undo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/redo.png</normaloff>:/icons/16x16/redo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/cut.png</normaloff>:/icons/16x16/cut.png</iconset>
+   </property>
+   <property name="text">
+    <string>Cut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/copy.png</normaloff>:/icons/16x16/copy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/paste.png</normaloff>:/icons/16x16/paste.png</iconset>
+   </property>
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionSelectAll">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/select-all.png</normaloff>:/icons/16x16/select-all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Select All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/delete.png</normaloff>:/icons/16x16/delete.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+   <property name="shortcut">
+    <string>Del</string>
+   </property>
+  </action>
+  <action name="actionRevert">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/revert.png</normaloff>:/icons/16x16/revert.png</iconset>
+   </property>
+   <property name="text">
+    <string>Revert</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/close.png</normaloff>:/icons/16x16/close.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionTabs">
+   <property name="text">
+    <string>Tabs</string>
+   </property>
+  </action>
+  <action name="actionTwoSpaces">
+   <property name="text">
+    <string>2 Spaces</string>
+   </property>
+  </action>
+  <action name="actionC">
+   <property name="text">
+    <string>C</string>
+   </property>
+  </action>
+  <action name="actionJava">
+   <property name="text">
+    <string>Java</string>
+   </property>
+  </action>
+  <action name="actionPython">
+   <property name="text">
+    <string>Python</string>
+   </property>
+  </action>
+  <action name="actionFindAndReplace">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/find-and-replace.png</normaloff>:/icons/16x16/find-and-replace.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find and Replace...</string>
+   </property>
+   <property name="toolTip">
+    <string>Find and Replace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionFindInFiles">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/find-in-files.png</normaloff>:/icons/16x16/find-in-files.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find in Files...</string>
+   </property>
+   <property name="toolTip">
+    <string>Find in Files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F</string>
+   </property>
+  </action>
+  <action name="actionCRLF">
+   <property name="text">
+    <string>CR + LF</string>
+   </property>
+  </action>
+  <action name="actionLF">
+   <property name="text">
+    <string>Line Feed</string>
+   </property>
+  </action>
+  <action name="actionCR">
+   <property name="text">
+    <string>Carriage Return</string>
+   </property>
+  </action>
+  <action name="actionGoToLine">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/go-to-line.png</normaloff>:/icons/16x16/go-to-line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to Line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionSpellChecker">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/spell-checker.png</normaloff>:/icons/16x16/spell-checker.png</iconset>
+   </property>
+   <property name="text">
+    <string>Spell Checker...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionFourSpaces">
+   <property name="text">
+    <string>4 Spaces</string>
+   </property>
+  </action>
+  <action name="actionTerminal">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/terminal.png</normaloff>:/icons/16x16/terminal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Terminal...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionToggleCase">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/toggle-case.png</normaloff>:/icons/16x16/toggle-case.png</iconset>
+   </property>
+   <property name="text">
+    <string>Toggle Case</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
+  </action>
+  <action name="actionGitDiff">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/git-diff.png</normaloff>:/icons/16x16/git-diff.png</iconset>
+   </property>
+   <property name="text">
+    <string>Git Diff...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionNew_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/new.png</normaloff>:/icons/24x24/new.png</iconset>
+   </property>
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionRevert_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/revert.png</normaloff>:/icons/24x24/revert.png</iconset>
+   </property>
+   <property name="text">
+    <string>Revert</string>
+   </property>
+   <property name="toolTip">
+    <string>Revert</string>
+   </property>
+  </action>
+  <action name="actionClose_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/close.png</normaloff>:/icons/24x24/close.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="toolTip">
+    <string>Close</string>
+   </property>
+  </action>
+  <action name="actionSave_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/save.png</normaloff>:/icons/24x24/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionToogleCase_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/toggle-case.png</normaloff>:/icons/24x24/toggle-case.png</iconset>
+   </property>
+   <property name="text">
+    <string>Toogle Case</string>
+   </property>
+  </action>
+  <action name="actionTerminal_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/terminal.png</normaloff>:/icons/24x24/terminal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Terminal</string>
+   </property>
+  </action>
+  <action name="actionFindQuick">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/find-quick.png</normaloff>:/icons/16x16/find-quick.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find Quick</string>
+   </property>
+   <property name="toolTip">
+    <string>Find Quick</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionFindQuick_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/find-quick.png</normaloff>:/icons/24x24/find-quick.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find Quick</string>
+   </property>
+   <property name="toolTip">
+    <string>Find Quick</string>
+   </property>
+  </action>
+  <action name="actionGoToLine_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/go-to-line.png</normaloff>:/icons/24x24/go-to-line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to Line</string>
+   </property>
+   <property name="toolTip">
+    <string>Go to Line</string>
+   </property>
+  </action>
+  <action name="actionGoToPreviousFile_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/go-to-previous-file.png</normaloff>:/icons/24x24/go-to-previous-file.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to Previous File</string>
+   </property>
+   <property name="toolTip">
+    <string>Go to Previous File</string>
+   </property>
+  </action>
+  <action name="actionGoToNextFile_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/go-to-next-file.png</normaloff>:/icons/24x24/go-to-next-file.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to Next File</string>
+   </property>
+   <property name="toolTip">
+    <string>Go to Next File</string>
+   </property>
+  </action>
+  <action name="actionGoToPreviousFile">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/go-to-previous-file.png</normaloff>:/icons/16x16/go-to-previous-file.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to Previous File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionGoToNextFile">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/go-to-next-file.png</normaloff>:/icons/16x16/go-to-next-file.png</iconset>
+   </property>
+   <property name="text">
+    <string>Go to Next File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+B</string>
+   </property>
+  </action>
+  <action name="actionOpen_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/open.png</normaloff>:/icons/24x24/open.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="toolTip">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionSaveAll_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/save-all.png</normaloff>:/icons/24x24/save-all.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save All</string>
+   </property>
+   <property name="toolTip">
+    <string>Save All</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>OpenFilesWidget</class>
+   <extends>QWidget</extends>
+   <header>src/openfileswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RecentFilesWidget</class>
+   <extends>QWidget</extends>
+   <header>src/recentfileswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FindInFilesWidget</class>
+   <extends>QWidget</extends>
+   <header>src/findinfileswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FindAndReplaceWidget</class>
+   <extends>QWidget</extends>
+   <header>src/findandreplacewidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../icons/icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>
