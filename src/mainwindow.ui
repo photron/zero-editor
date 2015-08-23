@@ -101,7 +101,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QPlainTextEdit" name="plainTextEdit"/>
+              <widget class="TextEditorWidget" name="plainTextEdit"/>
              </item>
             </layout>
            </widget>
@@ -789,6 +789,11 @@
    <class>FindAndReplaceWidget</class>
    <extends>QWidget</extends>
    <header>src/findandreplacewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TextEditorWidget</class>
+   <extends>QPlainTextEdit</extends>
+   <header>src/texteditorwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>
