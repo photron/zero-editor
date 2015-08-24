@@ -34,6 +34,12 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
 {
     setFont(QFont("DejaVu Sans Mono", 9));
 
+    // Ensure that the text is black
+    QPalette p = palette();
+
+    p.setColor(QPalette::Text, Qt::black);
+    setPalette(p);
+
     connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
     connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::updateExtraArea);
     connect(this, &QPlainTextEdit::cursorPositionChanged, this, &TextEditorWidget::highlightCurrentLine);
