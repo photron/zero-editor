@@ -40,6 +40,13 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     p.setColor(QPalette::Text, Qt::black);
     setPalette(p);
 
+    // Show tabs and spaces
+    QTextOption option =  document()->defaultTextOption();
+
+    option.setFlags(option.flags() | QTextOption::ShowTabsAndSpaces);
+
+    document()->setDefaultTextOption(option);
+
     connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
     connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::updateExtraArea);
     connect(this, &QPlainTextEdit::cursorPositionChanged, this, &TextEditorWidget::highlightCurrentLine);
