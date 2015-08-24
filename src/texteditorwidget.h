@@ -24,7 +24,6 @@ private slots:
     void highlightCurrentLine();
 
 private:
-
     TextEditorExtraArea *extraArea;
 };
 

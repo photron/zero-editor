@@ -11,6 +11,14 @@ public:
         QWidget(editor),
         editor(editor)
     {
+        QPalette palette;
+
+        palette.setColor(QPalette::HighlightedText, palette.color(QPalette::WindowText));
+        palette.setColor(QPalette::WindowText, palette.color(QPalette::Dark));
+
+        setPalette(palette);
+        setAutoFillBackground(true);
+        setFont(QFont("DejaVu Sans Mono", 10));
     }
 
     QSize sizeHint() const
@@ -37,11 +45,12 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     // Ensure that the text is black
     QPalette p = palette();
 
-    p.setColor(QPalette::Text, Qt::black);
+    p.setColor(QPalette::Text, Qt::black); // FIXME: Why is this necessary on Linux?
+
     setPalette(p);
 
     // Show tabs and spaces
-    QTextOption option =  document()->defaultTextOption();
+    QTextOption option = document()->defaultTextOption();
 
     option.setFlags(option.flags() | QTextOption::ShowTabsAndSpaces);
 
@@ -76,31 +85,44 @@ int TextEditorWidget::extraAreaWidth() const
         ++digits;
     }
 
-    return 3 + fontMetrics().width('9') * digits + 3;
+    return 6 + fontMetrics().width('9') * digits + 6;
 }
 
 void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(extraArea);
-
-    painter.fillRect(event->rect(), Qt::lightGray);
-
+    int extraAreaWidth = extraArea->width();
+    int selectionStart = textCursor().selectionStart();
+    int selectionEnd = textCursor().selectionEnd();
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
-    int top = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + (int)blockBoundingRect(block).height();
+    qreal top = blockBoundingGeometry(block).translated(contentOffset()).top();
+    qreal height = blockBoundingRect(block).height();
+    qreal bottom = top + height;
 
-    painter.setPen(Qt::black);
+    painter.setPen(extraArea->palette().color(QPalette::WindowText));
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            painter.drawText(0, top, extraArea->width() - 3, fontMetrics().height(),
+            bool selected = (selectionStart < block.position() + block.length() && selectionEnd > block.position()) ||
+                            (selectionStart == selectionEnd && selectionStart == block.position());
+
+            if (selected) {
+                painter.setPen(extraArea->palette().color(QPalette::HighlightedText));
+            }
+
+            painter.drawText(QRectF(0, top, extraAreaWidth - 6, height),
                              Qt::AlignRight, QString::number(blockNumber + 1));
+
+            if (selected) {
+                painter.setPen(extraArea->palette().color(QPalette::WindowText));
+            }
         }
 
         block = block.next();
         top = bottom;
-        bottom = top + (int)blockBoundingRect(block).height();
+        height = blockBoundingRect(block).height();
+        bottom = top + height;
         ++blockNumber;
     }
 }
