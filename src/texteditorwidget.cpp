@@ -32,7 +32,7 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     QPlainTextEdit(parent),
     extraArea(new TextEditorExtraArea(this))
 {
-    setFont(QFont("DejaVu Sans Mono", 9));
+    setFont(QFont("DejaVu Sans Mono", 10));
 
     // Ensure that the text is black
     QPalette p = palette();
