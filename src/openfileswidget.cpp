@@ -8,7 +8,7 @@ OpenFilesWidget::OpenFilesWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->checkShowFilter, QCheckBox::toggled, ui->editFilter, QLineEdit::setVisible);
+    connect(ui->checkShowFilter, &QCheckBox::toggled, ui->editFilter, &QLineEdit::setVisible);
 
     ui->editFilter->setVisible(ui->checkShowFilter->isChecked());
 }

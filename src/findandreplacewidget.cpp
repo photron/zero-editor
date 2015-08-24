@@ -10,7 +10,7 @@ FindAndReplaceWidget::FindAndReplaceWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->buttonHide, QToolButton::clicked, this, hideClicked);
+    connect(ui->buttonHide, &QToolButton::clicked, this, &FindAndReplaceWidget::hideClicked);
 
     ui->comboFind->lineEdit()->setClearButtonEnabled(true);
     ui->comboFind->lineEdit()->setPlaceholderText("Find");

@@ -34,9 +34,9 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
 {
     setFont(QFont("DejaVu Sans Mono", 9));
 
-    connect(this, blockCountChanged, this, updateExtraAreaWidth);
-    connect(this, updateRequest, this, updateExtraArea);
-    connect(this, cursorPositionChanged, this, highlightCurrentLine);
+    connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
+    connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::updateExtraArea);
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &TextEditorWidget::highlightCurrentLine);
 
     updateExtraAreaWidth();
     highlightCurrentLine();
@@ -75,7 +75,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
     int top = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
-    int bottom = top + (int) blockBoundingRect(block).height();
+    int bottom = top + (int)blockBoundingRect(block).height();
 
     painter.setPen(Qt::black);
 
