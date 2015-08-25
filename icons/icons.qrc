@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/icons">
+        <file>zero-editor.ico</file>
         <file>14x14/clear.png</file>
         <file>16x16/clear.png</file>
         <file>16x16/close.png</file>
