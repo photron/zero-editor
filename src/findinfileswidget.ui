@@ -72,6 +72,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkRegularExpression">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Regular Expression</string>
         </property>
@@ -79,6 +82,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkWholeWord">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Whole Word</string>
         </property>
@@ -86,6 +92,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkCaseSensitive">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Case Sensitive</string>
         </property>
@@ -93,6 +102,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="buttonHide">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Hide</string>
         </property>
@@ -153,6 +165,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -160,6 +175,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="checkRecursive">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Recursive</string>
        </property>
@@ -216,6 +234,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>comboFind</tabstop>
+  <tabstop>comboScope</tabstop>
+  <tabstop>comboDirectory</tabstop>
+  <tabstop>comboFilter</tabstop>
+  <tabstop>buttonFind</tabstop>
+  <tabstop>buttonPrevious</tabstop>
+  <tabstop>buttonNext</tabstop>
+  <tabstop>listResults</tabstop>
+ </tabstops>
  <resources>
   <include location="../icons/icons.qrc"/>
  </resources>

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>519</width>
+    <width>607</width>
     <height>413</height>
    </rect>
   </property>
@@ -71,7 +71,10 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkRegExp">
+       <widget class="QCheckBox" name="checkRegularExpression">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Regular Expression</string>
         </property>
@@ -79,6 +82,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkWholeWord">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Whole Word</string>
         </property>
@@ -86,6 +92,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkCaseSensitive">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Case Sensitive</string>
         </property>
@@ -93,6 +102,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="buttonHide">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Hide</string>
         </property>
@@ -162,6 +174,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>comboFind</tabstop>
+  <tabstop>comboReplace</tabstop>
+  <tabstop>buttonPrevious</tabstop>
+  <tabstop>buttonNext</tabstop>
+  <tabstop>buttonReplace</tabstop>
+  <tabstop>buttonReplaceAndNext</tabstop>
+  <tabstop>buttonReplaceAll</tabstop>
+  <tabstop>listResults</tabstop>
+ </tabstops>
  <resources>
   <include location="../icons/icons.qrc"/>
  </resources>

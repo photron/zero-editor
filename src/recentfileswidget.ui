@@ -75,6 +75,9 @@
       </item>
       <item>
        <widget class="QToolButton" name="buttonMode">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Mode</string>
         </property>
