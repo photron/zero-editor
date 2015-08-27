@@ -12,10 +12,10 @@ public:
         QWidget(editor),
         editor(editor)
     {
+        // Ensure that the text is black
         QPalette palette;
 
-        palette.setColor(QPalette::HighlightedText, palette.color(QPalette::WindowText));
-        palette.setColor(QPalette::WindowText, palette.color(QPalette::Dark));
+        palette.setColor(QPalette::WindowText, Qt::black); // FIXME: Why is this necessary on Linux?
 
         setPalette(palette);
         setAutoFillBackground(true);
@@ -107,7 +107,7 @@ int TextEditorWidget::extraAreaWidth() const
         ++digits;
     }
 
-    return 6 + fontMetrics().width('9') * digits + 6;
+    return 8 + fontMetrics().width('9') * digits + 8;
 }
 
 void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
@@ -116,6 +116,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     int extraAreaWidth = extraArea->width();
     int selectionStart = textCursor().selectionStart();
     int selectionEnd = textCursor().selectionEnd();
+    QTextBlock textCursorBlock = textCursor().block();
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
     qreal top = blockBoundingGeometry(block).translated(contentOffset()).top();
@@ -126,14 +127,24 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
+            if (block == textCursorBlock) {
+                QRectF textCursorLine = block.layout()->lineForTextPosition(textCursor().positionInBlock()).rect();
+
+                textCursorLine.translate(0, top);
+                textCursorLine.setLeft(0);
+                textCursorLine.setRight(extraAreaWidth);
+
+                painter.fillRect(textCursorLine, currentLineHighlightColor);
+            }
+
             bool selected = (selectionStart < block.position() + block.length() && selectionEnd >= block.position()) ||
                             (selectionStart == selectionEnd && selectionStart == block.position());
 
             if (selected) {
-                painter.setPen(extraArea->palette().color(QPalette::HighlightedText));
+                painter.setPen(extraArea->palette().color(QPalette::Highlight).darker(100));
             }
 
-            painter.drawText(QRectF(0, top, extraAreaWidth - 6, height),
+            painter.drawText(QRectF(0, top, extraAreaWidth - 8, height),
                              Qt::AlignRight, QString::number(blockNumber + 1));
 
             if (selected) {
