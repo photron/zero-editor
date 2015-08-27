@@ -19,12 +19,15 @@ protected:
     void resizeEvent(QResizeEvent *event);
 
 private slots:
-    void updateExtraAreaWidth();
     void updateExtraArea(const QRect &rect, int dy);
-    void highlightCurrentLine();
+    void updateExtraAreaWidth();
+    void updateExtraAreaSelectionHighlight();
+    void updateCurrentLineHighlight();
 
 private:
     TextEditorExtraArea *extraArea;
+    int lastCursorBlockNumber;
+    int lastCursorSelectionStart;
     QColor currentLineHighlightColor;
 };
 

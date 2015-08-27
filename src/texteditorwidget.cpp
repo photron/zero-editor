@@ -44,7 +44,9 @@ private:
 
 TextEditorWidget::TextEditorWidget(QWidget *parent) :
     QPlainTextEdit(parent),
-    extraArea(new TextEditorExtraArea(this))
+    extraArea(new TextEditorExtraArea(this)),
+    lastCursorBlockNumber(-1),
+    lastCursorSelectionStart(-1)
 {
     setFont(QFont("DejaVu Sans Mono", 10));
 
@@ -75,12 +77,13 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
 
     document()->setDefaultTextOption(option);
 
-    connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
     connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::updateExtraArea);
-    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &TextEditorWidget::highlightCurrentLine);
+    connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
+    connect(this, &QPlainTextEdit::selectionChanged, this, &TextEditorWidget::updateExtraAreaSelectionHighlight);
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this, &TextEditorWidget::updateCurrentLineHighlight);
 
     updateExtraAreaWidth();
-    highlightCurrentLine();
+    updateCurrentLineHighlight();
 }
 
 void TextEditorWidget::resizeEvent(QResizeEvent *event)
@@ -147,12 +150,6 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 }
 
 // private slot
-void TextEditorWidget::updateExtraAreaWidth()
-{
-    setViewportMargins(extraAreaWidth(), 0, 0, 0);
-}
-
-// private slot
 void TextEditorWidget::updateExtraArea(const QRect &rect, int dy)
 {
     if (dy != 0) {
@@ -167,7 +164,55 @@ void TextEditorWidget::updateExtraArea(const QRect &rect, int dy)
 }
 
 // private slot
-void TextEditorWidget::highlightCurrentLine()
+void TextEditorWidget::updateExtraAreaWidth()
+{
+    setViewportMargins(extraAreaWidth(), 0, 0, 0);
+}
+
+// private slot
+void TextEditorWidget::updateExtraAreaSelectionHighlight()
+{
+    // FIXME: This is only necessary if blocks can be wrapped
+    //if (no block wrapping) {
+    //    return;
+    //}
+
+    int cursorBlockNumber = textCursor().blockNumber();
+
+    if (cursorBlockNumber != lastCursorBlockNumber) {
+        QPointF offset = contentOffset();
+
+        // Force an update on the entire block that currently contains the cursor to ensure that the line number
+        // highlight is updated even if the cursor position is not in the first line of that block. Without this the
+        // line number for a wrapped block stays non-highlight if the cursor/selection enters it without touching its
+        // first line.
+        QTextBlock block = document()->findBlockByNumber(cursorBlockNumber);
+
+        if (block.isValid() && block.isVisible()) {
+            extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
+        }
+
+        lastCursorBlockNumber = cursorBlockNumber;
+
+        // Also force an update on the entire block that contained the previous selection start to ensure that the
+        // line number highlight is updated even if the previous selection start was not in the first line of that
+        // block. Without this the line number for a wrapped block stays highlight if the selection leaves it.
+        int cursorSelectionStart = textCursor().selectionStart();
+
+        if (cursorSelectionStart != lastCursorSelectionStart) {
+            block = document()->findBlock(lastCursorSelectionStart);
+
+            if (block.isValid()) {
+                extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
+            }
+
+            lastCursorSelectionStart = cursorSelectionStart;
+        }
+    }
+}
+
+// private slot
+void TextEditorWidget::updateCurrentLineHighlight()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -183,4 +228,9 @@ void TextEditorWidget::highlightCurrentLine()
     }
 
     setExtraSelections(extraSelections);
+
+    // Update the extra area selection highlight to ensure that the line number highlight is updated even if the
+    // previous cursor position was not in the first line of that block. Without this the line number for a wrapped
+    // block stays highlight if the cursor leaves it.
+    updateExtraAreaSelectionHighlight();
 }
