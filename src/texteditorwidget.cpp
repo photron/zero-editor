@@ -126,7 +126,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
-            bool selected = (selectionStart < block.position() + block.length() && selectionEnd > block.position()) ||
+            bool selected = (selectionStart < block.position() + block.length() && selectionEnd >= block.position()) ||
                             (selectionStart == selectionEnd && selectionStart == block.position());
 
             if (selected) {
