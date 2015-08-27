@@ -97,7 +97,7 @@ void TextEditorWidget::resizeEvent(QResizeEvent *event)
 int TextEditorWidget::extraAreaWidth() const
 {
     int digits = 1;
-    int maximum = qMax(1, blockCount());
+    int maximum = blockCount();
 
     while (maximum >= 10) {
         maximum /= 10;
