@@ -1,6 +1,7 @@
 
 #include "texteditorwidget.h"
 
+#include <QCoreApplication>
 #include <QPainter>
 #include <QTextBlock>
 
@@ -30,6 +31,11 @@ protected:
     void paintEvent(QPaintEvent *event)
     {
         editor->extraAreaPaintEvent(event);
+    }
+
+    void wheelEvent(QWheelEvent *event)
+    {
+        QCoreApplication::sendEvent(editor->viewport(), event);
     }
 
 private:
