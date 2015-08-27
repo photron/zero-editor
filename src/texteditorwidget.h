@@ -25,6 +25,7 @@ private slots:
 
 private:
     TextEditorExtraArea *extraArea;
+    QColor currentLineHighlightColor;
 };
 
 #endif // TEXTEDITORWIDGET_H
