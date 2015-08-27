@@ -70,10 +70,14 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
                                                  forground.blueF()  * ratio + background.blueF()  * (1.0 - ratio));
     currentLineHighlightColor.setAlpha(128);
 
-    // Show tabs and spaces
+    // Show tabs and spaces and set tab size to 4 spaces
     QTextOption option = document()->defaultTextOption();
 
     option.setFlags(option.flags() | QTextOption::ShowTabsAndSpaces);
+
+    // Use QFontMetricsF to avoid truncation/rounding errors which would accululate and result in tab stops that are
+    // more and more off from the correct postion the farther to right the tabs stops are.
+    option.setTabStop(QFontMetricsF(font()).width(' ') * 4);
 
     document()->setDefaultTextOption(option);
 
