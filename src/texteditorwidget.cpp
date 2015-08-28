@@ -75,7 +75,7 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
 
     option.setFlags(option.flags() | QTextOption::ShowTabsAndSpaces);
 
-    // Use QFontMetricsF to avoid truncation/rounding errors which would accululate and result in tab stops that are
+    // Use QFontMetricsF to avoid truncation/rounding errors which would accumulate and result in tab stops that are
     // more and more off from the correct postion the farther to right the tabs stops are.
     option.setTabStop(QFontMetricsF(font()).width(' ') * 4);
 
