@@ -191,10 +191,6 @@ void TextEditorWidget::updateExtraArea(const QRect &rect, int dy)
     } else {
         m_extraArea->update(0, rect.y(), m_extraArea->width(), rect.height());
     }
-
-    if (rect.contains(viewport()->rect())) {
-        updateExtraAreaWidth();
-    }
 }
 
 // private slot
