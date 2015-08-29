@@ -122,7 +122,6 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     int selectionEnd = textCursor().selectionEnd();
     QTextBlock textCursorBlock = textCursor().block();
     QTextBlock block = firstVisibleBlock();
-    int blockNumber = block.blockNumber();
     qreal top = blockBoundingGeometry(block).translated(contentOffset()).top();
     qreal height = blockBoundingRect(block).height();
     qreal bottom = top + height;
@@ -131,6 +130,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
+            // Highlight the line containing the cursor
             if (block == textCursorBlock) {
                 QRectF textCursorLine = block.layout()->lineForTextPosition(textCursor().positionInBlock()).rect();
 
@@ -141,6 +141,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
                 painter.fillRect(textCursorLine, currentLineHighlightColor);
             }
 
+            // Highlight selected line number
             bool selected = (selectionStart < block.position() + block.length() && selectionEnd >= block.position()) ||
                             (selectionStart == selectionEnd && selectionStart == block.position());
 
@@ -148,9 +149,23 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
                 painter.setPen(extraArea->palette().color(QPalette::Highlight).darker(100));
             }
 
-            painter.drawText(QRectF(0, top, extraAreaWidth - 8, height),
-                             Qt::AlignRight, QString::number(blockNumber + 1));
+            // Draw line number
+            painter.drawText(QRectF(0, top, extraAreaWidth - 8, height), Qt::AlignRight,
+                             QString::number(block.blockNumber() + 1));
 
+            // Draw dots for the additional lines in wrapped blocks
+            int blockLineCount = block.lineCount();
+
+            if (blockLineCount > 1) {
+                qreal lineHeight = height / blockLineCount;
+
+                for (int i = 1; i < blockLineCount; ++i) {
+                    painter.drawText(QRectF(0, top + lineHeight * i, extraAreaWidth - 8, lineHeight),
+                                     Qt::AlignRight, "\u00B7");
+                }
+            }
+
+            // Reset text color
             if (selected) {
                 painter.setPen(extraArea->palette().color(QPalette::WindowText));
             }
@@ -160,7 +175,6 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
         top = bottom;
         height = blockBoundingRect(block).height();
         bottom = top + height;
-        ++blockNumber;
     }
 }
 
@@ -187,10 +201,10 @@ void TextEditorWidget::updateExtraAreaWidth()
 // private slot
 void TextEditorWidget::updateExtraAreaSelectionHighlight()
 {
-    // FIXME: This is only necessary if blocks can be wrapped
-    //if (no block wrapping) {
-    //    return;
-    //}
+    // The following logic is only necessary if blocks can be wrapped
+    if (wordWrapMode() == QTextOption::NoWrap) {
+        return;
+    }
 
     int cursorBlockNumber = textCursor().blockNumber();
 
