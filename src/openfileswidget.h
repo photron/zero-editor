@@ -36,7 +36,7 @@ public:
     void installLineEditEventFilter(QObject *filter);
 
 private:
-    Ui::OpenFilesWidget *ui;
+    Ui::OpenFilesWidget *m_ui;
 };
 
 #endif // OPENFILESWIDGET_H

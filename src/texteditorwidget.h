@@ -43,9 +43,9 @@ private slots:
     void updateCurrentLineHighlight();
 
 private:
-    TextEditorExtraArea *extraArea;
-    int lastCursorBlockNumber;
-    int lastCursorSelectionStart;
+    TextEditorExtraArea *m_extraArea;
+    int m_lastCursorBlockNumber;
+    int m_lastCursorSelectionStart;
 };
 
 #endif // TEXTEDITORWIDGET_H

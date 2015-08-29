@@ -27,36 +27,36 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    m_ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
-    ui->actionWordWrap->setChecked(ui->plainTextEdit->wordWrapMode() != QTextOption::NoWrap);
+    m_ui->actionWordWrap->setChecked(m_ui->plainTextEdit->wordWrapMode() != QTextOption::NoWrap);
 
-    connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
-    connect(ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
-    connect(ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
-    connect(ui->widgetFindAndReplace, &FindAndReplaceWidget::hideClicked, ui->widgetStackedSearches, &QStackedWidget::hide);
-    connect(ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, ui->widgetStackedSearches, &QStackedWidget::hide);
-    connect(ui->actionWordWrap, &QAction::triggered, this, &MainWindow::setWordWrapMode);
-    connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
-    connect(ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
+    connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+    connect(m_ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
+    connect(m_ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
+    connect(m_ui->widgetFindAndReplace, &FindAndReplaceWidget::hideClicked, m_ui->widgetStackedSearches, &QStackedWidget::hide);
+    connect(m_ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, m_ui->widgetStackedSearches, &QStackedWidget::hide);
+    connect(m_ui->actionWordWrap, &QAction::triggered, this, &MainWindow::setWordWrapMode);
+    connect(m_ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
+    connect(m_ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
 
-    ui->widgetOpenFiles->installLineEditEventFilter(this);
-    ui->widgetFindAndReplace->installLineEditEventFilter(this);
-    ui->widgetFindInFiles->installLineEditEventFilter(this);
+    m_ui->widgetOpenFiles->installLineEditEventFilter(this);
+    m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
+    m_ui->widgetFindInFiles->installLineEditEventFilter(this);
 
-    ui->widgetStackedSearches->hide();
+    m_ui->widgetStackedSearches->hide();
 
-    ui->actionSave->setText("Save \"brickd.c\"");
-    ui->actionSave_Tool->setToolTip("Save \"brickd.c\"");
-    ui->actionSaveAs->setText("Save \"brickd.c\" As...");
-    ui->actionSaveAll->setText("Save All (2 Files)");
-    ui->actionSaveAll_Tool->setText("Save All (2 Files)");
-    ui->actionRevert->setText("Revert \"brickd.c\"");
-    ui->actionRevert_Tool->setToolTip("Revert \"brickd.c\"");
-    ui->actionClose->setText("Close \"brickd.c\"");
-    ui->actionClose_Tool->setToolTip("Close \"brickd.c\"");
+    m_ui->actionSave->setText("Save \"brickd.c\"");
+    m_ui->actionSave_Tool->setToolTip("Save \"brickd.c\"");
+    m_ui->actionSaveAs->setText("Save \"brickd.c\" As...");
+    m_ui->actionSaveAll->setText("Save All (2 Files)");
+    m_ui->actionSaveAll_Tool->setText("Save All (2 Files)");
+    m_ui->actionRevert->setText("Revert \"brickd.c\"");
+    m_ui->actionRevert_Tool->setToolTip("Revert \"brickd.c\"");
+    m_ui->actionClose->setText("Close \"brickd.c\"");
+    m_ui->actionClose_Tool->setToolTip("Close \"brickd.c\"");
 
     // Setup toolbar go-to-line edit
     QLineEdit *editGoToLine = new QLineEdit();
@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     actionGoToLine->setDefaultWidget(widgetGoToLine);
 
-    ui->toolBar->insertAction(ui->actionGoToLine_Tool, actionGoToLine);
+    m_ui->toolBar->insertAction(m_ui->actionGoToLine_Tool, actionGoToLine);
 
     // Setup toolbar find-quick edit
     QLineEdit *editFindQuick = new QLineEdit();
@@ -108,12 +108,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     actionFindQuick->setDefaultWidget(widgetFindQuick);
 
-    ui->toolBar->insertAction(ui->actionFindQuick_Tool, actionFindQuick);
+    m_ui->toolBar->insertAction(m_ui->actionFindQuick_Tool, actionFindQuick);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete m_ui;
 }
 
 // protected
@@ -151,26 +151,26 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 // private slot
 void MainWindow::showFindAndReplaceWidget()
 {
-    ui->widgetStackedSearches->setCurrentIndex(ui->widgetStackedSearches->indexOf(ui->widgetFindAndReplace));
-    ui->widgetStackedSearches->show();
-    ui->widgetFindAndReplace->prepareForShow();
+    m_ui->widgetStackedSearches->setCurrentIndex(m_ui->widgetStackedSearches->indexOf(m_ui->widgetFindAndReplace));
+    m_ui->widgetStackedSearches->show();
+    m_ui->widgetFindAndReplace->prepareForShow();
 }
 
 // private slot
 void MainWindow::showFindInFilesWidget()
 {
-    ui->widgetStackedSearches->setCurrentIndex(ui->widgetStackedSearches->indexOf(ui->widgetFindInFiles));
-    ui->widgetStackedSearches->show();
-    ui->widgetFindInFiles->prepareForShow();
+    m_ui->widgetStackedSearches->setCurrentIndex(m_ui->widgetStackedSearches->indexOf(m_ui->widgetFindInFiles));
+    m_ui->widgetStackedSearches->show();
+    m_ui->widgetFindInFiles->prepareForShow();
 }
 
 // private slot
 void MainWindow::setWordWrapMode(bool enabled)
 {
     if (enabled) {
-        ui->plainTextEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+        m_ui->plainTextEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
     } else {
-        ui->plainTextEdit->setWordWrapMode(QTextOption::NoWrap);
+        m_ui->plainTextEdit->setWordWrapMode(QTextOption::NoWrap);
     }
 }
 

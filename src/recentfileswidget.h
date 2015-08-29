@@ -34,7 +34,7 @@ public:
     ~RecentFilesWidget();
 
 private:
-    Ui::RecentFilesWidget *ui;
+    Ui::RecentFilesWidget *m_ui;
 };
 
 #endif // RECENTFILESWIDGET_H

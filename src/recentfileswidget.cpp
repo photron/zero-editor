@@ -23,9 +23,9 @@
 
 RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::RecentFilesWidget)
+    m_ui(new Ui::RecentFilesWidget)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
     QMenu *menuMode = new QMenu();
 
@@ -33,10 +33,10 @@ RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
     menuMode->addAction("Recently Opened Files");
     menuMode->addAction("Recently Closed Files");
 
-    ui->buttonMode->setMenu(menuMode);
+    m_ui->buttonMode->setMenu(menuMode);
 }
 
 RecentFilesWidget::~RecentFilesWidget()
 {
-    delete ui;
+    delete m_ui;
 }

@@ -64,9 +64,9 @@ private:
 
 TextEditorWidget::TextEditorWidget(QWidget *parent) :
     QPlainTextEdit(parent),
-    extraArea(new TextEditorExtraArea(this)),
-    lastCursorBlockNumber(-1),
-    lastCursorSelectionStart(-1)
+    m_extraArea(new TextEditorExtraArea(this)),
+    m_lastCursorBlockNumber(-1),
+    m_lastCursorSelectionStart(-1)
 {
     setFont(MonospaceFontMetrics::font());
     setCursorWidth(2);
@@ -103,7 +103,7 @@ void TextEditorWidget::resizeEvent(QResizeEvent *event)
 
     rect.setWidth(extraAreaWidth());
 
-    extraArea->setGeometry(rect);
+    m_extraArea->setGeometry(rect);
 }
 
 int TextEditorWidget::extraAreaWidth() const
@@ -121,8 +121,8 @@ int TextEditorWidget::extraAreaWidth() const
 
 void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 {
-    QPainter painter(extraArea);
-    int extraAreaWidth = extraArea->width();
+    QPainter painter(m_extraArea);
+    int extraAreaWidth = m_extraArea->width();
     int selectionStart = textCursor().selectionStart();
     int selectionEnd = textCursor().selectionEnd();
     QTextBlock textCursorBlock = textCursor().block();
@@ -131,7 +131,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     qreal height = blockBoundingRect(block).height();
     qreal bottom = top + height;
 
-    painter.setPen(extraArea->palette().color(QPalette::WindowText));
+    painter.setPen(m_extraArea->palette().color(QPalette::WindowText));
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
@@ -151,7 +151,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
                             (selectionStart == selectionEnd && selectionStart == block.position());
 
             if (selected) {
-                painter.setPen(extraArea->palette().color(QPalette::Highlight).darker(100));
+                painter.setPen(m_extraArea->palette().color(QPalette::Highlight).darker(100));
             }
 
             // Draw line number
@@ -172,7 +172,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 
             // Reset text color
             if (selected) {
-                painter.setPen(extraArea->palette().color(QPalette::WindowText));
+                painter.setPen(m_extraArea->palette().color(QPalette::WindowText));
             }
         }
 
@@ -187,9 +187,9 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 void TextEditorWidget::updateExtraArea(const QRect &rect, int dy)
 {
     if (dy != 0) {
-        extraArea->scroll(0, dy);
+        m_extraArea->scroll(0, dy);
     } else {
-        extraArea->update(0, rect.y(), extraArea->width(), rect.height());
+        m_extraArea->update(0, rect.y(), m_extraArea->width(), rect.height());
     }
 
     if (rect.contains(viewport()->rect())) {
@@ -213,7 +213,7 @@ void TextEditorWidget::updateExtraAreaSelectionHighlight()
 
     int cursorBlockNumber = textCursor().blockNumber();
 
-    if (cursorBlockNumber != lastCursorBlockNumber) {
+    if (cursorBlockNumber != m_lastCursorBlockNumber) {
         QPointF offset = contentOffset();
 
         // Force an update on the entire block that currently contains the cursor to ensure that the line number
@@ -223,24 +223,24 @@ void TextEditorWidget::updateExtraAreaSelectionHighlight()
         QTextBlock block = document()->findBlockByNumber(cursorBlockNumber);
 
         if (block.isValid() && block.isVisible()) {
-            extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
+            m_extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
         }
 
-        lastCursorBlockNumber = cursorBlockNumber;
+        m_lastCursorBlockNumber = cursorBlockNumber;
 
         // Also force an update on the entire block that contained the previous selection start to ensure that the
         // line number highlight is updated even if the previous selection start was not in the first line of that
         // block. Without this the line number for a wrapped block stays highlight if the selection leaves it.
         int cursorSelectionStart = textCursor().selectionStart();
 
-        if (cursorSelectionStart != lastCursorSelectionStart) {
-            block = document()->findBlock(lastCursorSelectionStart);
+        if (cursorSelectionStart != m_lastCursorSelectionStart) {
+            block = document()->findBlock(m_lastCursorSelectionStart);
 
             if (block.isValid()) {
-                extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
+                m_extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
             }
 
-            lastCursorSelectionStart = cursorSelectionStart;
+            m_lastCursorSelectionStart = cursorSelectionStart;
         }
     }
 }

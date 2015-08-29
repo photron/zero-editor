@@ -21,21 +21,21 @@
 
 OpenFilesWidget::OpenFilesWidget(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::OpenFilesWidget)
+    m_ui(new Ui::OpenFilesWidget)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
-    connect(ui->checkShowFilter, &QCheckBox::toggled, ui->editFilter, &QLineEdit::setVisible);
+    connect(m_ui->checkShowFilter, &QCheckBox::toggled, m_ui->editFilter, &QLineEdit::setVisible);
 
-    ui->editFilter->setVisible(ui->checkShowFilter->isChecked());
+    m_ui->editFilter->setVisible(m_ui->checkShowFilter->isChecked());
 }
 
 OpenFilesWidget::~OpenFilesWidget()
 {
-    delete ui;
+    delete m_ui;
 }
 
 void OpenFilesWidget::installLineEditEventFilter(QObject *filter)
 {
-    ui->editFilter->installEventFilter(filter);
+    m_ui->editFilter->installEventFilter(filter);
 }

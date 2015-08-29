@@ -41,7 +41,7 @@ signals:
     void hideClicked();
 
 private:
-    Ui::FindAndReplaceWidget *ui;
+    Ui::FindAndReplaceWidget *m_ui;
 };
 
 #endif // FINDANDREPLACEWIDGET_H

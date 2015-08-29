@@ -43,7 +43,7 @@ private slots:
     void openTerminal();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow *m_ui;
 };
 
 #endif // MAINWINDOW_H

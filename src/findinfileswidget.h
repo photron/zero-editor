@@ -41,7 +41,7 @@ signals:
     void hideClicked();
 
 private:
-    Ui::FindInFilesWidget *ui;
+    Ui::FindInFilesWidget *m_ui;
 };
 
 #endif // FINDINFILESWIDGET_H
