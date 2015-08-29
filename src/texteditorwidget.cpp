@@ -51,6 +51,7 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     lastCursorSelectionStart(-1)
 {
     setFont(MonospaceFontMetrics::font());
+    setCursorWidth(2);
 
     // Ensure that the text is black
     QPalette palette;
