@@ -95,17 +95,6 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     updateCurrentLineHighlight();
 }
 
-void TextEditorWidget::resizeEvent(QResizeEvent *event)
-{
-    QPlainTextEdit::resizeEvent(event);
-
-    QRect rect = contentsRect();
-
-    rect.setWidth(extraAreaWidth());
-
-    m_extraArea->setGeometry(rect);
-}
-
 int TextEditorWidget::extraAreaWidth() const
 {
     int digits = 1;
@@ -181,6 +170,17 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
         height = blockBoundingRect(block).height();
         bottom = top + height;
     }
+}
+
+void TextEditorWidget::resizeEvent(QResizeEvent *event)
+{
+    QPlainTextEdit::resizeEvent(event);
+
+    QRect rect = contentsRect();
+
+    rect.setWidth(extraAreaWidth());
+
+    m_extraArea->setGeometry(rect);
 }
 
 // private slot
