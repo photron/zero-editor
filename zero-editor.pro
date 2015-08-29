@@ -5,6 +5,7 @@ SOURCES     += src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
                src/main.cpp \
                src/mainwindow.cpp \
+               src/monospacefontmetrics.cpp \
                src/openfileswidget.cpp \
                src/recentfileswidget.cpp \
                src/style.cpp \
@@ -12,6 +13,7 @@ SOURCES     += src/findandreplacewidget.cpp \
 HEADERS     += src/findandreplacewidget.h \
                src/findinfileswidget.h \
                src/mainwindow.h \
+               src/monospacefontmetrics.h \
                src/openfileswidget.h \
                src/recentfileswidget.h \
                src/style.h \

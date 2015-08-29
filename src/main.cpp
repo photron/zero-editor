@@ -1,5 +1,6 @@
 
 #include "mainwindow.h"
+#include "monospacefontmetrics.h"
 #include "style.h"
 
 #include <QApplication>
@@ -12,6 +13,7 @@ int main(int argc, char **argv)
     application.setWindowIcon(QIcon(":/icons/zero-editor.ico"));
 
     QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
+    MonospaceFontMetrics::initialize();
     QApplication::setStyle(new Style(QApplication::style()));
     QIcon::setThemeName("zero-editor");
 

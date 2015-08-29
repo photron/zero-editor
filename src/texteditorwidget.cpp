@@ -1,6 +1,8 @@
 
 #include "texteditorwidget.h"
 
+#include "monospacefontmetrics.h"
+
 #include <QCoreApplication>
 #include <QPainter>
 #include <QTextBlock>
@@ -19,7 +21,7 @@ public:
 
         setPalette(palette);
         setAutoFillBackground(true);
-        setFont(QFont("DejaVu Sans Mono", 10));
+        setFont(MonospaceFontMetrics::font());
     }
 
     QSize sizeHint() const
@@ -48,7 +50,7 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     lastCursorBlockNumber(-1),
     lastCursorSelectionStart(-1)
 {
-    setFont(QFont("DejaVu Sans Mono", 10));
+    setFont(MonospaceFontMetrics::font());
 
     // Ensure that the text is black
     QPalette palette;
@@ -74,10 +76,7 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     QTextOption option = document()->defaultTextOption();
 
     option.setFlags(option.flags() | QTextOption::ShowTabsAndSpaces);
-
-    // Use QFontMetricsF to avoid truncation/rounding errors which would accumulate and result in tab stops that are
-    // more and more off from the correct postion the farther to right the tabs stops are.
-    option.setTabStop(QFontMetricsF(font()).width(' ') * 4);
+    option.setTabStop(MonospaceFontMetrics::charWidth() * 4);
 
     document()->setDefaultTextOption(option);
 
@@ -111,7 +110,7 @@ int TextEditorWidget::extraAreaWidth() const
         ++digits;
     }
 
-    return 8 + fontMetrics().width('9') * digits + 8;
+    return 8 + MonospaceFontMetrics::charWidth() * digits + 8;
 }
 
 void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
