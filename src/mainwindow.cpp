@@ -14,13 +14,16 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->actionWordWrap->setChecked(ui->plainTextEdit->wordWrapMode() != QTextOption::NoWrap);
+
     connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
     connect(ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
     connect(ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
-    connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
-    connect(ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(ui->widgetFindAndReplace, &FindAndReplaceWidget::hideClicked, ui->widgetStackedSearches, &QStackedWidget::hide);
     connect(ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, ui->widgetStackedSearches, &QStackedWidget::hide);
+    connect(ui->actionWordWrap, &QAction::triggered, this, &MainWindow::setWordWrapMode);
+    connect(ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
+    connect(ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
 
     ui->widgetOpenFiles->installLineEditEventFilter(this);
     ui->widgetFindAndReplace->installLineEditEventFilter(this);
@@ -142,6 +145,16 @@ void MainWindow::showFindInFilesWidget()
     ui->widgetStackedSearches->setCurrentIndex(ui->widgetStackedSearches->indexOf(ui->widgetFindInFiles));
     ui->widgetStackedSearches->show();
     ui->widgetFindInFiles->prepareForShow();
+}
+
+// private slot
+void MainWindow::setWordWrapMode(bool enabled)
+{
+    if (enabled) {
+        ui->plainTextEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    } else {
+        ui->plainTextEdit->setWordWrapMode(QTextOption::NoWrap);
+    }
 }
 
 // private slot

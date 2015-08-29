@@ -21,6 +21,7 @@ protected:
 private slots:
     void showFindAndReplaceWidget();
     void showFindInFilesWidget();
+    void setWordWrapMode(bool enabled);
     void openTerminal();
 
 private:
