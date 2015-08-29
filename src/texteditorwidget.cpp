@@ -18,6 +18,7 @@
 
 #include "texteditorwidget.h"
 
+#include "editorcolors.h"
 #include "monospacefontmetrics.h"
 
 #include <QCoreApplication>
@@ -76,19 +77,6 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     palette.setColor(QPalette::Text, Qt::black); // FIXME: Why is this necessary on Linux?
 
     setPalette(palette);
-
-    // Calculate current line highlight color (formula taken from Qt Creator 3.5.0)
-    QColor forground = palette.color(QPalette::Highlight);
-    QColor background = palette.color(QPalette::Base);
-    qreal smallRatio = 0.3; // 0.05 for search scope
-    qreal largeRatio = 0.6; // 0.4 for search scope
-    qreal ratio = ((palette.color(QPalette::Text).value() < 128) ^
-                   (palette.color(QPalette::HighlightedText).value() < 128)) ? smallRatio : largeRatio;
-
-    currentLineHighlightColor = QColor::fromRgbF(forground.redF()   * ratio + background.redF()   * (1.0 - ratio),
-                                                 forground.greenF() * ratio + background.greenF() * (1.0 - ratio),
-                                                 forground.blueF()  * ratio + background.blueF()  * (1.0 - ratio));
-    currentLineHighlightColor.setAlpha(128);
 
     // Show tabs and spaces and set tab size to 4 spaces
     QTextOption option = document()->defaultTextOption();
@@ -155,7 +143,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
                 textCursorLine.setLeft(0);
                 textCursorLine.setRight(extraAreaWidth);
 
-                painter.fillRect(textCursorLine, currentLineHighlightColor);
+                painter.fillRect(textCursorLine, EditorColors::currentLineHighlightColor());
             }
 
             // Highlight selected line number
@@ -265,7 +253,7 @@ void TextEditorWidget::updateCurrentLineHighlight()
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        selection.format.setBackground(currentLineHighlightColor);
+        selection.format.setBackground(EditorColors::currentLineHighlightColor());
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();

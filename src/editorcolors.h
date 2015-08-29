@@ -16,36 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEXTEDITORWIDGET_H
-#define TEXTEDITORWIDGET_H
+#ifndef EDITORCOLORS_H
+#define EDITORCOLORS_H
 
-#include <QPlainTextEdit>
+#include <QColor>
 
-class TextEditorExtraArea;
-
-class TextEditorWidget : public QPlainTextEdit
+class EditorColors
 {
-    Q_OBJECT
-
 public:
-    TextEditorWidget(QWidget *parent = NULL);
+    static void initialize();
 
-    int extraAreaWidth() const;
-    void extraAreaPaintEvent(QPaintEvent *event);
-
-protected:
-    void resizeEvent(QResizeEvent *event);
-
-private slots:
-    void updateExtraArea(const QRect &rect, int dy);
-    void updateExtraAreaWidth();
-    void updateExtraAreaSelectionHighlight();
-    void updateCurrentLineHighlight();
+    static QColor currentLineHighlightColor() { return m_currentLineHighlightColor; }
 
 private:
-    TextEditorExtraArea *extraArea;
-    int lastCursorBlockNumber;
-    int lastCursorSelectionStart;
+    static QColor m_currentLineHighlightColor;
 };
 
-#endif // TEXTEDITORWIDGET_H
+#endif // EDITORCOLORS_H

@@ -1,7 +1,8 @@
 TEMPLATE     = app
 TARGET       = zero-editor
 QT          += core gui widgets
-SOURCES     += src/findandreplacewidget.cpp \
+SOURCES     += src/editorcolors.cpp \
+               src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
                src/main.cpp \
                src/mainwindow.cpp \
@@ -10,7 +11,8 @@ SOURCES     += src/findandreplacewidget.cpp \
                src/recentfileswidget.cpp \
                src/style.cpp \
                src/texteditorwidget.cpp
-HEADERS     += src/findandreplacewidget.h \
+HEADERS     += src/editorcolors.h \
+               src/findandreplacewidget.h \
                src/findinfileswidget.h \
                src/mainwindow.h \
                src/monospacefontmetrics.h \
