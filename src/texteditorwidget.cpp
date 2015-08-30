@@ -30,7 +30,7 @@ class TextEditorExtraArea : public QWidget
 public:
     TextEditorExtraArea(TextEditorWidget *editor) :
         QWidget(editor),
-        editor(editor)
+        m_editor(editor)
     {
         // Ensure that the text is black
         QPalette palette;
@@ -44,22 +44,22 @@ public:
 
     QSize sizeHint() const
     {
-        return QSize(editor->extraAreaWidth(), 0);
+        return QSize(m_editor->extraAreaWidth(), 0);
     }
 
 protected:
     void paintEvent(QPaintEvent *event)
     {
-        editor->extraAreaPaintEvent(event);
+        m_editor->extraAreaPaintEvent(event);
     }
 
     void wheelEvent(QWheelEvent *event)
     {
-        QCoreApplication::sendEvent(editor->viewport(), event);
+        QCoreApplication::sendEvent(m_editor->viewport(), event);
     }
 
 private:
-    TextEditorWidget *editor;
+    TextEditorWidget *m_editor;
 };
 
 TextEditorWidget::TextEditorWidget(QWidget *parent) :
