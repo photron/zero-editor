@@ -20,7 +20,7 @@
 
 #include <QPalette>
 
-QColor EditorColors::m_currentLineHighlightColor;
+QColor EditorColors::m_currentLineHighlight;
 
 // static
 void EditorColors::initialize()
@@ -35,9 +35,9 @@ void EditorColors::initialize()
     qreal ratio = ((palette.color(QPalette::Text).value() < 128) ^
                    (palette.color(QPalette::HighlightedText).value() < 128)) ? smallRatio : largeRatio;
 
-    m_currentLineHighlightColor = QColor::fromRgbF(forground.redF()   * ratio + background.redF()   * (1.0 - ratio),
-                                                   forground.greenF() * ratio + background.greenF() * (1.0 - ratio),
-                                                   forground.blueF()  * ratio + background.blueF()  * (1.0 - ratio));
-    m_currentLineHighlightColor.setAlpha(128);
+    m_currentLineHighlight = QColor::fromRgbF(forground.redF()   * ratio + background.redF()   * (1.0 - ratio),
+                                              forground.greenF() * ratio + background.greenF() * (1.0 - ratio),
+                                              forground.blueF()  * ratio + background.blueF()  * (1.0 - ratio));
+    m_currentLineHighlight.setAlpha(128);
 }
 

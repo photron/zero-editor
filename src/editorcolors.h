@@ -26,10 +26,10 @@ class EditorColors
 public:
     static void initialize();
 
-    static QColor currentLineHighlightColor() { return m_currentLineHighlightColor; }
+    static QColor currentLineHighlight() { return m_currentLineHighlight; }
 
 private:
-    static QColor m_currentLineHighlightColor;
+    static QColor m_currentLineHighlight;
 };
 
 #endif // EDITORCOLORS_H

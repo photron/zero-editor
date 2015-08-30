@@ -132,7 +132,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
                 textCursorLine.setLeft(0);
                 textCursorLine.setRight(extraAreaWidth);
 
-                painter.fillRect(textCursorLine, EditorColors::currentLineHighlightColor());
+                painter.fillRect(textCursorLine, EditorColors::currentLineHighlight());
             }
 
             // Highlight selected line number
@@ -249,7 +249,7 @@ void TextEditorWidget::updateCurrentLineHighlight()
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        selection.format.setBackground(EditorColors::currentLineHighlightColor());
+        selection.format.setBackground(EditorColors::currentLineHighlight());
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
