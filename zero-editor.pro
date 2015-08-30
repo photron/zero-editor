@@ -1,7 +1,8 @@
 TEMPLATE     = app
 TARGET       = zero-editor
 QT          += core gui widgets
-SOURCES     += src/editorcolors.cpp \
+SOURCES     += src/binaryeditorwidget.cpp \
+               src/editorcolors.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
                src/main.cpp \
@@ -11,7 +12,8 @@ SOURCES     += src/editorcolors.cpp \
                src/recentfileswidget.cpp \
                src/style.cpp \
                src/texteditorwidget.cpp
-HEADERS     += src/editorcolors.h \
+HEADERS     += src/binaryeditorwidget.h \
+               src/editorcolors.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
                src/mainwindow.h \

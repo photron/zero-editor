@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>738</width>
-    <height>559</height>
+    <width>1134</width>
+    <height>563</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -86,6 +86,9 @@
            <number>6</number>
           </property>
           <widget class="QStackedWidget" name="widgetStackedTextEditors">
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
            <widget class="QWidget" name="page">
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <property name="leftMargin">
@@ -105,7 +108,25 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="page_2"/>
+           <widget class="QWidget" name="page_2">
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="BinaryEditorWidget" name="widget" native="true"/>
+             </item>
+            </layout>
+           </widget>
           </widget>
           <widget class="QStackedWidget" name="widgetStackedSearches">
            <widget class="FindInFilesWidget" name="widgetFindInFiles"/>
@@ -124,7 +145,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>738</width>
+     <width>1134</width>
      <height>21</height>
     </rect>
    </property>
@@ -804,6 +825,12 @@
    <class>TextEditorWidget</class>
    <extends>QPlainTextEdit</extends>
    <header>src/texteditorwidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>BinaryEditorWidget</class>
+   <extends>QWidget</extends>
+   <header>src/binaryeditorwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
