@@ -26,11 +26,12 @@ class MonospaceFontMetrics
 public:
     static void initialize();
 
-    static QFont font() { return QFont("DejaVu Sans Mono", 10); }
+    static QFont font() { return *m_font; }
     static qreal charWidth() { return m_charWidth; }
     static qreal lineSpacing() { return m_lineSpacing; }
 
 private:
+    static QFont *m_font;
     static qreal m_charWidth;
     static qreal m_lineSpacing;
 };
