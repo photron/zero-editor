@@ -232,7 +232,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
     }
 
     int leftHex = m_documentMargin - horizontalScrollBar()->value();
-    int leftPrintable = leftHex+ (HexColumnsPerLine + 1) * charWidth + 1 + charWidth;
+    int leftPrintable = leftHex + (HexColumnsPerLine + 1) * charWidth + 1 + charWidth;
     int right = viewport()->width() + horizontalScrollBar()->value() - m_documentMargin;
     int line = verticalScrollBar()->value();
     qreal top = 0;
