@@ -45,8 +45,15 @@ void MonospaceFontMetrics::initialize()
     QString ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
     if (metrics.width(ascii) != m_charWidth * ascii.length()) {
-        qDebug() << font().family() << "is NOT monospace, char width" << m_charWidth;
+        qDebug() << font().family() << "is NOT monospace";
     } else {
-        qDebug() << font().family() << "is monospace, char width" << m_charWidth;
+        qDebug() << font().family() << "is monospace";
     }
+
+    qDebug() << "  Char Width" << m_charWidth;
+    qDebug() << "  Line Spacing" << m_lineSpacing;
+    qDebug() << "  Leading" << metrics.leading();
+    qDebug() << "  Height" << metrics.height();
+    qDebug() << "  Ascent" << metrics.ascent();
+    qDebug() << "  Descent" << metrics.descent();
 }

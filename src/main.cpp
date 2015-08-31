@@ -22,6 +22,7 @@
 #include "style.h"
 
 #include <QApplication>
+#include <QDebug>
 #include <QFontDatabase>
 
 int main(int argc, char **argv)
@@ -30,7 +31,10 @@ int main(int argc, char **argv)
 
     application.setWindowIcon(QIcon(":/icons/zero-editor.ico"));
 
-    QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf");
+    if (QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf") < 0) {
+        qDebug() << "Loading DejaVuSansMono.ttf failed";
+    }
+
     MonospaceFontMetrics::initialize();
     EditorColors::initialize();
     QApplication::setStyle(new Style(QApplication::style()));
