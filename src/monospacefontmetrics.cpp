@@ -24,7 +24,7 @@
 // Use a QFont pointer here to avoid potential static initialization order problems
 QFont *MonospaceFontMetrics::m_font = NULL;
 qreal MonospaceFontMetrics::m_charWidth = 0;
-qreal MonospaceFontMetrics::m_lineSpacing = 0;
+qreal MonospaceFontMetrics::m_lineHeight = 0;
 
 // static
 void MonospaceFontMetrics::initialize()
@@ -40,7 +40,7 @@ void MonospaceFontMetrics::initialize()
     QFontMetricsF metrics(*m_font);
 
     m_charWidth = metrics.width('x');
-    m_lineSpacing = metrics.lineSpacing();
+    m_lineHeight = metrics.height();
 
     QString ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
@@ -51,9 +51,9 @@ void MonospaceFontMetrics::initialize()
     }
 
     qDebug() << "  Char Width" << m_charWidth;
-    qDebug() << "  Line Spacing" << m_lineSpacing;
-    qDebug() << "  Leading" << metrics.leading();
-    qDebug() << "  Height" << metrics.height();
+    qDebug() << "  Height" << m_lineHeight;
     qDebug() << "  Ascent" << metrics.ascent();
     qDebug() << "  Descent" << metrics.descent();
+    qDebug() << "  Leading" << metrics.leading();
+    qDebug() << "  Line Spacing" << metrics.lineSpacing();
 }

@@ -28,12 +28,12 @@ public:
 
     static QFont font() { return *m_font; }
     static qreal charWidth() { return m_charWidth; }
-    static qreal lineSpacing() { return m_lineSpacing; }
+    static qreal lineHeight() { return m_lineHeight; }
 
 private:
     static QFont *m_font;
     static qreal m_charWidth;
-    static qreal m_lineSpacing;
+    static qreal m_lineHeight;
 };
 
 #endif // MONOSPACEFONTMETRICS_H

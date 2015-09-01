@@ -119,7 +119,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     }
 
     int line = verticalScrollBar()->value();
-    qreal height = MonospaceFontMetrics::lineSpacing();
+    qreal lineHeight = MonospaceFontMetrics::lineHeight();
     qreal top = 0;
 
     // If the first line is visible then offset it by the document margin to mimic the QPlainTextEdit margin behavior.
@@ -127,7 +127,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
         top += m_documentMargin;
     }
 
-    qreal bottom = top + height;
+    qreal bottom = top + lineHeight;
 
     painter.setPen(m_extraArea->palette().color(QPalette::WindowText));
 
@@ -138,7 +138,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
             // Highlight the line containing the cursor
             if (m_highlightCurrentLine &&
                 m_cursorPosition >= linePosition && m_cursorPosition < linePosition + BytesPerLine) {
-                painter.fillRect(QRectF(0, top, extraAreaWidth, height), EditorColors::currentLineHighlightColor());
+                painter.fillRect(QRectF(0, top, extraAreaWidth, lineHeight), EditorColors::currentLineHighlightColor());
             }
 
             // Highlight selected line number
@@ -149,7 +149,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
             }
 
             // Draw line number
-            painter.drawText(QRectF(0, top, extraAreaWidth - 8, height), Qt::AlignRight,
+            painter.drawText(QRectF(0, top, extraAreaWidth - 8, lineHeight), Qt::AlignRight,
                              QString::asprintf("%08X", line * BytesPerLine));
 
             // Reset text color
@@ -160,7 +160,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
 
         ++line;
         top = bottom;
-        bottom = top + height;
+        bottom = top + lineHeight;
     }
 }
 
@@ -171,7 +171,7 @@ void BinaryEditorWidget::scrollContentsBy(int dx, int dy)
 
     // The vertical scroll bar operates in lines, but the scroll function operates in pixels. Multiply dy by the line
     // spacing to convert between the two.
-    dy *= MonospaceFontMetrics::lineSpacing();
+    dy *= MonospaceFontMetrics::lineHeight();
 
     // Check if the scroll operation resulted in showing/hiding the first line. If that is the case then an extra top
     // margin of 4px (see QTextDocument::documentMargin) is added/subtracted to mimic the document margin of the
@@ -208,8 +208,8 @@ void BinaryEditorWidget::resizeEvent(QResizeEvent *event)
 void BinaryEditorWidget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(viewport());
-    qreal height = MonospaceFontMetrics::lineSpacing();
     qreal charWidth = MonospaceFontMetrics::charWidth();
+    qreal lineHeight = MonospaceFontMetrics::lineHeight();
     int selectionStart;
     int selectionEnd;
 
@@ -232,7 +232,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
         top += m_documentMargin;
     }
 
-    qreal bottom = top + height;
+    qreal bottom = top + lineHeight;
     QString hexString(HexColumnsPerLine, ' ');
     QChar *hexChars = hexString.data();
     const char *hexDigits= "0123456789ABCDEF";
@@ -253,12 +253,12 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
         if (bottom >= event->rect().top()) {
             int linePosition = BytesPerLine * line;
             bool cursorInLine = m_cursorPosition >= linePosition && m_cursorPosition < linePosition + BytesPerLine;
-            QRectF hexRect(leftHex, top, HexColumnsPerLine * charWidth, height);
-            QRectF printableRect(leftPrintable, top, BytesPerLine * charWidth, height);
+            QRectF hexRect(leftHex, top, HexColumnsPerLine * charWidth, lineHeight);
+            QRectF printableRect(leftPrintable, top, BytesPerLine * charWidth, lineHeight);
 
             // Highlight the line containing the cursor
             if (m_highlightCurrentLine && cursorInLine) {
-                painter.fillRect(QRectF(0, top, right + m_documentMargin, height),
+                painter.fillRect(QRectF(0, top, right + m_documentMargin, lineHeight),
                                  EditorColors::currentLineHighlightColor());
             }
 
@@ -325,7 +325,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
 
             // Draw selected lines
             if (hexSelectionLeft >= 0 && hexSelectionRight >= 0) {
-                QRect selectionRect(hexSelectionLeft, top, hexSelectionRight - hexSelectionLeft, height);
+                QRect selectionRect(hexSelectionLeft, top, hexSelectionRight - hexSelectionLeft, lineHeight);
 
                 painter.save();
                 painter.fillRect(selectionRect, palette().color(QPalette::Highlight));
@@ -337,7 +337,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
 
             if (printableSelectionLeft >= 0 && printableSelectionRight >= 0) {
                 QRect selectionRect(printableSelectionLeft, top,
-                                    printableSelectionRight - printableSelectionLeft, height);
+                                    printableSelectionRight - printableSelectionLeft, lineHeight);
 
                 painter.save();
                 painter.fillRect(selectionRect, palette().color(QPalette::Highlight));
@@ -351,7 +351,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
                 int offset = (m_cursorPosition % BytesPerLine) * charWidth;
 
                 // Draw hex cursor
-                QRect hexCursorRect(hexRect.left() + offset * 3, top, charWidth * 2, height);
+                QRect hexCursorRect(hexRect.left() + offset * 3, top, charWidth * 2, lineHeight);
 
                 painter.save();
 
@@ -368,7 +368,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
                 painter.restore();
 
                 // Draw printable cursor
-                QRect printableCursorRect(printableRect.left() + offset, top, charWidth, height);
+                QRect printableCursorRect(printableRect.left() + offset, top, charWidth, lineHeight);
 
                 painter.save();
 
@@ -388,7 +388,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
 
         ++line;
         top = bottom;
-        bottom = top + height;
+        bottom = top + lineHeight;
     }
 }
 
@@ -469,7 +469,7 @@ void BinaryEditorWidget::timerEvent(QTimerEvent *event)
 // private
 void BinaryEditorWidget::updateScrollBarRanges()
 {
-    qreal lineHeight = MonospaceFontMetrics::lineSpacing();
+    qreal lineHeight = MonospaceFontMetrics::lineHeight();
     qreal charWidth = MonospaceFontMetrics::charWidth();
 
     // Mimic the logic QPlainTextWidget uses to calculate the visible line count. QPlainTextWidget basically takes the
@@ -507,7 +507,7 @@ void BinaryEditorWidget::setBlinkingCursorEnabled(bool enable)
 int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) const
 {
     qreal charWidth = MonospaceFontMetrics::charWidth();
-    qreal lineSpacing = MonospaceFontMetrics::lineSpacing();
+    qreal lineHeight = MonospaceFontMetrics::lineHeight();
     int maxPosition = m_data.length() - 1;
 
     // Calculate x relative to the left edge of the first hex column
@@ -518,7 +518,7 @@ int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) c
 
     // Calculate line relative to the top edge of the first hex line. Use qFloor, because truncation would round
     // towards zero which would produce a wrong result if the position is in the line immediatly above the first line.
-    int line = verticalScrollBar()->value() + qFloor((position.y() - m_documentMargin) / lineSpacing);
+    int line = verticalScrollBar()->value() + qFloor((position.y() - m_documentMargin) / lineHeight);
 
     // Check if position is before the first or after the last line
     if (line < 0) {
