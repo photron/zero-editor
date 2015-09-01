@@ -19,12 +19,12 @@
 #include "monospacefontmetrics.h"
 
 #include <QDebug>
-#include <QFontMetricsF>
+#include <QFontMetrics>
 
 // Use a QFont pointer here to avoid potential static initialization order problems
 QFont *MonospaceFontMetrics::m_font = NULL;
-qreal MonospaceFontMetrics::m_charWidth = 0;
-qreal MonospaceFontMetrics::m_lineHeight = 0;
+int MonospaceFontMetrics::m_charWidth = 0;
+int MonospaceFontMetrics::m_lineHeight = 0;
 
 // static
 void MonospaceFontMetrics::initialize()
@@ -37,7 +37,7 @@ void MonospaceFontMetrics::initialize()
     // avoid all of this trouble by forcing an integer char width of exactly 8px on Linux as well.
     m_font->setStyleStrategy(QFont::ForceIntegerMetrics);
 
-    QFontMetricsF metrics(*m_font);
+    QFontMetrics metrics(*m_font);
 
     m_charWidth = metrics.width('x');
     m_lineHeight = metrics.height();

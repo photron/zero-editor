@@ -119,15 +119,15 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     }
 
     int line = verticalScrollBar()->value();
-    qreal lineHeight = MonospaceFontMetrics::lineHeight();
-    qreal top = 0;
+    int lineHeight = MonospaceFontMetrics::lineHeight();
+    int top = 0;
 
     // If the first line is visible then offset it by the document margin to mimic the QPlainTextEdit margin behavior.
     if (line == 0) {
         top += m_documentMargin;
     }
 
-    qreal bottom = top + lineHeight;
+    int bottom = top + lineHeight;
 
     painter.setPen(m_extraArea->palette().color(QPalette::WindowText));
 
@@ -138,7 +138,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
             // Highlight the line containing the cursor
             if (m_highlightCurrentLine &&
                 m_cursorPosition >= linePosition && m_cursorPosition < linePosition + BytesPerLine) {
-                painter.fillRect(QRectF(0, top, extraAreaWidth, lineHeight), EditorColors::currentLineHighlightColor());
+                painter.fillRect(QRect(0, top, extraAreaWidth, lineHeight), EditorColors::currentLineHighlightColor());
             }
 
             // Highlight selected line number
@@ -149,7 +149,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
             }
 
             // Draw line number
-            painter.drawText(QRectF(0, top, extraAreaWidth - 8, lineHeight), Qt::AlignRight,
+            painter.drawText(QRect(0, top, extraAreaWidth - 8, lineHeight), Qt::AlignRight,
                              QString::asprintf("%08X", line * BytesPerLine));
 
             // Reset text color
@@ -208,8 +208,8 @@ void BinaryEditorWidget::resizeEvent(QResizeEvent *event)
 void BinaryEditorWidget::paintEvent(QPaintEvent *event)
 {
     QPainter painter(viewport());
-    qreal charWidth = MonospaceFontMetrics::charWidth();
-    qreal lineHeight = MonospaceFontMetrics::lineHeight();
+    int charWidth = MonospaceFontMetrics::charWidth();
+    int lineHeight = MonospaceFontMetrics::lineHeight();
     int selectionStart;
     int selectionEnd;
 
@@ -225,14 +225,14 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
     int leftPrintable = leftHex + (HexColumnsPerLine + 1) * charWidth + 1 + charWidth;
     int right = viewport()->width() + horizontalScrollBar()->value() - m_documentMargin;
     int line = verticalScrollBar()->value();
-    qreal top = 0;
+    int top = 0;
 
     // If the first line is visible then offset it by the document margin to mimic the QPlainTextEdit margin behavior.
     if (line == 0) {
         top += m_documentMargin;
     }
 
-    qreal bottom = top + lineHeight;
+    int bottom = top + lineHeight;
     QString hexString(HexColumnsPerLine, ' ');
     QChar *hexChars = hexString.data();
     const char *hexDigits= "0123456789ABCDEF";
@@ -244,7 +244,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
 
     if (divider < viewport()->width()) {
         painter.setPen(palette().color(QPalette::Midlight));
-        painter.drawLine(QPointF(divider, event->rect().top()), QPointF(divider, event->rect().bottom()));
+        painter.drawLine(divider, event->rect().top(), divider, event->rect().bottom());
     }
 
     painter.setPen(palette().color(QPalette::Text));
@@ -253,12 +253,12 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
         if (bottom >= event->rect().top()) {
             int linePosition = BytesPerLine * line;
             bool cursorInLine = m_cursorPosition >= linePosition && m_cursorPosition < linePosition + BytesPerLine;
-            QRectF hexRect(leftHex, top, HexColumnsPerLine * charWidth, lineHeight);
-            QRectF printableRect(leftPrintable, top, BytesPerLine * charWidth, lineHeight);
+            QRect hexRect(leftHex, top, HexColumnsPerLine * charWidth, lineHeight);
+            QRect printableRect(leftPrintable, top, BytesPerLine * charWidth, lineHeight);
 
             // Highlight the line containing the cursor
             if (m_highlightCurrentLine && cursorInLine) {
-                painter.fillRect(QRectF(0, top, right + m_documentMargin, lineHeight),
+                painter.fillRect(QRect(0, top, right + m_documentMargin, lineHeight),
                                  EditorColors::currentLineHighlightColor());
             }
 
@@ -291,7 +291,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
                 // Selection ends in this line
                 int offset = ((selectionEnd % BytesPerLine) + 1) * charWidth;
 
-                hexSelectionRight = hexRect.left() + qMax(offset * 3 - charWidth, 0.0);
+                hexSelectionRight = hexRect.left() + qMax(offset * 3 - charWidth, 0);
                 printableSelectionRight = printableRect.left() + offset;
             }
 
@@ -300,7 +300,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
                 int offset = line * BytesPerLine + i;
 
                 if (offset < m_data.length()) {
-                    quint8 byte = (quint8)m_data.at(offset);
+                    quint8 byte = m_data.at(offset);
 
                     hexChars[i * 3] = hexDigits[(byte >> 4) & 0x0F];
                     hexChars[i * 3 + 1] = hexDigits[byte & 0x0F];
@@ -469,14 +469,14 @@ void BinaryEditorWidget::timerEvent(QTimerEvent *event)
 // private
 void BinaryEditorWidget::updateScrollBarRanges()
 {
-    qreal lineHeight = MonospaceFontMetrics::lineHeight();
-    qreal charWidth = MonospaceFontMetrics::charWidth();
+    int charWidth = MonospaceFontMetrics::charWidth();
+    int lineHeight = MonospaceFontMetrics::lineHeight();
 
     // Mimic the logic QPlainTextWidget uses to calculate the visible line count. QPlainTextWidget basically takes the
     // viewport height, subtracts the document top/bottom margins (defaults to 4px, see QTextDocument::documentMargin),
     // sutracts 1px (to avoid that the last line could touch the widget bottom) and then calcualtes how many lines fit
     // into the remaining height.
-    int visibleLineCount = (viewport()->height() - m_documentMargin * 2 - 1) / lineHeight;
+    int visibleLineCount = qMax(viewport()->height() - m_documentMargin * 2 - 1, 0) / lineHeight;
     int contentWidth = (HexColumnsPerLine + 1) * charWidth + 1 + (1 + BytesPerLine) * charWidth;
 
     horizontalScrollBar()->setRange(0, contentWidth + m_documentMargin * 2 - viewport()->width());
@@ -506,8 +506,8 @@ void BinaryEditorWidget::setBlinkingCursorEnabled(bool enable)
 // private
 int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) const
 {
-    qreal charWidth = MonospaceFontMetrics::charWidth();
-    qreal lineHeight = MonospaceFontMetrics::lineHeight();
+    int charWidth = MonospaceFontMetrics::charWidth();
+    int lineHeight = MonospaceFontMetrics::lineHeight();
     int maxPosition = m_data.length() - 1;
 
     // Calculate x relative to the left edge of the first hex column
@@ -518,7 +518,7 @@ int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) c
 
     // Calculate line relative to the top edge of the first hex line. Use qFloor, because truncation would round
     // towards zero which would produce a wrong result if the position is in the line immediatly above the first line.
-    int line = verticalScrollBar()->value() + qFloor((position.y() - m_documentMargin) / lineHeight);
+    int line = verticalScrollBar()->value() + qFloor((position.y() - m_documentMargin) / (float)lineHeight);
 
     // Check if position is before the first or after the last line
     if (line < 0) {
@@ -530,7 +530,7 @@ int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) c
     if (*inHexSection) {
         // Use qFloor, because truncation would round towards zero which would produce a wrong result if the position
         // is in the column immediatly left to the first hex column.
-        int hexColumn = qBound(0, qFloor((x + charWidth / 2) / (charWidth * 3)), BytesPerLine - 1);
+        int hexColumn = qBound(0, qFloor((x + (float)charWidth / 2) / (charWidth * 3)), BytesPerLine - 1);
 
         return qMin(BytesPerLine * line + hexColumn, maxPosition);
     } else {
@@ -539,7 +539,7 @@ int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) c
 
         // Use qFloor, because truncation would round towards zero which would produce a wrong result if the position
         // is in the column immediatly left to the first printable column.
-        int printableColumn = qBound(0, qFloor(x / charWidth), BytesPerLine - 1);
+        int printableColumn = qBound(0, qFloor(x / (float)charWidth), BytesPerLine - 1);
 
         return qMin(BytesPerLine * line + printableColumn, maxPosition);
     }

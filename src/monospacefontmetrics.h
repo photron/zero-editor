@@ -27,13 +27,13 @@ public:
     static void initialize();
 
     static QFont font() { return *m_font; }
-    static qreal charWidth() { return m_charWidth; }
-    static qreal lineHeight() { return m_lineHeight; }
+    static int charWidth() { return m_charWidth; }
+    static int lineHeight() { return m_lineHeight; }
 
 private:
     static QFont *m_font;
-    static qreal m_charWidth;
-    static qreal m_lineHeight;
+    static int m_charWidth;
+    static int m_lineHeight;
 };
 
 #endif // MONOSPACEFONTMETRICS_H
