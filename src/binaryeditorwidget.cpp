@@ -66,6 +66,7 @@ BinaryEditorWidget::BinaryEditorWidget(QWidget *parent) :
     m_extraArea(new BinaryEditorExtraArea(this)),
     m_lineCount(1),
     m_lastVerticalScrollBarValue(-1),
+    m_cursorVisible(false),
     m_cursorInHexSection(true),
     m_cursorPosition(0),
     m_anchorPosition(0),
