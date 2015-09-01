@@ -36,14 +36,9 @@ public:
         QWidget(editor),
         m_editor(editor)
     {
-        QPalette palette;
-
-        // Ensure that the text is black
-        palette.setColor(QPalette::WindowText, Qt::black);
-
-        setPalette(palette);
-        setAutoFillBackground(true);
         setFont(MonospaceFontMetrics::font());
+        setPalette(EditorColors::basicPalette());
+        setAutoFillBackground(true);
     }
 
     QSize sizeHint() const
@@ -78,13 +73,7 @@ BinaryEditorWidget::BinaryEditorWidget(QWidget *parent) :
     m_highlightCurrentLine(false)
 {
     setFont(MonospaceFontMetrics::font());
-
-    QPalette palette;
-
-    // Ensure that the text is black
-    palette.setColor(QPalette::Text, Qt::black);
-
-    setPalette(palette);
+    setPalette(EditorColors::basicPalette());
     updateScrollBarRanges();
     setViewportMargins(extraAreaWidth(), 0, 0, 0);
 
@@ -148,7 +137,7 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
             // Highlight the line containing the cursor
             if (m_highlightCurrentLine &&
                 m_cursorPosition >= linePosition && m_cursorPosition < linePosition + BytesPerLine) {
-                painter.fillRect(QRectF(0, top, extraAreaWidth, height), EditorColors::currentLineHighlight());
+                painter.fillRect(QRectF(0, top, extraAreaWidth, height), EditorColors::currentLineHighlightColor());
             }
 
             // Highlight selected line number
@@ -269,7 +258,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
             // Highlight the line containing the cursor
             if (m_highlightCurrentLine && cursorInLine) {
                 painter.fillRect(QRectF(0, top, right + m_documentMargin, height),
-                                 EditorColors::currentLineHighlight());
+                                 EditorColors::currentLineHighlightColor());
             }
 
             // Highlight selected bytes

@@ -32,14 +32,9 @@ public:
         QWidget(editor),
         m_editor(editor)
     {
-        // Ensure that the text is black
-        QPalette palette;
-
-        palette.setColor(QPalette::WindowText, Qt::black); // FIXME: Why is this necessary on Linux?
-
-        setPalette(palette);
-        setAutoFillBackground(true);
         setFont(MonospaceFontMetrics::font());
+        setPalette(EditorColors::basicPalette());
+        setAutoFillBackground(true);
     }
 
     QSize sizeHint() const
@@ -69,14 +64,8 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     m_lastCursorSelectionStart(-1)
 {
     setFont(MonospaceFontMetrics::font());
+    setPalette(EditorColors::basicPalette());
     setCursorWidth(2);
-
-    // Ensure that the text is black
-    QPalette palette;
-
-    palette.setColor(QPalette::Text, Qt::black); // FIXME: Why is this necessary on Linux?
-
-    setPalette(palette);
 
     // Show tabs and spaces and set tab size to 4 spaces
     QTextOption option = document()->defaultTextOption();
@@ -132,7 +121,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
                 textCursorLine.setLeft(0);
                 textCursorLine.setRight(extraAreaWidth);
 
-                painter.fillRect(textCursorLine, EditorColors::currentLineHighlight());
+                painter.fillRect(textCursorLine, EditorColors::currentLineHighlightColor());
             }
 
             // Highlight selected line number
@@ -249,7 +238,7 @@ void TextEditorWidget::updateCurrentLineHighlight()
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        selection.format.setBackground(EditorColors::currentLineHighlight());
+        selection.format.setBackground(EditorColors::currentLineHighlightColor());
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();

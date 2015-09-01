@@ -20,16 +20,19 @@
 #define EDITORCOLORS_H
 
 #include <QColor>
+#include <QPalette>
 
 class EditorColors
 {
 public:
     static void initialize();
 
-    static QColor currentLineHighlight() { return m_currentLineHighlight; }
+    static QPalette basicPalette() { return *m_basicPalette; }
+    static QColor currentLineHighlightColor() { return m_currentLineHighlightColor; }
 
 private:
-    static QColor m_currentLineHighlight;
+    static QPalette *m_basicPalette;
+    static QColor m_currentLineHighlightColor;
 };
 
 #endif // EDITORCOLORS_H

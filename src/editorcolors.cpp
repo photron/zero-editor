@@ -20,24 +20,35 @@
 
 #include <QPalette>
 
-QColor EditorColors::m_currentLineHighlight;
+// Use a QPalette pointer here to avoid potential static initialization order problems
+QPalette *EditorColors::m_basicPalette = NULL;
+QColor EditorColors::m_currentLineHighlightColor;
 
 // static
 void EditorColors::initialize()
 {
-    QPalette palette;
+    m_basicPalette = new QPalette(); // FIXME: This leaks memory
+
+    // Ensure that the (window) text is black
+    m_basicPalette->setColor(QPalette::WindowText, Qt::black);
+    m_basicPalette->setColor(QPalette::Text, Qt::black);
+
+    // Ensure that highlighted text does not turn gray if widget is not in focus
+    m_basicPalette->setColor(QPalette::Inactive, QPalette::Highlight,
+                             m_basicPalette->color(QPalette::Highlight));
+    m_basicPalette->setColor(QPalette::Inactive, QPalette::HighlightedText,
+                             m_basicPalette->color(QPalette::HighlightedText));
 
     // Calculate current line highlight color (formula taken from Qt Creator 3.5.0)
-    QColor forground = palette.color(QPalette::Highlight);
-    QColor background = palette.color(QPalette::Base);
+    QColor forground = m_basicPalette->color(QPalette::Highlight);
+    QColor background = m_basicPalette->color(QPalette::Base);
     qreal smallRatio = 0.3; // 0.05 for search scope
     qreal largeRatio = 0.6; // 0.4 for search scope
-    qreal ratio = ((palette.color(QPalette::Text).value() < 128) ^
-                   (palette.color(QPalette::HighlightedText).value() < 128)) ? smallRatio : largeRatio;
+    qreal ratio = ((m_basicPalette->color(QPalette::Text).value() < 128) ^
+                   (m_basicPalette->color(QPalette::HighlightedText).value() < 128)) ? smallRatio : largeRatio;
 
-    m_currentLineHighlight = QColor::fromRgbF(forground.redF()   * ratio + background.redF()   * (1.0 - ratio),
-                                              forground.greenF() * ratio + background.greenF() * (1.0 - ratio),
-                                              forground.blueF()  * ratio + background.blueF()  * (1.0 - ratio));
-    m_currentLineHighlight.setAlpha(128);
+    m_currentLineHighlightColor = QColor::fromRgbF(forground.redF()   * ratio + background.redF()   * (1.0 - ratio),
+                                                   forground.greenF() * ratio + background.greenF() * (1.0 - ratio),
+                                                   forground.blueF()  * ratio + background.blueF()  * (1.0 - ratio));
+    m_currentLineHighlightColor.setAlpha(128);
 }
-
