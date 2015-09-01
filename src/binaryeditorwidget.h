@@ -57,7 +57,7 @@ private:
 
     void updateScrollBarRanges();
     void setBlinkingCursorEnabled(bool enable);
-    int positionAt(const QPoint &position, bool *inHexSection = NULL) const;
+    int positionAt(const QPoint &position, bool *inHexSection) const;
 
     BinaryEditorExtraArea *m_extraArea;
     QByteArray m_data;

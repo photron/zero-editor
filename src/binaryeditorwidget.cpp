@@ -505,47 +505,41 @@ void BinaryEditorWidget::setBlinkingCursorEnabled(bool enable)
 // private
 int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) const
 {
-    qreal lineSpacing = MonospaceFontMetrics::lineSpacing();
     qreal charWidth = MonospaceFontMetrics::charWidth();
+    qreal lineSpacing = MonospaceFontMetrics::lineSpacing();
     int maxPosition = m_data.length() - 1;
+
+    // Calculate x relative to the left edge of the first hex column
+    int x = position.x() + horizontalScrollBar()->value() - m_documentMargin;
+
+    // Check if x is in the hex section
+    *inHexSection = x < (HexColumnsPerLine + 1) * charWidth;
 
     // Calculate line relative to the top edge of the first hex line. Use qFloor, because truncation would round
     // towards zero which would produce a wrong result if the position is in the line immediatly above the first line.
     int line = verticalScrollBar()->value() + qFloor((position.y() - m_documentMargin) / lineSpacing);
 
+    // Check if position is before the first or after the last line
     if (line < 0) {
         return 0;
     } else if (line >= m_lineCount) {
         return maxPosition;
     }
 
-    // Calculate x relative to the left edge of the first hex column
-    int x = position.x() + horizontalScrollBar()->value() - m_documentMargin;
-
-    // Check if x is in the hex section
-    if (x < (HexColumnsPerLine + 1) * charWidth) {
-        if (inHexSection != NULL) {
-            *inHexSection = true;
-        }
-
+    if (*inHexSection) {
         // Use qFloor, because truncation would round towards zero which would produce a wrong result if the position
         // is in the column immediatly left to the first hex column.
         int hexColumn = qBound(0, qFloor((x + charWidth / 2) / (charWidth * 3)), BytesPerLine - 1);
 
         return qMin(BytesPerLine * line + hexColumn, maxPosition);
+    } else {
+        // Shift x to calculate printable column relative to the left edge of the first printable column
+        x -= BytesPerLine * 3 * charWidth + 1 + charWidth;
+
+        // Use qFloor, because truncation would round towards zero which would produce a wrong result if the position
+        // is in the column immediatly left to the first printable column.
+        int printableColumn = qBound(0, qFloor(x / charWidth), BytesPerLine - 1);
+
+        return qMin(BytesPerLine * line + printableColumn, maxPosition);
     }
-
-    // Otherwise x it is in the printable section
-    if (inHexSection != NULL) {
-        *inHexSection = false;
-    }
-
-    // Shift x to calculate printable column relative to the left edge of the first printable column
-    x -= BytesPerLine * 3 * charWidth + 1 + charWidth;
-
-    // Use qFloor, because truncation would round towards zero which would produce a wrong result if the position
-    // is in the column immediatly left to the first printable column.
-    int printableColumn = qBound(0, qFloor(x / charWidth), BytesPerLine - 1);
-
-    return qMin(BytesPerLine * line + printableColumn, maxPosition);
 }
