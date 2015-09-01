@@ -283,9 +283,9 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
             }
 
             if (selectionEnd >= linePosition + BytesPerLine) {
-                // Selection ends after this line
-                hexSelectionRight = hexRect.right();
-                printableSelectionRight = printableRect.right();
+                // Selection ends after this line, +1 because right() returns the last position INSIDE the QRect
+                hexSelectionRight = hexRect.right() + 1;
+                printableSelectionRight = printableRect.right() + 1;
                 ++fullWidthSelection;
             } else if (selectionEnd >= linePosition && selectionEnd < linePosition + BytesPerLine) {
                 // Selection ends in this line
