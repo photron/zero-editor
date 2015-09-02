@@ -80,7 +80,7 @@ BinaryEditorWidget::BinaryEditorWidget(QWidget *parent) :
 
     QByteArray d("cons\0t int topLine = verticalScrollBar()->value();   const int xoffset = horizontalScrollBar()->value();            const int x1 = -xoffset + m_margin + m_labelWidth - m_charWidth/2 - 1;            const int x2 = -xoffset + m_margin + m_labelWidth + m_bytesPerLine * m_columnWidth + m_charWidth/2;            painter.drawLine(x1, 0, x1, viewport()->height());            painter.drawLine(x2, 0, x2, viewport()->height());", 0x165);
 
-    setData(d); // FIXME: deal with spcial case of empty data
+    setData(d); // FIXME: deal with special case of empty data
 }
 
 QByteArray BinaryEditorWidget::data() const
@@ -399,15 +399,7 @@ void BinaryEditorWidget::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    bool inHexSection;
-    int position = positionAt(event->pos(), &inHexSection);
-
-    m_cursorInHexSection = inHexSection;
-    m_cursorPosition = position;
-    m_anchorPosition = position;
-
-    viewport()->update(); // FIXME: do a more fine grained update
-    m_extraArea->update(); // FIXME: do a more fine grained update
+    setCursorPosition(positionAt(event->pos(), &m_cursorInHexSection), MoveAnchor);
 }
 
 // protected
@@ -417,14 +409,7 @@ void BinaryEditorWidget::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    bool inHexSection;
-    int position = positionAt(event->pos(), &inHexSection);
-
-    m_cursorInHexSection = inHexSection;
-    m_cursorPosition = position;
-
-    viewport()->update(); // FIXME: do a more fine grained update
-    m_extraArea->update(); // FIXME: do a more fine grained update
+    setCursorPosition(positionAt(event->pos(), &m_cursorInHexSection), KeepAnchor);
 }
 
 // protected
@@ -438,7 +423,8 @@ void BinaryEditorWidget::focusInEvent(QFocusEvent *event)
     setBlinkingCursorEnabled(true);
 
     m_highlightCurrentLine = true;
-    m_extraArea->update(); // FIXME: do a more fine grained update for the current line
+
+    updateCursorLine();
 
     QAbstractScrollArea::focusInEvent(event);
 }
@@ -449,7 +435,8 @@ void BinaryEditorWidget::focusOutEvent(QFocusEvent *event)
     setBlinkingCursorEnabled(false);
 
     m_highlightCurrentLine = false;
-    m_extraArea->update(); // FIXME: do a more fine grained update for the current line
+
+    updateCursorLine();
 
     QAbstractScrollArea::focusOutEvent(event);
 }
@@ -460,7 +447,7 @@ void BinaryEditorWidget::timerEvent(QTimerEvent *event)
     if (event->timerId() == m_cursorBlinkTimer.timerId()) {
         m_cursorVisible = !m_cursorVisible;
 
-        viewport()->update(); // FIXME: update just the cursor line
+        updateCursorLine();
     }
 
     QAbstractScrollArea::timerEvent(event);
@@ -490,6 +477,31 @@ void BinaryEditorWidget::updateScrollBarRanges()
 }
 
 // private
+void BinaryEditorWidget::updateLines(int fromPosition, int toPosition)
+{
+    int lineHeight = MonospaceFontMetrics::lineHeight();
+    int line = verticalScrollBar()->value();
+    int firstLine = qMin(fromPosition, toPosition) / BytesPerLine;
+    int lastLine = qMax(fromPosition, toPosition) / BytesPerLine;
+    int y = (firstLine - line) * lineHeight;
+    int height = (lastLine - firstLine + 1) * lineHeight;
+
+    // If the first line is visible then offset it by the document margin to mimic the QPlainTextEdit margin behavior.
+    if (line == 0) {
+        y += m_documentMargin;
+    }
+
+    viewport()->update(0, y, viewport()->width(), height);
+    m_extraArea->update(0, y, extraAreaWidth(), height);
+}
+
+// private
+void BinaryEditorWidget::updateCursorLine()
+{
+    updateLines(m_cursorPosition, m_cursorPosition);
+}
+
+// private
 void BinaryEditorWidget::setBlinkingCursorEnabled(bool enable)
 {
     if (enable && QApplication::cursorFlashTime() > 0) {
@@ -500,7 +512,7 @@ void BinaryEditorWidget::setBlinkingCursorEnabled(bool enable)
 
     m_cursorVisible = enable;
 
-    viewport()->update(); // FIXME: do a more fine grained update
+    updateCursorLine();
 }
 
 // private
@@ -542,5 +554,58 @@ int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) c
         int printableColumn = qBound(0, qFloor(x / (float)charWidth), BytesPerLine - 1);
 
         return qMin(BytesPerLine * line + printableColumn, maxPosition);
+    }
+}
+
+// private
+void BinaryEditorWidget::setCursorPosition(int position, MoveMode moveMode)
+{
+    int lastCursorPosition = m_cursorPosition;
+
+    m_cursorPosition = qBound(0, position, m_data.length() - 1);
+
+    if (moveMode == MoveAnchor) {
+        updateLines(m_anchorPosition, lastCursorPosition);
+
+        m_anchorPosition = m_cursorPosition;
+    }
+
+    updateLines(lastCursorPosition, m_cursorPosition);
+    ensureCursorVisible();
+}
+
+// private
+void BinaryEditorWidget::ensureCursorVisible()
+{
+    int charWidth = MonospaceFontMetrics::charWidth();
+    int line = verticalScrollBar()->value();
+    int lineHeight = MonospaceFontMetrics::lineHeight();
+    int y = (m_cursorPosition / BytesPerLine - line) * lineHeight;
+    int leftHex = m_documentMargin - horizontalScrollBar()->value();
+    int leftPrintable = leftHex + (HexColumnsPerLine + 1) * charWidth + 1 + charWidth;
+    int offset = (m_cursorPosition % BytesPerLine) * charWidth;
+    int visibleLineCount = qMax(viewport()->height() - m_documentMargin * 2 - 1, 0) / lineHeight;
+    QRect cursorRect;
+
+    // If the first line is visible then offset it by the document margin to mimic the QPlainTextEdit margin behavior.
+    if (line == 0) {
+        y += m_documentMargin;
+    }
+
+    if (m_cursorInHexSection) {
+        cursorRect = QRect(leftHex + offset * 3, y, charWidth * 2, lineHeight);
+    } else {
+        cursorRect = QRect(leftPrintable + offset, y, charWidth, lineHeight);
+    }
+
+    QRect viewportRect = viewport()->rect();
+
+    // FIXME: need to handle horizontal scrolling
+    if (!viewportRect.contains(cursorRect)) {
+        if (cursorRect.top() < viewportRect.top()) {
+            verticalScrollBar()->setValue(m_cursorPosition / BytesPerLine);
+        } else if (cursorRect.bottom() > viewportRect.bottom()) {
+            verticalScrollBar()->setValue(m_cursorPosition / BytesPerLine - visibleLineCount + 1);
+        }
     }
 }

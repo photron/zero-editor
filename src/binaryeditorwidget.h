@@ -55,9 +55,18 @@ private:
         HexColumnsPerLine = BytesPerLine * 3 - 1 // Including the interior whitespace
     };
 
+    enum MoveMode {
+        KeepAnchor,
+        MoveAnchor
+    };
+
     void updateScrollBarRanges();
+    void updateLines(int fromPosition, int toPosition);
+    void updateCursorLine();
     void setBlinkingCursorEnabled(bool enable);
     int positionAt(const QPoint &position, bool *inHexSection) const;
+    void setCursorPosition(int position, MoveMode moveMode);
+    void ensureCursorVisible();
 
     BinaryEditorExtraArea *m_extraArea;
     QByteArray m_data;
