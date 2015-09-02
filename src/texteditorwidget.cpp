@@ -61,7 +61,8 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     QPlainTextEdit(parent),
     m_extraArea(new TextEditorExtraArea(this)),
     m_lastCursorBlockNumber(-1),
-    m_lastCursorSelectionStart(-1)
+    m_lastCursorSelectionStart(-1),
+    m_highlightCurrentLine(false)
 {
     setFont(MonospaceFontMetrics::font());
     setPalette(EditorColors::basicPalette());
@@ -114,7 +115,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             // Highlight the line containing the cursor
-            if (block == textCursorBlock) {
+            if (m_highlightCurrentLine && block == textCursorBlock) {
                 QRectF textCursorLine = block.layout()->lineForTextPosition(textCursor().positionInBlock()).rect();
 
                 textCursorLine.translate(0, top);
@@ -238,7 +239,7 @@ void TextEditorWidget::paintEvent(QPaintEvent *event)
                 }
             }
 
-            if (block == textCursorBlock) {
+            if (m_highlightCurrentLine && block == textCursorBlock) {
                 QRectF rr = layout->lineForTextPosition(textCursor().positionInBlock()).rect();
 
                 rr.translate(0, r.top());
@@ -284,6 +285,26 @@ void TextEditorWidget::paintEvent(QPaintEvent *event)
 
         block = block.next();
     }
+}
+
+// protected
+void TextEditorWidget::focusInEvent(QFocusEvent *event)
+{
+    m_highlightCurrentLine = true;
+    viewport()->update(); // FIXME: do a more fine grained update for the current line
+    m_extraArea->update(); // FIXME: do a more fine grained update for the current line
+
+    QPlainTextEdit::focusInEvent(event);
+}
+
+// protected
+void TextEditorWidget::focusOutEvent(QFocusEvent *event)
+{
+    m_highlightCurrentLine = false;
+    viewport()->update(); // FIXME: do a more fine grained update for the current line
+    m_extraArea->update(); // FIXME: do a more fine grained update for the current line
+
+    QPlainTextEdit::focusOutEvent(event);
 }
 
 // private slot

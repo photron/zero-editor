@@ -36,6 +36,8 @@ public:
 protected:
     void resizeEvent(QResizeEvent *event);
     void paintEvent(QPaintEvent *event);
+    void focusInEvent(QFocusEvent *event);
+    void focusOutEvent(QFocusEvent *event);
 
 private slots:
     void updateExtraArea(const QRect &rect, int dy);
@@ -47,6 +49,7 @@ private:
     TextEditorExtraArea *m_extraArea;
     int m_lastCursorBlockNumber;
     int m_lastCursorSelectionStart;
+    bool m_highlightCurrentLine;
 };
 
 #endif // TEXTEDITORWIDGET_H
