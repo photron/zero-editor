@@ -29,10 +29,14 @@ public:
 
     static QPalette basicPalette() { return *m_basicPalette; }
     static QColor currentLineHighlightColor() { return m_currentLineHighlightColor; }
+    static QColor innerWrapMarkerColor() { return m_innerWrapMarkerColor; }
+    static QColor outerWrapMarkerColor() { return m_outerWrapMarkerColor; }
 
 private:
     static QPalette *m_basicPalette;
     static QColor m_currentLineHighlightColor;
+    static QColor m_innerWrapMarkerColor;
+    static QColor m_outerWrapMarkerColor;
 };
 
 #endif // EDITORCOLORS_H

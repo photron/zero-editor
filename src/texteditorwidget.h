@@ -35,6 +35,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    void paintEvent(QPaintEvent *event);
 
 private slots:
     void updateExtraArea(const QRect &rect, int dy);

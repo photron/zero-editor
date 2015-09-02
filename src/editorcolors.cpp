@@ -23,6 +23,8 @@
 // Use a QPalette pointer here to avoid potential static initialization order problems
 QPalette *EditorColors::m_basicPalette = NULL;
 QColor EditorColors::m_currentLineHighlightColor;
+QColor EditorColors::m_innerWrapMarkerColor;
+QColor EditorColors::m_outerWrapMarkerColor;
 
 // static
 void EditorColors::initialize()
@@ -51,4 +53,7 @@ void EditorColors::initialize()
                                                    forground.greenF() * ratio + background.greenF() * (1.0 - ratio),
                                                    forground.blueF()  * ratio + background.blueF()  * (1.0 - ratio));
     m_currentLineHighlightColor.setAlpha(128);
+
+    m_innerWrapMarkerColor = QColor(194,235,194);
+    m_outerWrapMarkerColor = QColor(235,194,194);
 }

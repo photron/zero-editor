@@ -161,6 +161,7 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
     }
 }
 
+// protected
 void TextEditorWidget::resizeEvent(QResizeEvent *event)
 {
     QPlainTextEdit::resizeEvent(event);
@@ -170,6 +171,119 @@ void TextEditorWidget::resizeEvent(QResizeEvent *event)
     rect.setWidth(extraAreaWidth());
 
     m_extraArea->setGeometry(rect);
+}
+
+// protected
+void TextEditorWidget::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(viewport());
+    QPointF offset = contentOffset();
+    QTextBlock textCursorBlock = textCursor().block();
+    QRect er = event->rect();
+    QRect viewportRect = viewport()->rect();
+    bool editable = !isReadOnly();
+    QTextBlock block = firstVisibleBlock();
+
+    // Set a brush origin so that the WaveUnderline knows where the wave started
+    painter.setBrushOrigin(offset);
+
+    // Draw 80 column wrap marker
+    int marker = MonospaceFontMetrics::charWidth() * 80 + offset.x() + document()->documentMargin();
+
+    if (marker < viewportRect.width()) {
+        painter.setPen(EditorColors::innerWrapMarkerColor());
+        painter.drawLine(QPointF(marker, er.top()), QPointF(marker, er.bottom()));
+
+        // Draw 120 column wrap marker
+        marker = MonospaceFontMetrics::charWidth() * 120 + offset.x() + document()->documentMargin();
+
+        if (marker < viewportRect.width()) {
+            painter.setPen(EditorColors::outerWrapMarkerColor());
+            painter.drawLine(QPointF(marker, er.top()), QPointF(marker, er.bottom()));
+        }
+    }
+
+    QAbstractTextDocumentLayout::PaintContext context = getPaintContext();
+
+    painter.setPen(palette().color(QPalette::Text));
+
+    while (block.isValid()) {
+        QRectF r = blockBoundingRect(block).translated(offset);
+        QTextLayout *layout = block.layout();
+
+        if (!block.isVisible()) {
+            offset.ry() += r.height();
+            block = block.next();
+            continue;
+        }
+
+        if (r.bottom() >= er.top() && r.top() <= er.bottom()) {
+            QVector<QTextLayout::FormatRange> selectionFormats;
+            int blockPosition = block.position();
+            int blockLength = block.length();
+
+            for (int i = 0; i < context.selections.size(); ++i) {
+                QAbstractTextDocumentLayout::Selection selection = context.selections.at(i);
+                int selectionStart = selection.cursor.selectionStart() - blockPosition;
+                int selectionEnd = selection.cursor.selectionEnd() - blockPosition;
+
+                if (selectionStart < blockLength && selectionEnd > 0 && selectionEnd > selectionStart) {
+                    QTextLayout::FormatRange selectionFormat;
+
+                    selectionFormat.start = selectionStart;
+                    selectionFormat.length = selectionEnd - selectionStart;
+                    selectionFormat.format = selection.format;
+
+                    selectionFormats.append(selectionFormat);
+                }
+            }
+
+            if (block == textCursorBlock) {
+                QRectF rr = layout->lineForTextPosition(textCursor().positionInBlock()).rect();
+
+                rr.translate(0, r.top());
+                rr.setLeft(0);
+                rr.setRight(viewportRect.width() - offset.x());
+
+                if (!editable && !er.contains(rr.toRect())) {
+                    QRect updateRect = er;
+                    updateRect.setLeft(0);
+                    updateRect.setRight(viewportRect.width() - offset.x());
+                    viewport()->update(updateRect);
+                }
+
+                painter.fillRect(rr, EditorColors::currentLineHighlightColor());
+            }
+
+            bool drawCursor = ((editable || (textInteractionFlags() & Qt::TextSelectableByKeyboard))
+                               && context.cursorPosition >= blockPosition
+                               && context.cursorPosition < blockPosition + blockLength);
+
+            layout->draw(&painter, offset, selectionFormats, er);
+
+            if (drawCursor
+                || (editable && context.cursorPosition < -1
+                    && !layout->preeditAreaText().isEmpty())) {
+                int cursorPosition = context.cursorPosition;
+
+                if (cursorPosition < -1) {
+                    cursorPosition = layout->preeditAreaPosition() - (cursorPosition + 2);
+                } else {
+                    cursorPosition -= blockPosition;
+                }
+
+                layout->drawCursor(&painter, offset, cursorPosition, cursorWidth());
+            }
+        }
+
+        offset.ry() += r.height();
+
+        if (offset.y() > viewportRect.height()) {
+            break;
+        }
+
+        block = block.next();
+    }
 }
 
 // private slot
