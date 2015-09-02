@@ -125,8 +125,8 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
             }
 
             // Highlight selected line number
-            bool selected = (selectionStart < block.position() + block.length() && selectionEnd >= block.position()) ||
-                            (selectionStart == selectionEnd && selectionStart == block.position());
+            bool selected = (selectionStart != selectionEnd) &&
+                            (selectionStart < block.position() + block.length() && selectionEnd >= block.position());
 
             if (selected) {
                 painter.setPen(m_extraArea->palette().color(QPalette::Highlight).darker(100));
