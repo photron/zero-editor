@@ -263,8 +263,8 @@ void TextEditorWidget::paintEvent(QPaintEvent *event)
             layout->draw(&painter, offset, selectionFormats, er);
 
             if (drawCursor
-                || (editable && context.cursorPosition < -1
-                    && !layout->preeditAreaText().isEmpty())) {
+                    || (editable && context.cursorPosition < -1
+                        && !layout->preeditAreaText().isEmpty())) {
                 int cursorPosition = context.cursorPosition;
 
                 if (cursorPosition < -1) {

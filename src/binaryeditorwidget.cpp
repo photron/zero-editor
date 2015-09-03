@@ -136,8 +136,8 @@ void BinaryEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
             int linePosition = BytesPerLine * line;
 
             // Highlight the line containing the cursor
-            if (m_highlightCurrentLine &&
-                m_cursorPosition >= linePosition && m_cursorPosition < linePosition + BytesPerLine) {
+            if (m_highlightCurrentLine && m_cursorPosition >= linePosition
+                    && m_cursorPosition < linePosition + BytesPerLine) {
                 painter.fillRect(QRect(0, top, extraAreaWidth, lineHeight), EditorColors::currentLineHighlightColor());
             }
 
