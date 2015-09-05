@@ -61,7 +61,9 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     QPlainTextEdit(parent),
     m_extraArea(new TextEditorExtraArea(this)),
     m_lastCursorBlockNumber(-1),
+    m_lastCursorPositionInBlock(-1),
     m_lastCursorSelectionStart(-1),
+    m_lastCursorSelectionEnd(-1),
     m_highlightCurrentLine(false)
 {
     setFont(MonospaceFontMetrics::font());
@@ -76,7 +78,7 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
 
     document()->setDefaultTextOption(option);
 
-    connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::updateExtraArea);
+    connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::redrawExtraAreaRect);
     connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
     connect(this, &QPlainTextEdit::selectionChanged, this, &TextEditorWidget::updateExtraAreaSelectionHighlight);
     connect(this, &QPlainTextEdit::cursorPositionChanged, this, &TextEditorWidget::updateCurrentLineHighlight);
@@ -116,13 +118,13 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
         if (block.isVisible() && bottom >= event->rect().top()) {
             // Highlight the line containing the cursor
             if (m_highlightCurrentLine && block == textCursorBlock) {
-                QRectF textCursorLine = block.layout()->lineForTextPosition(textCursor().positionInBlock()).rect();
+                QRectF lineRect = block.layout()->lineForTextPosition(textCursor().positionInBlock()).rect();
 
-                textCursorLine.translate(0, top);
-                textCursorLine.setLeft(0);
-                textCursorLine.setRight(extraAreaWidth);
+                lineRect.moveTop(top + lineRect.top());
+                lineRect.setLeft(0);
+                lineRect.setRight(extraAreaWidth);
 
-                painter.fillRect(textCursorLine, EditorColors::currentLineHighlightColor());
+                painter.fillRect(lineRect, EditorColors::currentLineHighlightColor());
             }
 
             // Highlight selected line number
@@ -240,20 +242,20 @@ void TextEditorWidget::paintEvent(QPaintEvent *event)
             }
 
             if (m_highlightCurrentLine && block == textCursorBlock) {
-                QRectF rr = layout->lineForTextPosition(textCursor().positionInBlock()).rect();
+                QRectF lineRect = layout->lineForTextPosition(textCursor().positionInBlock()).rect();
 
-                rr.translate(0, r.top());
-                rr.setLeft(0);
-                rr.setRight(viewportRect.width() - offset.x());
+                lineRect.moveTop(r.top() + lineRect.top());
+                lineRect.setLeft(0);
+                lineRect.setRight(viewportRect.width() - offset.x());
 
-                if (!editable && !er.contains(rr.toRect())) {
+                if (!editable && !er.contains(lineRect.toRect())) {
                     QRect updateRect = er;
                     updateRect.setLeft(0);
                     updateRect.setRight(viewportRect.width() - offset.x());
                     viewport()->update(updateRect);
                 }
 
-                painter.fillRect(rr, EditorColors::currentLineHighlightColor());
+                painter.fillRect(lineRect, EditorColors::currentLineHighlightColor());
             }
 
             bool drawCursor = ((editable || (textInteractionFlags() & Qt::TextSelectableByKeyboard))
@@ -291,8 +293,9 @@ void TextEditorWidget::paintEvent(QPaintEvent *event)
 void TextEditorWidget::focusInEvent(QFocusEvent *event)
 {
     m_highlightCurrentLine = true;
-    viewport()->update(); // FIXME: do a more fine grained update for the current line
-    m_extraArea->update(); // FIXME: do a more fine grained update for the current line
+
+    // Redraw cursor line highlight rect to show it
+    redrawLineInBlock(textCursor().blockNumber(), textCursor().positionInBlock());
 
     QPlainTextEdit::focusInEvent(event);
 }
@@ -301,18 +304,20 @@ void TextEditorWidget::focusInEvent(QFocusEvent *event)
 void TextEditorWidget::focusOutEvent(QFocusEvent *event)
 {
     m_highlightCurrentLine = false;
-    viewport()->update(); // FIXME: do a more fine grained update for the current line
-    m_extraArea->update(); // FIXME: do a more fine grained update for the current line
+
+    // Redraw cursor line highlight rect to clear it
+    redrawLineInBlock(textCursor().blockNumber(), textCursor().positionInBlock());
 
     QPlainTextEdit::focusOutEvent(event);
 }
 
 // private slot
-void TextEditorWidget::updateExtraArea(const QRect &rect, int dy)
+void TextEditorWidget::redrawExtraAreaRect(const QRect &rect, int dy)
 {
     if (dy != 0) {
         m_extraArea->scroll(0, dy);
     } else {
+        // Project QPlainTextEdit::updateRequest() calls onto the full extra area width
         m_extraArea->update(0, rect.y(), m_extraArea->width(), rect.height());
     }
 }
@@ -326,65 +331,101 @@ void TextEditorWidget::updateExtraAreaWidth()
 // private slot
 void TextEditorWidget::updateExtraAreaSelectionHighlight()
 {
-    // The following logic is only necessary if blocks can be wrapped
-    if (wordWrapMode() == QTextOption::NoWrap) {
-        return;
+    // Redraw the now deselected lines to clear them and redraw the now selected lines to show them
+    int selectionStart = textCursor().selectionStart();
+    int selectionEnd = textCursor().selectionEnd();
+
+    // Calculate (de-)selected section before the unchanged selection section
+    int beforeStart = qMin(m_lastCursorSelectionStart, selectionStart);
+    int beforeEnd;
+
+    if (m_lastCursorSelectionStart <= selectionStart) {
+        beforeEnd = qMin(m_lastCursorSelectionEnd, selectionStart);
+    } else {
+        beforeEnd = qMin(m_lastCursorSelectionStart, selectionEnd);
     }
 
-    int cursorBlockNumber = textCursor().blockNumber();
+    // Calculate (de-)selected section after the unchanged selection section
+    int afterStart;
 
-    if (cursorBlockNumber != m_lastCursorBlockNumber) {
-        QPointF offset = contentOffset();
-
-        // Force an update on the entire block that currently contains the cursor to ensure that the line number
-        // highlight is updated even if the cursor position is not in the first line of that block. Without this the
-        // line number for a wrapped block stays non-highlight if the cursor/selection enters it without touching its
-        // first line.
-        QTextBlock block = document()->findBlockByNumber(cursorBlockNumber);
-
-        if (block.isValid() && block.isVisible()) {
-            m_extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
-        }
-
-        m_lastCursorBlockNumber = cursorBlockNumber;
-
-        // Also force an update on the entire block that contained the previous selection start to ensure that the
-        // line number highlight is updated even if the previous selection start was not in the first line of that
-        // block. Without this the line number for a wrapped block stays highlight if the selection leaves it.
-        int cursorSelectionStart = textCursor().selectionStart();
-
-        if (cursorSelectionStart != m_lastCursorSelectionStart) {
-            block = document()->findBlock(m_lastCursorSelectionStart);
-
-            if (block.isValid()) {
-                m_extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
-            }
-
-            m_lastCursorSelectionStart = cursorSelectionStart;
-        }
+    if (m_lastCursorSelectionEnd <= selectionEnd) {
+        afterStart = qMax(m_lastCursorSelectionEnd, selectionStart);
+    } else {
+        afterStart = qMax(m_lastCursorSelectionStart, selectionEnd);
     }
+
+    int afterEnd = qMax(m_lastCursorSelectionEnd, selectionEnd);
+
+    // Redraw non-empty ranges
+    if (beforeStart != beforeEnd) {
+        redrawExtraAreaBlockRange(beforeStart, beforeEnd);
+    }
+
+    if (afterStart != afterEnd) {
+        redrawExtraAreaBlockRange(afterStart, afterEnd);
+    }
+
+    m_lastCursorSelectionStart = selectionStart;
+    m_lastCursorSelectionEnd = selectionEnd;
 }
 
 // private slot
 void TextEditorWidget::updateCurrentLineHighlight()
 {
-    QList<QTextEdit::ExtraSelection> extraSelections;
-
-    if (!isReadOnly()) {
-        QTextEdit::ExtraSelection selection;
-
-        selection.format.setBackground(EditorColors::currentLineHighlightColor());
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = textCursor();
-        selection.cursor.clearSelection();
-
-        extraSelections.append(selection);
+    // Redraw last cursor line highlight rect to clear it
+    if (m_lastCursorBlockNumber >= 0 && m_lastCursorPositionInBlock >= 0) {
+        redrawLineInBlock(m_lastCursorBlockNumber, m_lastCursorPositionInBlock);
     }
 
-    setExtraSelections(extraSelections);
+    // Redraw current cursor line highlight rect to show it
+    int blockNumber = textCursor().blockNumber();
+    int positionInBlock = textCursor().positionInBlock();
 
-    // Update the extra area selection highlight to ensure that the line number highlight is updated even if the
-    // previous cursor position was not in the first line of that block. Without this the line number for a wrapped
-    // block stays highlight if the cursor leaves it.
-    updateExtraAreaSelectionHighlight();
+    redrawLineInBlock(blockNumber, positionInBlock);
+
+    m_lastCursorBlockNumber = blockNumber;
+    m_lastCursorPositionInBlock = positionInBlock;
+}
+
+// private
+void TextEditorWidget::redrawLineInBlock(int blockNumber, int positionInBlock)
+{
+    QTextBlock block = document()->findBlockByNumber(blockNumber);
+
+    if (!block.isValid()) {
+        return;
+    }
+
+    // The block bounding geometry is in content coordinates. After translating it with the content offset the block
+    // rect is in viewport coordinates.
+    QRect blockRect = blockBoundingGeometry(block).translated(contentOffset()).toAlignedRect();
+
+    // The line rect is relative to the containing block
+    QRect lineRect = block.layout()->lineForTextPosition(positionInBlock).rect().toAlignedRect();
+
+    // Translate the line rect to viewport coordinates and make it full width
+    lineRect.moveTop(blockRect.top() + lineRect.top());
+    lineRect.setLeft(0);
+    lineRect.setRight(INT_MAX);
+
+    viewport()->update(lineRect);
+    m_extraArea->update(lineRect);
+}
+
+// private
+void TextEditorWidget::redrawExtraAreaBlockRange(int fromPosition, int toPosition)
+{
+    QPointF offset = contentOffset();
+    QTextBlock block = document()->findBlock(fromPosition);
+    QTextBlock lastBlock = document()->findBlock(toPosition);
+
+    while (block.isValid()) {
+        m_extraArea->update(blockBoundingGeometry(block).translated(offset).toAlignedRect());
+
+        if (block == lastBlock) {
+            break;
+        }
+
+        block = block.next();
+    }
 }

@@ -40,15 +40,20 @@ protected:
     void focusOutEvent(QFocusEvent *event);
 
 private slots:
-    void updateExtraArea(const QRect &rect, int dy);
+    void redrawExtraAreaRect(const QRect &rect, int dy);
     void updateExtraAreaWidth();
     void updateExtraAreaSelectionHighlight();
     void updateCurrentLineHighlight();
 
 private:
+    void redrawLineInBlock(int blockNumber, int positionInBlock);
+    void redrawExtraAreaBlockRange(int fromPosition, int toPosition);
+
     TextEditorExtraArea *m_extraArea;
     int m_lastCursorBlockNumber;
+    int m_lastCursorPositionInBlock;
     int m_lastCursorSelectionStart;
+    int m_lastCursorSelectionEnd;
     bool m_highlightCurrentLine;
 };
 
