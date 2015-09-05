@@ -65,7 +65,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 24x24/toggle-case.png         -> 24x24/apps/preferences-desktop-font.png
 24x24/undo.png                -> 24x24/actions/edit-undo.png
 
-The following icon came from msysgit. The original git icon is licenced under
+The following icon came from msysgit. The original git logo is licensed under
 the Creative Commons Attribution 3.0 Unported License:
 
 16x16/git-diff.png            -> etc/git.ico
