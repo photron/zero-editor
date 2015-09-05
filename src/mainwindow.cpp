@@ -36,17 +36,22 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
     connect(m_ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
     connect(m_ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
-    connect(m_ui->widgetFindAndReplace, &FindAndReplaceWidget::hideClicked, m_ui->widgetStackedSearches, &QStackedWidget::hide);
-    connect(m_ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, m_ui->widgetStackedSearches, &QStackedWidget::hide);
     connect(m_ui->actionWordWrap, &QAction::triggered, this, &MainWindow::setWordWrapMode);
     connect(m_ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
+    connect(m_ui->actionUnsavedDiff, &QAction::triggered, this, &MainWindow::showUnsavedDiffWidget);
+    connect(m_ui->actionGitDiff, &QAction::triggered, this, &MainWindow::showGitDiffWidget);
+
+    connect(m_ui->widgetFindAndReplace, &FindAndReplaceWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
+    connect(m_ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
+    connect(m_ui->widgetUnsavedDiff, &UnsavedDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
+    connect(m_ui->widgetGitDiff, &GitDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
 
     m_ui->widgetOpenFiles->installLineEditEventFilter(this);
     m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
     m_ui->widgetFindInFiles->installLineEditEventFilter(this);
 
-    m_ui->widgetStackedSearches->hide();
+    m_ui->widgetStackedHelpers->hide();
 
     m_ui->actionSave->setText("Save \"brickd.c\"");
     m_ui->actionSave_Tool->setToolTip("Save \"brickd.c\"");
@@ -151,16 +156,16 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 // private slot
 void MainWindow::showFindAndReplaceWidget()
 {
-    m_ui->widgetStackedSearches->setCurrentIndex(m_ui->widgetStackedSearches->indexOf(m_ui->widgetFindAndReplace));
-    m_ui->widgetStackedSearches->show();
+    m_ui->widgetStackedHelpers->setCurrentIndex(m_ui->widgetStackedHelpers->indexOf(m_ui->widgetFindAndReplace));
+    m_ui->widgetStackedHelpers->show();
     m_ui->widgetFindAndReplace->prepareForShow();
 }
 
 // private slot
 void MainWindow::showFindInFilesWidget()
 {
-    m_ui->widgetStackedSearches->setCurrentIndex(m_ui->widgetStackedSearches->indexOf(m_ui->widgetFindInFiles));
-    m_ui->widgetStackedSearches->show();
+    m_ui->widgetStackedHelpers->setCurrentIndex(m_ui->widgetStackedHelpers->indexOf(m_ui->widgetFindInFiles));
+    m_ui->widgetStackedHelpers->show();
     m_ui->widgetFindInFiles->prepareForShow();
 }
 
@@ -182,4 +187,18 @@ void MainWindow::openTerminal()
     QString workingDirectory;
 
     QProcess::startDetached(program, arguments, workingDirectory);
+}
+
+// private slot
+void MainWindow::showUnsavedDiffWidget()
+{
+    m_ui->widgetStackedHelpers->setCurrentIndex(m_ui->widgetStackedHelpers->indexOf(m_ui->widgetUnsavedDiff));
+    m_ui->widgetStackedHelpers->show();
+}
+
+// private slot
+void MainWindow::showGitDiffWidget()
+{
+    m_ui->widgetStackedHelpers->setCurrentIndex(m_ui->widgetStackedHelpers->indexOf(m_ui->widgetGitDiff));
+    m_ui->widgetStackedHelpers->show();
 }

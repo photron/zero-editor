@@ -85,7 +85,7 @@
           <property name="handleWidth">
            <number>6</number>
           </property>
-          <widget class="QStackedWidget" name="widgetStackedTextEditors">
+          <widget class="QStackedWidget" name="widgetStackedEditors">
            <property name="currentIndex">
             <number>1</number>
            </property>
@@ -128,9 +128,11 @@
             </layout>
            </widget>
           </widget>
-          <widget class="QStackedWidget" name="widgetStackedSearches">
+          <widget class="QStackedWidget" name="widgetStackedHelpers">
            <widget class="FindInFilesWidget" name="widgetFindInFiles"/>
            <widget class="FindAndReplaceWidget" name="widgetFindAndReplace"/>
+           <widget class="UnsavedDiffWidget" name="widgetUnsavedDiff"/>
+           <widget class="GitDiffWidget" name="widgetGitDiff"/>
           </widget>
          </widget>
         </item>
@@ -245,8 +247,9 @@
      <string>Tools</string>
     </property>
     <addaction name="actionSpellChecker"/>
-    <addaction name="actionGitDiff"/>
     <addaction name="actionTerminal"/>
+    <addaction name="actionUnsavedDiff"/>
+    <addaction name="actionGitDiff"/>
    </widget>
    <widget class="QMenu" name="menuNavigation">
     <property name="title">
@@ -598,7 +601,7 @@
     <string>Toggle Case</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+U</string>
+    <string>Ctrl+H</string>
    </property>
   </action>
   <action name="actionGitDiff">
@@ -795,6 +798,21 @@
     <string>Word Wrap</string>
    </property>
   </action>
+  <action name="actionUnsavedDiff">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/unsaved-diff.png</normaloff>:/icons/16x16/unsaved-diff.png</iconset>
+   </property>
+   <property name="text">
+    <string>Unsaved Diff...</string>
+   </property>
+   <property name="toolTip">
+    <string>Unsaved Diff</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -830,6 +848,18 @@
    <class>BinaryEditorWidget</class>
    <extends>QWidget</extends>
    <header>src/binaryeditorwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>UnsavedDiffWidget</class>
+   <extends>QWidget</extends>
+   <header>src/unsaveddiffwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>GitDiffWidget</class>
+   <extends>QWidget</extends>
+   <header>src/gitdiffwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

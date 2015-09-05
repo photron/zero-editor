@@ -41,6 +41,8 @@ private slots:
     void showFindInFilesWidget();
     void setWordWrapMode(bool enabled);
     void openTerminal();
+    void showUnsavedDiffWidget();
+    void showGitDiffWidget();
 
 private:
     Ui::MainWindow *m_ui;

@@ -34,6 +34,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 16x16/terminal.png            -> 16x16/apps/utilities-terminal.png
 16x16/toggle-case.png         -> 16x16/apps/preferences-desktop-font.png
 16x16/undo.png                -> 16x16/actions/edit-undo.png
+16x16/unsaved-diff.png        -> 16x16/actions/format-justify-fill.png (modified)
 
 24x24/clear.png               -> 24x24/actions/edit-clear.png
 24x24/close.png               -> 24x24/actions/window-close.png
@@ -64,6 +65,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 24x24/terminal.png            -> 24x24/apps/utilities-terminal.png
 24x24/toggle-case.png         -> 24x24/apps/preferences-desktop-font.png
 24x24/undo.png                -> 24x24/actions/edit-undo.png
+24x24/unsaved-diff.png        -> 24x24/actions/format-justify-fill.png (modified)
 
 The following icon came from msysgit. The original git logo is licensed under
 the Creative Commons Attribution 3.0 Unported License:
