@@ -23,6 +23,7 @@
 
 #include <QCoreApplication>
 #include <QPainter>
+#include <QScrollBar>
 #include <QTextBlock>
 
 class TextEditorExtraArea : public QWidget
@@ -48,6 +49,21 @@ protected:
         m_editor->extraAreaPaintEvent(event);
     }
 
+    void mousePressEvent(QMouseEvent *event)
+    {
+        m_editor->extraAreaMousePressEvent(event);
+    }
+
+    void mouseMoveEvent(QMouseEvent *event)
+    {
+        m_editor->extraAreaMouseMoveEvent(event);
+    }
+
+    void mouseReleaseEvent(QMouseEvent *event)
+    {
+        m_editor->extraAreaMouseReleaseEvent(event);
+    }
+
     void wheelEvent(QWheelEvent *event)
     {
         QCoreApplication::sendEvent(m_editor->viewport(), event);
@@ -60,6 +76,7 @@ private:
 TextEditorWidget::TextEditorWidget(QWidget *parent) :
     QPlainTextEdit(parent),
     m_extraArea(new TextEditorExtraArea(this)),
+    m_extraAreaSelectionAnchorBlockNumber(-1),
     m_lastCursorBlockNumber(-1),
     m_lastCursorPositionInBlock(-1),
     m_lastCursorSelectionStart(-1),
@@ -162,6 +179,73 @@ void TextEditorWidget::extraAreaPaintEvent(QPaintEvent *event)
         height = blockBoundingRect(block).height();
         bottom = top + height;
     }
+}
+
+void TextEditorWidget::extraAreaMousePressEvent(QMouseEvent *event)
+{
+    if (event->button() != Qt::LeftButton) {
+        return;
+    }
+
+    QTextCursor cursor = cursorForPosition(QPoint(0, event->pos().y()));
+
+    m_extraAreaSelectionAnchorBlockNumber = cursor.blockNumber();
+
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+
+    setTextCursor(cursor);
+}
+
+// protected
+void TextEditorWidget::extraAreaMouseMoveEvent(QMouseEvent *event)
+{
+    if ((event->buttons() & Qt::LeftButton) == 0) {
+        return;
+    }
+
+    if (m_extraAreaSelectionAnchorBlockNumber >= 0) {
+        int y = event->pos().y();
+        QTextCursor cursor = cursorForPosition(QPoint(0, y));
+        int cursorBlockNumber = cursor.blockNumber();
+        int cursorBlockPosition = cursor.block().position();
+        QTextBlock anchorBlock = document()->findBlockByNumber(m_extraAreaSelectionAnchorBlockNumber);
+
+        cursor.setPosition(anchorBlock.position());
+
+        if (cursorBlockNumber < m_extraAreaSelectionAnchorBlockNumber) {
+            cursor.movePosition(QTextCursor::EndOfBlock);
+            cursor.movePosition(QTextCursor::Right);
+        }
+
+        cursor.setPosition(cursorBlockPosition, QTextCursor::KeepAnchor);
+
+        if (cursorBlockNumber >= m_extraAreaSelectionAnchorBlockNumber) {
+            cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+        }
+
+        setTextCursor(cursor);
+
+        if (y >= 0 && y <= m_extraArea->height()) {
+            m_extraAreaAutoScrollTimer.stop();
+        } else if (!m_extraAreaAutoScrollTimer.isActive()) {
+            m_extraAreaAutoScrollTimer.start(100, this);
+        }
+    }
+}
+
+// protected
+void TextEditorWidget::extraAreaMouseReleaseEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event)
+
+    if (m_extraAreaAutoScrollTimer.isActive()) {
+        m_extraAreaAutoScrollTimer.stop();
+        ensureCursorVisible();
+    }
+
+    m_extraAreaSelectionAnchorBlockNumber = -1;
 }
 
 // protected
@@ -309,6 +393,39 @@ void TextEditorWidget::focusOutEvent(QFocusEvent *event)
     redrawLineInBlock(textCursor().blockNumber(), textCursor().positionInBlock());
 
     QPlainTextEdit::focusOutEvent(event);
+}
+
+// protected
+void TextEditorWidget::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == m_extraAreaAutoScrollTimer.timerId()) {
+        // Logic copied from the QPlainTextEdit auto scroll logic
+        QRect visible = m_extraArea->rect();
+        QPoint globalPosition = QCursor::pos();
+        QPoint position = m_extraArea->mapFromGlobal(globalPosition);
+        QMouseEvent move(QEvent::MouseMove, position, m_extraArea->mapTo(m_extraArea->topLevelWidget(), position),
+                         globalPosition, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+
+        extraAreaMouseMoveEvent(&move);
+
+        int delta = qMax(position.y() - visible.top(), visible.bottom() - position.y()) - visible.height();
+
+        if (delta >= 0) {
+            if (delta < 7) {
+                delta = 7;
+            }
+
+            m_extraAreaAutoScrollTimer.start(4900 / (delta * delta), this);
+
+            if (position.y() < visible.center().y()) {
+                verticalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepSub);
+            } else {
+                verticalScrollBar()->triggerAction(QAbstractSlider::SliderSingleStepAdd);
+            }
+        }
+    }
+
+    QPlainTextEdit::timerEvent(event);
 }
 
 // private slot

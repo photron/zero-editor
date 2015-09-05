@@ -19,6 +19,7 @@
 #ifndef TEXTEDITORWIDGET_H
 #define TEXTEDITORWIDGET_H
 
+#include <QBasicTimer>
 #include <QPlainTextEdit>
 
 class TextEditorExtraArea;
@@ -32,12 +33,16 @@ public:
 
     int extraAreaWidth() const;
     void extraAreaPaintEvent(QPaintEvent *event);
+    void extraAreaMousePressEvent(QMouseEvent *event);
+    void extraAreaMouseMoveEvent(QMouseEvent *event);
+    void extraAreaMouseReleaseEvent(QMouseEvent *event);
 
 protected:
     void resizeEvent(QResizeEvent *event);
     void paintEvent(QPaintEvent *event);
     void focusInEvent(QFocusEvent *event);
     void focusOutEvent(QFocusEvent *event);
+    void timerEvent(QTimerEvent *event);
 
 private slots:
     void redrawExtraAreaRect(const QRect &rect, int dy);
@@ -50,10 +55,14 @@ private:
     void redrawExtraAreaBlockRange(int fromPosition, int toPosition);
 
     TextEditorExtraArea *m_extraArea;
+    int m_extraAreaSelectionAnchorBlockNumber;
+    QBasicTimer m_extraAreaAutoScrollTimer;
+
     int m_lastCursorBlockNumber;
     int m_lastCursorPositionInBlock;
     int m_lastCursorSelectionStart;
     int m_lastCursorSelectionEnd;
+
     bool m_highlightCurrentLine;
 };
 
