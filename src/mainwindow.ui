@@ -319,7 +319,10 @@
    <addaction name="separator"/>
    <addaction name="actionFindQuick_Tool"/>
    <addaction name="separator"/>
+   <addaction name="actionSpellChecker_Tool"/>
    <addaction name="actionTerminal_Tool"/>
+   <addaction name="actionUnsavedDiff_Tool"/>
+   <addaction name="actionGitDiff_Tool"/>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -492,7 +495,7 @@
     <string>Close</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Q</string>
+    <string>Ctrl+W</string>
    </property>
   </action>
   <action name="actionTabs">
@@ -585,9 +588,6 @@
    <property name="text">
     <string>Spell Checker...</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+W</string>
-   </property>
   </action>
   <action name="actionFourSpaces">
    <property name="text">
@@ -602,9 +602,6 @@
    <property name="text">
     <string>Terminal...</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+T</string>
-   </property>
   </action>
   <action name="actionToggleCase">
    <property name="icon">
@@ -615,7 +612,7 @@
     <string>Toggle Case</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+H</string>
+    <string>Ctrl+U</string>
    </property>
   </action>
   <action name="actionGitDiff">
@@ -625,9 +622,6 @@
    </property>
    <property name="text">
     <string>Git Diff...</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+G</string>
    </property>
   </action>
   <action name="actionNew_Tool">
@@ -765,7 +759,7 @@
     <string>Go to Previous File</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+B</string>
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionGoToNextFile">
@@ -777,7 +771,7 @@
     <string>Go to Next File</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+B</string>
+    <string>Ctrl+Shift+Q</string>
    </property>
   </action>
   <action name="actionOpen_Tool">
@@ -823,8 +817,32 @@
    <property name="toolTip">
     <string>Unsaved Diff</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+U</string>
+  </action>
+  <action name="actionSpellChecker_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/spell-checker.png</normaloff>:/icons/24x24/spell-checker.png</iconset>
+   </property>
+   <property name="text">
+    <string>Spell Checker</string>
+   </property>
+  </action>
+  <action name="actionUnsavedDiff_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/unsaved-diff.png</normaloff>:/icons/24x24/unsaved-diff.png</iconset>
+   </property>
+   <property name="text">
+    <string>Unsaved Diff</string>
+   </property>
+  </action>
+  <action name="actionGitDiff_Tool">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/24x24/git-diff.png</normaloff>:/icons/24x24/git-diff.png</iconset>
+   </property>
+   <property name="text">
+    <string>Git Diff</string>
    </property>
   </action>
  </widget>

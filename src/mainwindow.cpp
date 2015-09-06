@@ -40,7 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionUnsavedDiff, &QAction::triggered, this, &MainWindow::showUnsavedDiffWidget);
+    connect(m_ui->actionUnsavedDiff_Tool, &QAction::triggered, this, &MainWindow::showUnsavedDiffWidget);
     connect(m_ui->actionGitDiff, &QAction::triggered, this, &MainWindow::showGitDiffWidget);
+    connect(m_ui->actionGitDiff_Tool, &QAction::triggered, this, &MainWindow::showGitDiffWidget);
 
     connect(m_ui->widgetFindAndReplace, &FindAndReplaceWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
     connect(m_ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
