@@ -34,6 +34,19 @@ RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
     menuMode->addAction("Recently Closed Files");
 
     m_ui->buttonMode->setMenu(menuMode);
+
+    // FIXME: the recently viewed mode always shows the currently viewed document at the top. dbl clicking an item
+    // in the list makes it the currently view document and moves the item to the top of the list. the go to previous
+    // file action makes the second item in the list the currently viewed document and moves it to the top of the list.
+    // this makes the go to previous file action toggle between the two most recently viewed documents. if a
+    //
+    // the recently opened mode shows files in the order they were opened. closing and reopening a file moves it to the
+    // top of the list
+    //
+    // the recently closed mode shows files in the order they were closed. reopening and closing a file moves it to the
+    // top of the list
+    //
+    // all three list have a maximum length of 100 items
 }
 
 RecentFilesWidget::~RecentFilesWidget()

@@ -55,9 +55,6 @@
         <property name="pixmap">
          <pixmap resource="../icons/icons.qrc">:/icons/16x16/recent.png</pixmap>
         </property>
-        <property name="scaledContents">
-         <bool>false</bool>
-        </property>
        </widget>
       </item>
       <item>
@@ -93,7 +90,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QListView" name="listView"/>
+    <widget class="QListView" name="listFiles"/>
    </item>
   </layout>
  </widget>
