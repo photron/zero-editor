@@ -308,7 +308,7 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
                     if (byte >= 32 && byte <= 126) {
                         printableChars[i] = (char)byte;
                     } else {
-                        printableChars[i] = 0xB7;
+                        printableChars[i] = 0x00B7;
                     }
                 } else {
                     hexChars[i * 3] = ' ';
@@ -424,7 +424,7 @@ void BinaryEditorWidget::focusInEvent(QFocusEvent *event)
 
     m_highlightCurrentLine = true;
 
-    updateCursorLine();
+    redrawCursorLine();
 
     QAbstractScrollArea::focusInEvent(event);
 }
@@ -436,7 +436,7 @@ void BinaryEditorWidget::focusOutEvent(QFocusEvent *event)
 
     m_highlightCurrentLine = false;
 
-    updateCursorLine();
+    redrawCursorLine();
 
     QAbstractScrollArea::focusOutEvent(event);
 }
@@ -447,7 +447,7 @@ void BinaryEditorWidget::timerEvent(QTimerEvent *event)
     if (event->timerId() == m_cursorBlinkTimer.timerId()) {
         m_cursorVisible = !m_cursorVisible;
 
-        updateCursorLine();
+        redrawCursorLine();
     }
 
     QAbstractScrollArea::timerEvent(event);
@@ -477,7 +477,7 @@ void BinaryEditorWidget::updateScrollBarRanges()
 }
 
 // private
-void BinaryEditorWidget::updateLines(int fromPosition, int toPosition)
+void BinaryEditorWidget::redrawLines(int fromPosition, int toPosition)
 {
     int lineHeight = MonospaceFontMetrics::lineHeight();
     int line = verticalScrollBar()->value();
@@ -496,9 +496,9 @@ void BinaryEditorWidget::updateLines(int fromPosition, int toPosition)
 }
 
 // private
-void BinaryEditorWidget::updateCursorLine()
+void BinaryEditorWidget::redrawCursorLine()
 {
-    updateLines(m_cursorPosition, m_cursorPosition);
+    redrawLines(m_cursorPosition, m_cursorPosition);
 }
 
 // private
@@ -512,7 +512,7 @@ void BinaryEditorWidget::setBlinkingCursorEnabled(bool enable)
 
     m_cursorVisible = enable;
 
-    updateCursorLine();
+    redrawCursorLine();
 }
 
 // private
@@ -565,12 +565,12 @@ void BinaryEditorWidget::setCursorPosition(int position, MoveMode moveMode)
     m_cursorPosition = qBound(0, position, m_data.length() - 1);
 
     if (moveMode == MoveAnchor) {
-        updateLines(m_anchorPosition, lastCursorPosition);
+        redrawLines(m_anchorPosition, lastCursorPosition);
 
         m_anchorPosition = m_cursorPosition;
     }
 
-    updateLines(lastCursorPosition, m_cursorPosition);
+    redrawLines(lastCursorPosition, m_cursorPosition);
     ensureCursorVisible();
 }
 

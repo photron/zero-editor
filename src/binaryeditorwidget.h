@@ -61,8 +61,8 @@ private:
     };
 
     void updateScrollBarRanges();
-    void updateLines(int fromPosition, int toPosition);
-    void updateCursorLine();
+    void redrawLines(int fromPosition, int toPosition);
+    void redrawCursorLine();
     void setBlinkingCursorEnabled(bool enable);
     int positionAt(const QPoint &position, bool *inHexSection) const;
     void setCursorPosition(int position, MoveMode moveMode);
@@ -77,7 +77,7 @@ private:
     int m_cursorPosition;
     int m_anchorPosition;
     QBasicTimer m_cursorBlinkTimer;
-    int m_documentMargin; // FIXME: Replace with BinaryDocument::documentMargin
+    int m_documentMargin; // FIXME: Replace with BinaryDocument::documentMargin()
     bool m_highlightCurrentLine;
 };
 
