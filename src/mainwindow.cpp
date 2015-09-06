@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
     m_ui->widgetFindInFiles->installLineEditEventFilter(this);
 
+    m_ui->widgetBookmarks->hide();
     m_ui->widgetStackedHelpers->hide();
 
     m_ui->actionSave->setText("Save \"brickd.c\"");
