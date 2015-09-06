@@ -22,6 +22,7 @@
 #include "monospacefontmetrics.h"
 
 #include <QCoreApplication>
+#include <QMenu>
 #include <QPainter>
 #include <QScrollBar>
 #include <QTextBlock>
@@ -426,6 +427,26 @@ void TextEditorWidget::timerEvent(QTimerEvent *event)
     }
 
     QPlainTextEdit::timerEvent(event);
+}
+
+// protected
+void TextEditorWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu *menu = createStandardContextMenu();
+    QList<QAction *> actions = menu->actions();
+
+    for (int i = actions.length() - 1; i >= 0; --i) {
+        QAction *action = actions.at(i);
+
+        if (action->text() == "Select All") {
+            action->setIcon(QIcon(":/icons/16x16/select-all.png"));
+
+            break;
+        }
+    }
+
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    menu->popup(event->globalPos());
 }
 
 // private slot
