@@ -35,16 +35,23 @@ public:
     QByteArray data() const;
     void setData(const QByteArray &data);
 
+    void undo();
+    void redo();
+    void copy();
+    void selectAll();
+
     int extraAreaWidth() const;
     void extraAreaPaintEvent(QPaintEvent *event);
 
 protected:
     void scrollContentsBy(int dx, int dy);
+    bool event(QEvent *event);
     void resizeEvent(QResizeEvent *event);
     void paintEvent(QPaintEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
     void focusInEvent(QFocusEvent *event);
     void focusOutEvent(QFocusEvent *event);
     void timerEvent(QTimerEvent *event);
@@ -69,14 +76,18 @@ private:
     void ensureCursorVisible();
 
     BinaryEditorExtraArea *m_extraArea;
+
     QByteArray m_data;
     int m_lineCount;
-    int m_lastVerticalScrollBarValue;
+
     bool m_cursorVisible;
     bool m_cursorInHexSection;
-    int m_cursorPosition;
-    int m_anchorPosition;
+    bool m_cursorAtLowNibble;
+    int m_cursorPosition; // in bytes
+    int m_anchorPosition; // in bytes
     QBasicTimer m_cursorBlinkTimer;
+
+    int m_lastVerticalScrollBarValue;
     int m_documentMargin; // FIXME: Replace with BinaryDocument::documentMargin()
     bool m_highlightCurrentLine;
 };

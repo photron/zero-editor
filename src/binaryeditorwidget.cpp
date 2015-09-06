@@ -23,6 +23,7 @@
 
 #include <QtMath>
 #include <QApplication>
+#include <QClipboard>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QScrollBar>
@@ -65,11 +66,12 @@ BinaryEditorWidget::BinaryEditorWidget(QWidget *parent) :
     QAbstractScrollArea(parent),
     m_extraArea(new BinaryEditorExtraArea(this)),
     m_lineCount(1),
-    m_lastVerticalScrollBarValue(-1),
     m_cursorVisible(false),
     m_cursorInHexSection(true),
+    m_cursorAtLowNibble(false),
     m_cursorPosition(0),
     m_anchorPosition(0),
+    m_lastVerticalScrollBarValue(-1),
     m_documentMargin(QTextDocument(this).documentMargin()),
     m_highlightCurrentLine(false)
 {
@@ -94,6 +96,65 @@ void BinaryEditorWidget::setData(const QByteArray &data)
     m_lineCount = m_data.length() / BytesPerLine + 1;
 
     updateScrollBarRanges();
+}
+
+void BinaryEditorWidget::undo()
+{
+
+}
+
+void BinaryEditorWidget::redo()
+{
+
+}
+
+void BinaryEditorWidget::copy()
+{
+    int selectionStart = qMin(m_anchorPosition, m_cursorPosition);
+    int selectionEnd = qMax(m_anchorPosition, m_cursorPosition);
+    int selectionLength = selectionEnd - selectionStart + 1;
+    QByteArray selectedData = m_data.mid(selectionStart, selectionLength);
+
+    if (m_cursorInHexSection) {
+        const char *hexDigits= "0123456789ABCDEF";
+        QString hexString;
+
+        hexString.reserve(3 * selectedData.size());
+
+        for (int i = 0; i < selectedData.size(); ++i) {
+            quint8 byte = selectedData.at(i);
+
+            hexString += hexDigits[(byte >> 4) & 0x0F];
+            hexString += hexDigits[byte & 0x0F];
+            hexString += ' ';
+        }
+
+        hexString.chop(1);
+
+        QApplication::clipboard()->setText(hexString);
+    } else {
+        QString printableString;
+
+        printableString.reserve(selectedData.size());
+
+        for (int i = 0; i < selectedData.size(); ++i) {
+            quint8 byte = selectedData.at(i);
+
+            if (byte >= 1 && byte <= 126) {
+                printableString += (char)byte;
+            } else {
+                printableString += ' ';
+            }
+        }
+
+        QApplication::clipboard()->setText(printableString);
+    }
+}
+
+void BinaryEditorWidget::selectAll()
+{
+    setCursorPosition(0, MoveAnchor);
+    setCursorPosition(m_data.length() - 1, KeepAnchor);
 }
 
 int BinaryEditorWidget::extraAreaWidth() const
@@ -188,6 +249,23 @@ void BinaryEditorWidget::scrollContentsBy(int dx, int dy)
 
     viewport()->scroll(dx, dy);
     m_extraArea->scroll(0, dy);
+}
+
+// protected
+bool BinaryEditorWidget::event(QEvent *event)
+{
+    if (event->type() == QEvent::ShortcutOverride) {
+        QKeyEvent* keyEvent = static_cast<QKeyEvent *>(event);
+
+        if (keyEvent == QKeySequence::Undo
+                || keyEvent == QKeySequence::Redo
+                || keyEvent == QKeySequence::Copy
+                || keyEvent == QKeySequence::SelectAll) {
+            keyEvent->accept();
+        }
+    }
+
+    return QAbstractScrollArea::event(event);
 }
 
 // protected
@@ -351,7 +429,13 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
                 int offset = (m_cursorPosition % BytesPerLine) * charWidth;
 
                 // Draw hex cursor
-                QRect hexCursorRect(hexRect.left() + offset * 3, top, charWidth * 2, lineHeight);
+                QRect hexCursorRect;
+
+                if (m_cursorAtLowNibble) {
+                    hexCursorRect = QRect(hexRect.left() + offset * 3 + charWidth, top, charWidth, lineHeight);
+                } else {
+                    hexCursorRect = QRect(hexRect.left() + offset * 3, top, charWidth * 2, lineHeight);
+                }
 
                 painter.save();
 
@@ -415,6 +499,147 @@ void BinaryEditorWidget::mouseMoveEvent(QMouseEvent *event)
 // protected
 void BinaryEditorWidget::mouseReleaseEvent(QMouseEvent *event)
 {
+}
+
+// protected
+void BinaryEditorWidget::keyPressEvent(QKeyEvent *event)
+{
+    if (event == QKeySequence::Undo) {
+        event->accept();
+        undo();
+
+        return;
+    } else if (event == QKeySequence::Redo) {
+        event->accept();
+        redo();
+
+        return;
+    } else if (event == QKeySequence::Copy) {
+        event->accept();
+        copy();
+
+        return;
+    } else if (event == QKeySequence::SelectAll) {
+        event->accept();
+        selectAll();
+
+        return;
+    }
+
+    MoveMode moveMode = event->modifiers() & Qt::ShiftModifier ? KeepAnchor : MoveAnchor;
+    bool ctrlPressed = event->modifiers() & Qt::ControlModifier;
+    int line;
+    int position;
+
+    switch (event->key()) {
+    case Qt::Key_Up:
+        if (ctrlPressed) {
+            verticalScrollBar()->triggerAction(QScrollBar::SliderSingleStepSub);
+        } else if (m_cursorPosition - BytesPerLine >= 0) {
+            setCursorPosition(m_cursorPosition - BytesPerLine, moveMode);
+        }
+
+        break;
+
+    case Qt::Key_Down:
+        if (ctrlPressed) {
+            verticalScrollBar()->triggerAction(QScrollBar::SliderSingleStepAdd);
+        } else if (m_cursorPosition + BytesPerLine < m_data.length()) {
+            setCursorPosition(m_cursorPosition + BytesPerLine, moveMode);
+        }
+
+        break;
+
+    case Qt::Key_Right:
+        setCursorPosition(m_cursorPosition + 1, moveMode);
+        break;
+
+    case Qt::Key_Left:
+        setCursorPosition(m_cursorPosition - 1, moveMode);
+        break;
+
+    case Qt::Key_PageUp:
+    case Qt::Key_PageDown:
+        // FIXME: does not jet jump to the start and end of the document
+        line = qMax(m_cursorPosition / BytesPerLine - verticalScrollBar()->value(), 0);
+
+        verticalScrollBar()->triggerAction(event->key() == Qt::Key_PageUp ? QScrollBar::SliderPageStepSub
+                                                                          : QScrollBar::SliderPageStepAdd);
+
+        if (!ctrlPressed) {
+            setCursorPosition((verticalScrollBar()->value() + line) * BytesPerLine + m_cursorPosition % BytesPerLine,
+                              moveMode);
+        }
+
+        break;
+
+    case Qt::Key_Home:
+        if (ctrlPressed) {
+            position = 0;
+        } else {
+            position = m_cursorPosition - (m_cursorPosition % BytesPerLine);
+        }
+
+        setCursorPosition(position, moveMode);
+
+        break;
+
+    case Qt::Key_End:
+        if (ctrlPressed) {
+            position = m_data.length() - 1;
+        } else {
+            position = m_cursorPosition / BytesPerLine * BytesPerLine + (BytesPerLine - 1);
+        }
+
+        setCursorPosition(position, moveMode);
+
+        break;
+
+    default:
+        QString text = event->text();
+
+        for (int i = 0; i < text.length(); ++i) {
+            QChar c = text.at(i);
+
+            if (m_cursorInHexSection) {
+                c = c.toLower();
+
+                int nibble = -1;
+
+                if (c.unicode() >= 'a' && c.unicode() <= 'f') {
+                    nibble = c.unicode() - 'a' + 10;
+                } else if (c.unicode() >= '0' && c.unicode() <= '9') {
+                    nibble = c.unicode() - '0';
+                }
+
+                if (nibble < 0) {
+                    continue;
+                }
+
+                if (m_cursorAtLowNibble) {
+                    m_data[m_cursorPosition] = nibble + (m_data.at(m_cursorPosition) & 0xF0);
+                    m_cursorAtLowNibble = false;
+
+                    setCursorPosition(m_cursorPosition + 1, MoveAnchor);
+                } else {
+                    m_data[m_cursorPosition] = (nibble << 4) + (m_data.at(m_cursorPosition) & 0x0F);
+                    m_cursorAtLowNibble = true;
+
+                    redrawCursorLine();
+                }
+            } else {
+                if (c.unicode() >= 128 || !c.isPrint()) {
+                    continue;
+                }
+
+                m_data[m_cursorPosition] = c.unicode();
+
+                setCursorPosition(m_cursorPosition + 1, MoveAnchor);
+            }
+        }
+    }
+
+    event->accept();
 }
 
 // protected
@@ -562,6 +787,7 @@ void BinaryEditorWidget::setCursorPosition(int position, MoveMode moveMode)
 {
     int lastCursorPosition = m_cursorPosition;
 
+    m_cursorAtLowNibble = false;
     m_cursorPosition = qBound(0, position, m_data.length() - 1);
 
     if (moveMode == MoveAnchor) {
