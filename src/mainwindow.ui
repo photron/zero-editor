@@ -123,7 +123,20 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="BinaryEditorWidget" name="widget" native="true"/>
+              <widget class="BinaryEditorWidget" name="widget">
+               <property name="focusPolicy">
+                <enum>Qt::WheelFocus</enum>
+               </property>
+               <property name="acceptDrops">
+                <bool>true</bool>
+               </property>
+               <property name="frameShape">
+                <enum>QFrame::StyledPanel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Sunken</enum>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -845,12 +858,6 @@
    <header>src/texteditorwidget.h</header>
   </customwidget>
   <customwidget>
-   <class>BinaryEditorWidget</class>
-   <extends>QWidget</extends>
-   <header>src/binaryeditorwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>UnsavedDiffWidget</class>
    <extends>QWidget</extends>
    <header>src/unsaveddiffwidget.h</header>
@@ -860,6 +867,12 @@
    <class>GitDiffWidget</class>
    <extends>QWidget</extends>
    <header>src/gitdiffwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BinaryEditorWidget</class>
+   <extends>QFrame</extends>
+   <header>src/binaryeditorwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
