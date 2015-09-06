@@ -15,6 +15,6 @@ trigger them by accident. For example, zooming using ctrl key + mouse wheel or
 enabling overwrite mode with the insert key or full screen mode or duplicating
 the current line using a hotkey or toggling two lines using a hotkey.
 
-So I'm a the point now where I say "screw you!" and create my own code editor
-that only has the features I need that work in the way I prefer. It'll have
+So I'm at the point now where I say "screw you!" and create my own code editor
+that only has the features I need and that work in the way I prefer. It'll have
 exactly zero features that I don't need, hence the name: Zero Editor.
