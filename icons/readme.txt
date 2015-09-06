@@ -5,6 +5,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 
 14x14/clear.png               -> src/edit-clear.svg (modified)
 
+16x16/bookmarks.png           -> 16x16/places/user-bookmarks.png
 16x16/clear.png               -> 16x16/actions/edit-clear.png
 16x16/close.png               -> 16x16/actions/window-close.png
 16x16/copy.png                -> 16x16/actions/edit-copy.png
@@ -36,6 +37,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 16x16/undo.png                -> 16x16/actions/edit-undo.png
 16x16/unsaved-diff.png        -> 16x16/actions/format-justify-fill.png (modified)
 
+24x24/bookmarks.png           -> 24x24/places/user-bookmarks.png
 24x24/clear.png               -> 24x24/actions/edit-clear.png
 24x24/close.png               -> 24x24/actions/window-close.png
 24x24/copy.png                -> 24x24/actions/edit-copy.png

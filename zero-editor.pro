@@ -2,6 +2,7 @@ TEMPLATE     = app
 TARGET       = zero-editor
 QT          += core gui widgets
 SOURCES     += src/binaryeditorwidget.cpp \
+               src/bookmarkswidget.cpp \
                src/editorcolors.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
@@ -15,6 +16,7 @@ SOURCES     += src/binaryeditorwidget.cpp \
                src/texteditorwidget.cpp \
                src/unsaveddiffwidget.cpp
 HEADERS     += src/binaryeditorwidget.h \
+               src/bookmarkswidget.h \
                src/editorcolors.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
@@ -26,7 +28,8 @@ HEADERS     += src/binaryeditorwidget.h \
                src/style.h \
                src/texteditorwidget.h \
                src/unsaveddiffwidget.h
-FORMS       += src/findandreplacewidget.ui \
+FORMS       += src/bookmarkswidget.ui \
+               src/findandreplacewidget.ui \
                src/findinfileswidget.ui \
                src/gitdiffwidget.ui \
                src/mainwindow.ui \

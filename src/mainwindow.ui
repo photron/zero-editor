@@ -57,6 +57,7 @@
           <property name="handleWidth">
            <number>6</number>
           </property>
+          <widget class="BookmarksWidget" name="widgetBookmarks" native="true"/>
           <widget class="OpenFilesWidget" name="widgetOpenFiles" native="true"/>
           <widget class="RecentFilesWidget" name="widgetRecentFiles" native="true"/>
          </widget>
@@ -873,6 +874,12 @@
    <class>BinaryEditorWidget</class>
    <extends>QFrame</extends>
    <header>src/binaryeditorwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BookmarksWidget</class>
+   <extends>QWidget</extends>
+   <header>src/bookmarkswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -2,6 +2,7 @@
     <qresource prefix="/icons">
         <file>zero-editor.ico</file>
         <file>14x14/clear.png</file>
+        <file>16x16/bookmarks.png</file>
         <file>16x16/clear.png</file>
         <file>16x16/close.png</file>
         <file>16x16/copy.png</file>
@@ -33,6 +34,7 @@
         <file>16x16/toggle-case.png</file>
         <file>16x16/undo.png</file>
         <file>16x16/unsaved-diff.png</file>
+        <file>24x24/bookmarks.png</file>
         <file>24x24/clear.png</file>
         <file>24x24/close.png</file>
         <file>24x24/copy.png</file>
