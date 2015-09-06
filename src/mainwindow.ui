@@ -58,7 +58,7 @@
            <number>6</number>
           </property>
           <widget class="BookmarksWidget" name="widgetBookmarks" native="true"/>
-          <widget class="OpenFilesWidget" name="widgetOpenFiles" native="true"/>
+          <widget class="OpenDocumentsWidget" name="widgetOpenDocuments" native="true"/>
           <widget class="RecentFilesWidget" name="widgetRecentFiles" native="true"/>
          </widget>
         </item>
@@ -849,9 +849,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>OpenFilesWidget</class>
+   <class>OpenDocumentsWidget</class>
    <extends>QWidget</extends>
-   <header>src/openfileswidget.h</header>
+   <header>src/opendocumentswidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

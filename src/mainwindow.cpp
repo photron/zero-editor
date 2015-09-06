@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->widgetUnsavedDiff, &UnsavedDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
     connect(m_ui->widgetGitDiff, &GitDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
 
-    m_ui->widgetOpenFiles->installLineEditEventFilter(this);
+    m_ui->widgetOpenDocuments->installLineEditEventFilter(this);
     m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
     m_ui->widgetFindInFiles->installLineEditEventFilter(this);
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OpenFilesWidget</class>
- <widget class="QWidget" name="OpenFilesWidget">
+ <class>OpenDocumentsWidget</class>
+ <widget class="QWidget" name="OpenDocumentsWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Open Files</string>
+   <string>Open Documents</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -69,7 +69,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Open Files</string>
+         <string>Open Documents</string>
         </property>
        </widget>
       </item>
@@ -97,7 +97,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeOpenFiles"/>
+    <widget class="QTreeView" name="treeDocuments"/>
    </item>
   </layout>
  </widget>

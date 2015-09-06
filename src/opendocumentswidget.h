@@ -16,26 +16,27 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "openfileswidget.h"
-#include "ui_openfileswidget.h"
+#ifndef OPENDOCUMENTSWIDGET_H
+#define OPENDOCUMENTSWIDGET_H
 
-OpenFilesWidget::OpenFilesWidget(QWidget *parent) :
-    QWidget(parent),
-    m_ui(new Ui::OpenFilesWidget)
-{
-    m_ui->setupUi(this);
+#include <QWidget>
 
-    connect(m_ui->checkShowFilter, &QCheckBox::toggled, m_ui->editFilter, &QLineEdit::setVisible);
-
-    m_ui->editFilter->setVisible(m_ui->checkShowFilter->isChecked());
+namespace Ui {
+class OpenDocumentsWidget;
 }
 
-OpenFilesWidget::~OpenFilesWidget()
+class OpenDocumentsWidget : public QWidget
 {
-    delete m_ui;
-}
+    Q_OBJECT
 
-void OpenFilesWidget::installLineEditEventFilter(QObject *filter)
-{
-    m_ui->editFilter->installEventFilter(filter);
-}
+public:
+    explicit OpenDocumentsWidget(QWidget *parent = 0);
+    ~OpenDocumentsWidget();
+
+    void installLineEditEventFilter(QObject *filter);
+
+private:
+    Ui::OpenDocumentsWidget *m_ui;
+};
+
+#endif // OPENDOCUMENTSWIDGET_H
