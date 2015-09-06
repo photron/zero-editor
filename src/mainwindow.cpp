@@ -124,33 +124,32 @@ MainWindow::~MainWindow()
 // protected
 bool MainWindow::eventFilter(QObject *object, QEvent *event)
 {
-    QLineEdit *edit = qobject_cast<QLineEdit *>(object);
+    if (event->type() == QEvent::ContextMenu) {
+        QLineEdit *edit = qobject_cast<QLineEdit *>(object);
 
-    if (edit != NULL) {
-        if (event->type() == QEvent::ContextMenu) {
+        if (edit != NULL) {
             QContextMenuEvent *contextMenuEvent = static_cast<QContextMenuEvent *>(event);
             QMenu *menu = edit->createStandardContextMenu();
+            QList<QAction *> actions = menu->actions();
 
-            if (menu != NULL) {
-                foreach (QAction *action, menu->actions()) {
-                    if (action->text() == "Select All") {
-                        action->setIcon(QIcon(":/icons/16x16/select-all.png"));
+            for (int i = actions.length() - 1; i >= 0; --i) {
+                QAction *action = actions.at(i);
 
-                        break;
-                    }
+                if (action->text() == "Select All") {
+                    action->setIcon(QIcon(":/icons/16x16/select-all.png"));
+
+                    break;
                 }
-
-                menu->setAttribute(Qt::WA_DeleteOnClose);
-                menu->popup(contextMenuEvent->globalPos());
             }
 
+            menu->setAttribute(Qt::WA_DeleteOnClose);
+            menu->popup(contextMenuEvent->globalPos());
+
             return true;
-        } else {
-            return false;
         }
-    } else {
-        return QMainWindow::eventFilter(object, event);
     }
+
+    return QMainWindow::eventFilter(object, event);
 }
 
 // private slot
