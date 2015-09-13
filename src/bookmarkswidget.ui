@@ -71,7 +71,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="button_remove_all">
+       <widget class="QToolButton" name="buttonRemoveAll">
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
