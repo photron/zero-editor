@@ -18,6 +18,8 @@
 
 #include "style.h"
 
+#include <QDebug>
+#include <QPainter>
 #include <QStyleOptionComplex>
 
 Style::Style(QStyle *style) :
@@ -27,7 +29,7 @@ Style::Style(QStyle *style) :
 
 QPixmap Style::standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option, const QWidget *widget) const
 {
-    // override default line-edit-clear-button icon
+    // Override default line edit clear button icon
     if (standardPixmap == QStyle::SP_LineEditClearButton) {
         return QPixmap(":/icons/14x14/clear.png");
     } else {
@@ -35,12 +37,29 @@ QPixmap Style::standardPixmap(StandardPixmap standardPixmap, const QStyleOption 
     }
 }
 
-void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget) const
+void Style::drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
+                          const QWidget *widget) const
 {
-    // strip menu style flag for QToolButton because the menu indicator overlaps the text
+#ifdef Q_OS_WIN
+    // Make the item view selection rect always cover the whole width of the item view to match the normal Windows
+    // style better. Without this the selection rect starts some pixels left of the item bounding box. This looks ugly
+    // in tree views, as it creates any empty space left of the item.
+    if (element == PE_PanelItemViewItem) {
+        const_cast<QStyleOption *>(option)->rect.setLeft(0);
+        painter->setClipRect(option->rect, Qt::ReplaceClip);
+    }
+#endif
+
+    QProxyStyle::drawPrimitive(element, option, painter, widget);
+}
+
+void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter,
+                               const QWidget *widget) const
+{
+    // Strip menu style flag for QToolButton because the menu indicator overlaps the text
     if (control == QStyle::CC_ToolButton) {
         static_cast<QStyleOptionToolButton *>(const_cast<QStyleOptionComplex *>(option))->features &= ~QStyleOptionToolButton::HasMenu;
     }
 
-    QProxyStyle::drawComplexControl(control,  option, painter, widget);
+    QProxyStyle::drawComplexControl(control, option, painter, widget);
 }

@@ -24,10 +24,14 @@
 class Style : public QProxyStyle
 {
 public:
-    Style(QStyle *style);
+    explicit Style(QStyle *style);
 
-    QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option = NULL, const QWidget *widget = NULL) const;
-    void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter, const QWidget *widget = NULL) const;
+    QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option = NULL,
+                           const QWidget *widget = NULL) const;
+    void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
+                       const QWidget *widget = NULL) const;
+    void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter,
+                            const QWidget *widget = NULL) const;
 };
 
 #endif // STYLE_H
