@@ -77,6 +77,7 @@ BinaryEditorWidget::BinaryEditorWidget(QWidget *parent) :
 {
     setFont(MonospaceFontMetrics::font());
     setPalette(EditorColors::basicPalette());
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     updateScrollBarRanges();
     setViewportMargins(extraAreaWidth(), 0, 0, 0);
 

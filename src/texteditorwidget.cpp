@@ -95,6 +95,7 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     option.setTabStop(MonospaceFontMetrics::charWidth() * 4);
 
     document()->setDefaultTextOption(option);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::redrawExtraAreaRect);
     connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
