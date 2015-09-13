@@ -27,16 +27,18 @@ class EditorColors
 public:
     static void initialize();
 
-    static QPalette basicPalette() { return *m_basicPalette; }
-    static QColor currentLineHighlightColor() { return m_currentLineHighlightColor; }
-    static QColor innerWrapMarkerColor() { return m_innerWrapMarkerColor; }
-    static QColor outerWrapMarkerColor() { return m_outerWrapMarkerColor; }
+    static QPalette basicPalette() { return *s_basicPalette; }
+    static QColor currentLineHighlightColor() { return s_currentLineHighlightColor; }
+    static QColor innerWrapMarkerColor() { return s_innerWrapMarkerColor; }
+    static QColor outerWrapMarkerColor() { return s_outerWrapMarkerColor; }
 
 private:
-    static QPalette *m_basicPalette;
-    static QColor m_currentLineHighlightColor;
-    static QColor m_innerWrapMarkerColor;
-    static QColor m_outerWrapMarkerColor;
+    EditorColors();
+
+    static QPalette *s_basicPalette;
+    static QColor s_currentLineHighlightColor;
+    static QColor s_innerWrapMarkerColor;
+    static QColor s_outerWrapMarkerColor;
 };
 
 #endif // EDITORCOLORS_H

@@ -26,14 +26,16 @@ class MonospaceFontMetrics
 public:
     static void initialize();
 
-    static QFont font() { return *m_font; }
-    static int charWidth() { return m_charWidth; }
-    static int lineHeight() { return m_lineHeight; }
+    static QFont font() { return *s_font; }
+    static int charWidth() { return s_charWidth; }
+    static int lineHeight() { return s_lineHeight; }
 
 private:
-    static QFont *m_font;
-    static int m_charWidth;
-    static int m_lineHeight;
+    MonospaceFontMetrics();
+
+    static QFont *s_font;
+    static int s_charWidth;
+    static int s_lineHeight;
 };
 
 #endif // MONOSPACEFONTMETRICS_H

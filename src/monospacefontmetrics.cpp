@@ -22,36 +22,36 @@
 #include <QFontMetrics>
 
 // Use a QFont pointer here to avoid potential static initialization order problems
-QFont *MonospaceFontMetrics::m_font = NULL;
-int MonospaceFontMetrics::m_charWidth = 0;
-int MonospaceFontMetrics::m_lineHeight = 0;
+QFont *MonospaceFontMetrics::s_font = NULL;
+int MonospaceFontMetrics::s_charWidth = 0;
+int MonospaceFontMetrics::s_lineHeight = 0;
 
 // static
 void MonospaceFontMetrics::initialize()
 {
-    m_font = new QFont("DejaVu Sans Mono", 10); // FIXME: This leaks memory
+    s_font = new QFont("DejaVu Sans Mono", 10); // FIXME: This leaks memory
 
     // Force integer metrics, otherwise the DejaVu Sans Mono font at size 10pt will have a fractional char width of
     // 7.8125px on Linux. It has an integer char width of exactly 8px on Windows. That fractional char width will
     // result in error prone calculations including the need for correct rounding to get pixel perfect results. Just
     // avoid all of this trouble by forcing an integer char width of exactly 8px on Linux as well.
-    m_font->setStyleStrategy(QFont::ForceIntegerMetrics);
+    s_font->setStyleStrategy(QFont::ForceIntegerMetrics);
 
-    QFontMetrics metrics(*m_font);
+    QFontMetrics metrics(*s_font);
 
-    m_charWidth = metrics.width('x');
-    m_lineHeight = metrics.height();
+    s_charWidth = metrics.width('x');
+    s_lineHeight = metrics.height();
 
     QString ascii = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-    if (metrics.width(ascii) != m_charWidth * ascii.length()) {
+    if (metrics.width(ascii) != s_charWidth * ascii.length()) {
         qDebug() << font().family() << "is NOT monospace";
     } else {
         qDebug() << font().family() << "is monospace";
     }
 
-    qDebug() << "  Char Width" << m_charWidth;
-    qDebug() << "  Height" << m_lineHeight;
+    qDebug() << "  Char Width" << s_charWidth;
+    qDebug() << "  Height" << s_lineHeight;
     qDebug() << "  Ascent" << metrics.ascent();
     qDebug() << "  Descent" << metrics.descent();
     qDebug() << "  Leading" << metrics.leading();
