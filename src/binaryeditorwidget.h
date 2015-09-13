@@ -23,6 +23,7 @@
 #include <QBasicTimer>
 #include <QByteArray>
 
+class BinaryDocument;
 class BinaryEditorExtraArea;
 
 class BinaryEditorWidget : public QAbstractScrollArea
@@ -31,7 +32,7 @@ class BinaryEditorWidget : public QAbstractScrollArea
     Q_DISABLE_COPY(BinaryEditorWidget)
 
 public:
-    BinaryEditorWidget(QWidget *parent = NULL);
+    BinaryEditorWidget(BinaryDocument *document, QWidget *parent = NULL);
 
     QByteArray data() const;
     void setData(const QByteArray &data);
@@ -76,9 +77,10 @@ private:
     void setCursorPosition(int position, MoveMode moveMode);
     void ensureCursorVisible();
 
+    BinaryDocument *m_document; // owned by BinaryEditor
+
     BinaryEditorExtraArea *m_extraArea;
 
-    QByteArray m_data;
     int m_lineCount;
 
     bool m_cursorVisible;

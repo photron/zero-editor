@@ -19,24 +19,33 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "document.h"
+#include "editor.h"
+
 #include <QContextMenuEvent>
+#include <QDebug>
+#include <QFileDialog>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QProcess>
 #include <QToolButton>
 #include <QWidgetAction>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    m_ui(new Ui::MainWindow)
+    m_ui(new Ui::MainWindow),
+    m_documentManager(new DocumentManager(this))
 {
     m_ui->setupUi(this);
 
-    m_ui->actionWordWrap->setChecked(m_ui->plainTextEdit->wordWrapMode() != QTextOption::NoWrap);
-
+    connect(m_ui->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
+    connect(m_ui->actionOpen_Tool, &QAction::triggered, this, &MainWindow::openFile);
     connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+    connect(m_ui->actionToggleCase, &QAction::triggered, this, &MainWindow::toggleCase);
+    connect(m_ui->actionToggleCase_Tool, &QAction::triggered, this, &MainWindow::toggleCase);
     connect(m_ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
     connect(m_ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
-    connect(m_ui->actionWordWrap, &QAction::triggered, this, &MainWindow::setWordWrapMode);
+    connect(m_ui->actionWordWrapping, &QAction::triggered, this, &MainWindow::setWordWrapping);
     connect(m_ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionUnsavedDiff, &QAction::triggered, this, &MainWindow::showUnsavedDiffWidget);
@@ -48,6 +57,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->widgetFindInFiles, &FindInFilesWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
     connect(m_ui->widgetUnsavedDiff, &UnsavedDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
     connect(m_ui->widgetGitDiff, &GitDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
+
+    connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &MainWindow::addDocument);
+    connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &MainWindow::setCurrentDocument);
 
     m_ui->widgetOpenDocuments->installLineEditEventFilter(this);
     m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
@@ -121,6 +133,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete m_documentManager;
     delete m_ui;
 }
 
@@ -156,6 +169,39 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 }
 
 // private slot
+void MainWindow::openFile()
+{
+    QStringList filePaths = QFileDialog::getOpenFileNames(this, "Open File");
+    QString error;
+
+    foreach (const QString &filePath, filePaths) {
+        if (!DocumentManager::open(filePath, &error)) {
+            if (error.isEmpty()) {
+                error = QString("Could not open '%1': Unknown error").arg(QDir::toNativeSeparators(filePath));
+            }
+
+            QMessageBox::critical(this, "File Open Error", error);
+        }
+    }
+}
+
+// private slot
+void MainWindow::toggleCase()
+{
+    Document *document = DocumentManager::currentDocument();
+
+    if (document == NULL) {
+        return;
+    }
+
+    Editor *editor = DocumentManager::editorForDocument(document);
+
+    Q_ASSERT(editor);
+
+    editor->toggleCase();
+}
+
+// private slot
 void MainWindow::showFindAndReplaceWidget()
 {
     m_ui->widgetStackedHelpers->setCurrentIndex(m_ui->widgetStackedHelpers->indexOf(m_ui->widgetFindAndReplace));
@@ -172,13 +218,19 @@ void MainWindow::showFindInFilesWidget()
 }
 
 // private slot
-void MainWindow::setWordWrapMode(bool enabled)
+void MainWindow::setWordWrapping(bool enable)
 {
-    if (enabled) {
-        m_ui->plainTextEdit->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-    } else {
-        m_ui->plainTextEdit->setWordWrapMode(QTextOption::NoWrap);
+    Document *document = DocumentManager::currentDocument();
+
+    if (document == NULL) {
+        return;
     }
+
+    Editor *editor = DocumentManager::editorForDocument(document);
+
+    Q_ASSERT(editor);
+
+    editor->setWordWrapping(enable);
 }
 
 // private slot
@@ -203,4 +255,40 @@ void MainWindow::showGitDiffWidget()
 {
     m_ui->widgetStackedHelpers->setCurrentIndex(m_ui->widgetStackedHelpers->indexOf(m_ui->widgetGitDiff));
     m_ui->widgetStackedHelpers->show();
+}
+
+// private slot
+void MainWindow::addDocument(Document *document)
+{
+    Q_ASSERT(document);
+
+    Editor *editor = DocumentManager::editorForDocument(document);
+
+    Q_ASSERT(editor);
+
+    m_ui->widgetStackedEditors->addWidget(editor->widget());
+}
+
+// private slot
+void MainWindow::setCurrentDocument(Document *document)
+{
+    Q_ASSERT(document);
+
+    QFileInfo fileInfo(document->filePath());
+    QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
+    QString fileName(fileInfo.fileName());
+
+    setWindowTitle(fileName + " - " + absolutePath + " - Zero Editor");
+
+    Editor *editor = DocumentManager::editorForDocument(document);
+
+    Q_ASSERT(editor);
+
+    m_ui->widgetStackedEditors->setCurrentWidget(editor->widget());
+
+    m_ui->actionToggleCase->setEnabled(editor->hasFeature(Editor::ToggleCase));
+    m_ui->actionToggleCase_Tool->setEnabled(editor->hasFeature(Editor::ToggleCase));
+
+    m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
+    m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
 }

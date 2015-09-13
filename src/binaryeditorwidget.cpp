@@ -18,12 +18,14 @@
 
 #include "binaryeditorwidget.h"
 
+#include "binarydocument.h"
 #include "editorcolors.h"
 #include "monospacefontmetrics.h"
 
 #include <QtMath>
 #include <QApplication>
 #include <QClipboard>
+#include <QDebug>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QScrollBar>
@@ -62,10 +64,11 @@ private:
     BinaryEditorWidget *m_editor;
 };
 
-BinaryEditorWidget::BinaryEditorWidget(QWidget *parent) :
+BinaryEditorWidget::BinaryEditorWidget(BinaryDocument *document, QWidget *parent) :
     QAbstractScrollArea(parent),
+    m_document(document),
     m_extraArea(new BinaryEditorExtraArea(this)),
-    m_lineCount(1),
+    m_lineCount(document->length() / BytesPerLine + 1),
     m_cursorVisible(false),
     m_cursorInHexSection(true),
     m_cursorAtLowNibble(false),
@@ -75,28 +78,13 @@ BinaryEditorWidget::BinaryEditorWidget(QWidget *parent) :
     m_documentMargin(QTextDocument(this).documentMargin()),
     m_highlightCurrentLine(false)
 {
+    Q_ASSERT(m_document->length() > 0);
+
     setFont(MonospaceFontMetrics::font());
     setPalette(EditorColors::basicPalette());
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     updateScrollBarRanges();
     setViewportMargins(extraAreaWidth(), 0, 0, 0);
-
-    QByteArray d("cons\0t int topLine = verticalScrollBar()->value();   const int xoffset = horizontalScrollBar()->value();            const int x1 = -xoffset + m_margin + m_labelWidth - m_charWidth/2 - 1;            const int x2 = -xoffset + m_margin + m_labelWidth + m_bytesPerLine * m_columnWidth + m_charWidth/2;            painter.drawLine(x1, 0, x1, viewport()->height());            painter.drawLine(x2, 0, x2, viewport()->height());", 0x165);
-
-    setData(d); // FIXME: deal with special case of empty data
-}
-
-QByteArray BinaryEditorWidget::data() const
-{
-    return m_data;
-}
-
-void BinaryEditorWidget::setData(const QByteArray &data)
-{
-    m_data = data;
-    m_lineCount = m_data.length() / BytesPerLine + 1;
-
-    updateScrollBarRanges();
 }
 
 void BinaryEditorWidget::undo()
@@ -114,7 +102,7 @@ void BinaryEditorWidget::copy()
     int selectionStart = qMin(m_anchorPosition, m_cursorPosition);
     int selectionEnd = qMax(m_anchorPosition, m_cursorPosition);
     int selectionLength = selectionEnd - selectionStart + 1;
-    QByteArray selectedData = m_data.mid(selectionStart, selectionLength);
+    QByteArray selectedData = m_document->slice(selectionStart, selectionLength);
 
     if (m_cursorInHexSection) {
         const char *hexDigits= "0123456789ABCDEF";
@@ -155,7 +143,7 @@ void BinaryEditorWidget::copy()
 void BinaryEditorWidget::selectAll()
 {
     setCursorPosition(0, MoveAnchor);
-    setCursorPosition(m_data.length() - 1, KeepAnchor);
+    setCursorPosition(m_document->length() - 1, KeepAnchor);
 }
 
 int BinaryEditorWidget::extraAreaWidth() const
@@ -378,8 +366,8 @@ void BinaryEditorWidget::paintEvent(QPaintEvent *event)
             for (int i = 0; i < BytesPerLine; ++i) {
                 int offset = line * BytesPerLine + i;
 
-                if (offset < m_data.length()) {
-                    quint8 byte = m_data.at(offset);
+                if (offset < m_document->length()) {
+                    quint8 byte = m_document->byteAt(offset);
 
                     hexChars[i * 3] = hexDigits[(byte >> 4) & 0x0F];
                     hexChars[i * 3 + 1] = hexDigits[byte & 0x0F];
@@ -545,7 +533,7 @@ void BinaryEditorWidget::keyPressEvent(QKeyEvent *event)
     case Qt::Key_Down:
         if (ctrlPressed) {
             verticalScrollBar()->triggerAction(QScrollBar::SliderSingleStepAdd);
-        } else if (m_cursorPosition + BytesPerLine < m_data.length()) {
+        } else if (m_cursorPosition + BytesPerLine < m_document->length()) {
             setCursorPosition(m_cursorPosition + BytesPerLine, moveMode);
         }
 
@@ -587,7 +575,7 @@ void BinaryEditorWidget::keyPressEvent(QKeyEvent *event)
 
     case Qt::Key_End:
         if (ctrlPressed) {
-            position = m_data.length() - 1;
+            position = m_document->length() - 1;
         } else {
             position = m_cursorPosition / BytesPerLine * BytesPerLine + (BytesPerLine - 1);
         }
@@ -618,12 +606,12 @@ void BinaryEditorWidget::keyPressEvent(QKeyEvent *event)
                 }
 
                 if (m_cursorAtLowNibble) {
-                    m_data[m_cursorPosition] = nibble + (m_data.at(m_cursorPosition) & 0xF0);
+                    m_document->setByteAt(m_cursorPosition, nibble + (m_document->byteAt(m_cursorPosition) & 0xF0));
                     m_cursorAtLowNibble = false;
 
                     setCursorPosition(m_cursorPosition + 1, MoveAnchor);
                 } else {
-                    m_data[m_cursorPosition] = (nibble << 4) + (m_data.at(m_cursorPosition) & 0x0F);
+                    m_document->setByteAt(m_cursorPosition, (nibble << 4) + (m_document->byteAt(m_cursorPosition) & 0x0F));
                     m_cursorAtLowNibble = true;
 
                     redrawCursorLine();
@@ -633,7 +621,7 @@ void BinaryEditorWidget::keyPressEvent(QKeyEvent *event)
                     continue;
                 }
 
-                m_data[m_cursorPosition] = c.unicode();
+                m_document->setByteAt(m_cursorPosition, c.unicode());
 
                 setCursorPosition(m_cursorPosition + 1, MoveAnchor);
             }
@@ -746,7 +734,7 @@ int BinaryEditorWidget::positionAt(const QPoint &position, bool *inHexSection) c
 {
     int charWidth = MonospaceFontMetrics::charWidth();
     int lineHeight = MonospaceFontMetrics::lineHeight();
-    int maxPosition = m_data.length() - 1;
+    int maxPosition = m_document->length() - 1;
 
     // Calculate x relative to the left edge of the first hex column
     int x = position.x() + horizontalScrollBar()->value() - m_documentMargin;
@@ -789,7 +777,7 @@ void BinaryEditorWidget::setCursorPosition(int position, MoveMode moveMode)
     int lastCursorPosition = m_cursorPosition;
 
     m_cursorAtLowNibble = false;
-    m_cursorPosition = qBound(0, position, m_data.length() - 1);
+    m_cursorPosition = qBound(0, position, m_document->length() - 1);
 
     if (moveMode == MoveAnchor) {
         redrawLines(m_anchorPosition, lastCursorPosition);

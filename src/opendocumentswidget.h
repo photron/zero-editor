@@ -19,7 +19,11 @@
 #ifndef OPENDOCUMENTSWIDGET_H
 #define OPENDOCUMENTSWIDGET_H
 
+#include <QHash>
+#include <QStandardItemModel>
 #include <QWidget>
+
+class Document;
 
 namespace Ui {
 class OpenDocumentsWidget;
@@ -36,8 +40,17 @@ public:
 
     void installLineEditEventFilter(QObject *filter);
 
+private slots:
+    void addDocument(Document *document);
+    void setCurrentDocument(const QModelIndex &index);
+    void setCurrentItem(Document *document);
+    void updateItemModification(bool modified);
+
 private:
     Ui::OpenDocumentsWidget *m_ui;
+    QStandardItemModel m_model;
+    QHash<Document *, QStandardItem *> m_items; // values owned by QStandardItemModel
+    QStandardItem *m_lastCurrentItem;
 };
 
 #endif // OPENDOCUMENTSWIDGET_H

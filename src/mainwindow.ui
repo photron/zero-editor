@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1134</width>
-    <height>563</height>
+    <width>697</width>
+    <height>544</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -88,59 +88,8 @@
           </property>
           <widget class="QStackedWidget" name="widgetStackedEditors">
            <property name="currentIndex">
-            <number>1</number>
+            <number>-1</number>
            </property>
-           <widget class="QWidget" name="page">
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="TextEditorWidget" name="plainTextEdit"/>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="page_2">
-            <layout class="QVBoxLayout" name="verticalLayout_3">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="BinaryEditorWidget" name="widget">
-               <property name="focusPolicy">
-                <enum>Qt::WheelFocus</enum>
-               </property>
-               <property name="acceptDrops">
-                <bool>true</bool>
-               </property>
-               <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Sunken</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
           </widget>
           <widget class="QStackedWidget" name="widgetStackedHelpers">
            <widget class="FindInFilesWidget" name="widgetFindInFiles"/>
@@ -161,7 +110,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1134</width>
+     <width>697</width>
      <height>21</height>
     </rect>
    </property>
@@ -254,7 +203,7 @@
     <addaction name="separator"/>
     <addaction name="menuLineEndings"/>
     <addaction name="separator"/>
-    <addaction name="actionWordWrap"/>
+    <addaction name="actionWordWrapping"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -311,7 +260,7 @@
    <addaction name="actionRevert_Tool"/>
    <addaction name="actionClose_Tool"/>
    <addaction name="separator"/>
-   <addaction name="actionToogleCase_Tool"/>
+   <addaction name="actionToggleCase_Tool"/>
    <addaction name="separator"/>
    <addaction name="actionGoToLine_Tool"/>
    <addaction name="actionGoToPreviousFile_Tool"/>
@@ -669,13 +618,16 @@
     <string>Save</string>
    </property>
   </action>
-  <action name="actionToogleCase_Tool">
+  <action name="actionToggleCase_Tool">
    <property name="icon">
     <iconset resource="../icons/icons.qrc">
      <normaloff>:/icons/24x24/toggle-case.png</normaloff>:/icons/24x24/toggle-case.png</iconset>
    </property>
    <property name="text">
-    <string>Toogle Case</string>
+    <string>Toggle Case</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle Case</string>
    </property>
   </action>
   <action name="actionTerminal_Tool">
@@ -798,12 +750,12 @@
     <string>Save All</string>
    </property>
   </action>
-  <action name="actionWordWrap">
+  <action name="actionWordWrapping">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Word Wrap</string>
+    <string>Word Wrapping</string>
    </property>
   </action>
   <action name="actionUnsavedDiff">
@@ -872,11 +824,6 @@
    <header>src/findandreplacewidget.h</header>
   </customwidget>
   <customwidget>
-   <class>TextEditorWidget</class>
-   <extends>QPlainTextEdit</extends>
-   <header>src/texteditorwidget.h</header>
-  </customwidget>
-  <customwidget>
    <class>UnsavedDiffWidget</class>
    <extends>QWidget</extends>
    <header>src/unsaveddiffwidget.h</header>
@@ -886,12 +833,6 @@
    <class>GitDiffWidget</class>
    <extends>QWidget</extends>
    <header>src/gitdiffwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>BinaryEditorWidget</class>
-   <extends>QFrame</extends>
-   <header>src/binaryeditorwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

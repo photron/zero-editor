@@ -1,8 +1,13 @@
 TEMPLATE     = app
 TARGET       = zero-editor
 QT          += core gui widgets
-SOURCES     += src/binaryeditorwidget.cpp \
+SOURCES     += src/binaryeditor.cpp \
+               src/binaryeditorwidget.cpp \
+               src/binarydocument.cpp \
                src/bookmarkswidget.cpp \
+               src/document.cpp \
+               src/documentmanager.cpp \
+               src/editor.cpp \
                src/editorcolors.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
@@ -13,10 +18,17 @@ SOURCES     += src/binaryeditorwidget.cpp \
                src/opendocumentswidget.cpp \
                src/recentfileswidget.cpp \
                src/style.cpp \
+               src/texteditor.cpp \
                src/texteditorwidget.cpp \
+               src/textdocument.cpp \
                src/unsaveddiffwidget.cpp
-HEADERS     += src/binaryeditorwidget.h \
+HEADERS     += src/binaryeditor.h \
+               src/binaryeditorwidget.h \
+               src/binarydocument.h \
                src/bookmarkswidget.h \
+               src/document.h \
+               src/documentmanager.h \
+               src/editor.h \
                src/editorcolors.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
@@ -26,7 +38,9 @@ HEADERS     += src/binaryeditorwidget.h \
                src/opendocumentswidget.h \
                src/recentfileswidget.h \
                src/style.h \
+               src/texteditor.h \
                src/texteditorwidget.h \
+               src/textdocument.h \
                src/unsaveddiffwidget.h
 FORMS       += src/bookmarkswidget.ui \
                src/findandreplacewidget.ui \

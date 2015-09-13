@@ -20,8 +20,10 @@
 
 #include "editorcolors.h"
 #include "monospacefontmetrics.h"
+#include "textdocument.h"
 
 #include <QCoreApplication>
+#include <QDebug>
 #include <QMenu>
 #include <QPainter>
 #include <QScrollBar>
@@ -74,8 +76,9 @@ private:
     TextEditorWidget *m_editor;
 };
 
-TextEditorWidget::TextEditorWidget(QWidget *parent) :
+TextEditorWidget::TextEditorWidget(TextDocument *document, QWidget *parent) :
     QPlainTextEdit(parent),
+    m_document(document),
     m_extraArea(new TextEditorExtraArea(this)),
     m_extraAreaSelectionAnchorBlockNumber(-1),
     m_lastCursorBlockNumber(-1),
@@ -84,17 +87,10 @@ TextEditorWidget::TextEditorWidget(QWidget *parent) :
     m_lastCursorSelectionEnd(-1),
     m_highlightCurrentLine(false)
 {
+    setDocument(m_document->document());
     setFont(MonospaceFontMetrics::font());
     setPalette(EditorColors::basicPalette());
     setCursorWidth(2);
-
-    // Show tabs and spaces and set tab size to 4 spaces
-    QTextOption option = document()->defaultTextOption();
-
-    option.setFlags(option.flags() | QTextOption::ShowTabsAndSpaces);
-    option.setTabStop(MonospaceFontMetrics::charWidth() * 4);
-
-    document()->setDefaultTextOption(option);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::redrawExtraAreaRect);

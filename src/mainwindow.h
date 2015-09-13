@@ -19,6 +19,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "documentmanager.h"
+
 #include <QMainWindow>
 
 namespace Ui {
@@ -38,15 +40,25 @@ protected:
     bool eventFilter(QObject *object, QEvent *event);
 
 private slots:
+    void openFile();
+
+    void toggleCase();
+
     void showFindAndReplaceWidget();
     void showFindInFilesWidget();
-    void setWordWrapMode(bool enabled);
+
+    void setWordWrapping(bool enable);
+
     void openTerminal();
     void showUnsavedDiffWidget();
     void showGitDiffWidget();
 
+    void addDocument(Document *document);
+    void setCurrentDocument(Document *document);
+
 private:
     Ui::MainWindow *m_ui;
+    DocumentManager *m_documentManager;
 };
 
 #endif // MAINWINDOW_H

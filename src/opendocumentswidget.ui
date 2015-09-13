@@ -74,12 +74,26 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="checkShowFilter">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
+       <widget class="QRadioButton" name="radioAll">
         <property name="text">
-         <string>Show Filter</string>
+         <string>All</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioModified">
+        <property name="text">
+         <string>Modified</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkFilter">
+        <property name="text">
+         <string>Filter</string>
         </property>
        </widget>
       </item>
@@ -97,7 +111,20 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeDocuments"/>
+    <widget class="QTreeView" name="treeDocuments">
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOn</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="textElideMode">
+      <enum>Qt::ElideLeft</enum>
+     </property>
+     <attribute name="headerVisible">
+      <bool>false</bool>
+     </attribute>
+    </widget>
    </item>
   </layout>
  </widget>

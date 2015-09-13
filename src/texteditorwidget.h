@@ -22,6 +22,7 @@
 #include <QBasicTimer>
 #include <QPlainTextEdit>
 
+class TextDocument;
 class TextEditorExtraArea;
 
 class TextEditorWidget : public QPlainTextEdit
@@ -30,7 +31,7 @@ class TextEditorWidget : public QPlainTextEdit
     Q_DISABLE_COPY(TextEditorWidget)
 
 public:
-    TextEditorWidget(QWidget *parent = NULL);
+    TextEditorWidget(TextDocument *document, QWidget *parent = NULL);
 
     int extraAreaWidth() const;
     void extraAreaPaintEvent(QPaintEvent *event);
@@ -55,6 +56,8 @@ private slots:
 private:
     void redrawLineInBlock(int blockNumber, int positionInBlock);
     void redrawExtraAreaBlockRange(int fromPosition, int toPosition);
+
+    TextDocument *m_document; // owned by TextEditor
 
     TextEditorExtraArea *m_extraArea;
     int m_extraAreaSelectionAnchorBlockNumber;

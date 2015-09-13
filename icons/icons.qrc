@@ -9,9 +9,11 @@
         <file>16x16/cut.png</file>
         <file>16x16/delete.png</file>
         <file>16x16/exit.png</file>
+        <file>16x16/file.png</file>
         <file>16x16/find-and-replace.png</file>
         <file>16x16/find-in-files.png</file>
         <file>16x16/find-quick.png</file>
+        <file>16x16/folder.png</file>
         <file>16x16/git-diff.png</file>
         <file>16x16/go-to-line.png</file>
         <file>16x16/go-to-next-file.png</file>
@@ -41,9 +43,11 @@
         <file>24x24/cut.png</file>
         <file>24x24/delete.png</file>
         <file>24x24/exit.png</file>
+        <file>24x24/file.png</file>
         <file>24x24/find-and-replace.png</file>
         <file>24x24/find-in-files.png</file>
         <file>24x24/find-quick.png</file>
+        <file>24x24/folder.png</file>
         <file>24x24/git-diff.png</file>
         <file>24x24/go-to-line.png</file>
         <file>24x24/go-to-next-file.png</file>
