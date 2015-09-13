@@ -549,7 +549,7 @@ void TextEditorWidget::redrawLineInBlock(int blockNumber, int positionInBlock)
     // Translate the line rect to viewport coordinates and make it full width
     lineRect.moveTop(blockRect.top() + lineRect.top());
     lineRect.setLeft(0);
-    lineRect.setRight(INT_MAX);
+    lineRect.setWidth(INT_MAX / 2);
 
     viewport()->update(lineRect);
     m_extraArea->update(lineRect);
