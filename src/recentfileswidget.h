@@ -28,9 +28,10 @@ class RecentFilesWidget;
 class RecentFilesWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(RecentFilesWidget)
 
 public:
-    explicit RecentFilesWidget(QWidget *parent = 0);
+    explicit RecentFilesWidget(QWidget *parent = NULL);
     ~RecentFilesWidget();
 
 private:

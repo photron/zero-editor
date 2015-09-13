@@ -28,6 +28,7 @@ class GitDiffWidget;
 class GitDiffWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(GitDiffWidget)
 
 public:
     explicit GitDiffWidget(QWidget *parent = NULL);

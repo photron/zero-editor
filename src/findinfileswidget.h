@@ -28,6 +28,7 @@ class FindInFilesWidget;
 class FindInFilesWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(FindInFilesWidget)
 
 public:
     explicit FindInFilesWidget(QWidget *parent = NULL);

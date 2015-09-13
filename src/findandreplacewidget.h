@@ -28,6 +28,7 @@ class FindAndReplaceWidget;
 class FindAndReplaceWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(FindAndReplaceWidget)
 
 public:
     explicit FindAndReplaceWidget(QWidget *parent = 0);

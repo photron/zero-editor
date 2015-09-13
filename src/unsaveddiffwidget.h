@@ -28,6 +28,7 @@ class UnsavedDiffWidget;
 class UnsavedDiffWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(UnsavedDiffWidget)
 
 public:
     explicit UnsavedDiffWidget(QWidget *parent = NULL);

@@ -27,6 +27,7 @@ class TextEditorExtraArea;
 class TextEditorWidget : public QPlainTextEdit
 {
     Q_OBJECT
+    Q_DISABLE_COPY(TextEditorWidget)
 
 public:
     TextEditorWidget(QWidget *parent = NULL);

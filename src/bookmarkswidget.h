@@ -28,6 +28,7 @@ class BookmarksWidget;
 class BookmarksWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(BookmarksWidget)
 
 public:
     explicit BookmarksWidget(QWidget *parent = NULL);

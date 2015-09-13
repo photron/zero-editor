@@ -28,9 +28,10 @@ class OpenDocumentsWidget;
 class OpenDocumentsWidget : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(OpenDocumentsWidget)
 
 public:
-    explicit OpenDocumentsWidget(QWidget *parent = 0);
+    explicit OpenDocumentsWidget(QWidget *parent = NULL);
     ~OpenDocumentsWidget();
 
     void installLineEditEventFilter(QObject *filter);

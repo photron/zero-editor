@@ -28,6 +28,7 @@ class BinaryEditorExtraArea;
 class BinaryEditorWidget : public QAbstractScrollArea
 {
     Q_OBJECT
+    Q_DISABLE_COPY(BinaryEditorWidget)
 
 public:
     BinaryEditorWidget(QWidget *parent = NULL);
