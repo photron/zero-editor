@@ -537,9 +537,14 @@ void TextEditorWidget::redrawLineInBlock(int blockNumber, int positionInBlock)
     // The block bounding geometry is in content coordinates. After translating it with the content offset the block
     // rect is in viewport coordinates.
     QRect blockRect = blockBoundingGeometry(block).translated(contentOffset()).toAlignedRect();
+    QTextLine line = block.layout()->lineForTextPosition(positionInBlock);
+
+    if (!line.isValid()) {
+        return;
+    }
 
     // The line rect is relative to the containing block
-    QRect lineRect = block.layout()->lineForTextPosition(positionInBlock).rect().toAlignedRect();
+    QRect lineRect = line.rect().toAlignedRect();
 
     // Translate the line rect to viewport coordinates and make it full width
     lineRect.moveTop(blockRect.top() + lineRect.top());
