@@ -75,6 +75,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="radioAll">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>All</string>
         </property>
@@ -85,6 +88,9 @@
       </item>
       <item>
        <widget class="QRadioButton" name="radioModified">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Modified</string>
         </property>
@@ -92,6 +98,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="checkFilter">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>Filter</string>
         </property>
