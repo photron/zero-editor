@@ -47,6 +47,11 @@ private slots:
     void updateItemModification(bool modified);
 
 private:
+    enum {
+        DocumentPointerRole = Qt::UserRole,
+        FileNameRole
+    };
+
     Ui::OpenDocumentsWidget *m_ui;
     QStandardItemModel m_model;
     QHash<Document *, QStandardItem *> m_items; // values owned by QStandardItemModel

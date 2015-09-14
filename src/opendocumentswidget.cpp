@@ -82,7 +82,8 @@ void OpenDocumentsWidget::addDocument(Document *document)
 
     child->setIcon(QIcon(":/icons/16x16/file.png"));
     child->setToolTip(QDir::toNativeSeparators(fileInfo.absoluteFilePath()));
-    child->setData(qVariantFromValue((void *)document), Qt::UserRole);
+    child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
+    child->setData(fileName, FileNameRole);
 
     m_items.insert(document, child);
 
@@ -97,7 +98,7 @@ void OpenDocumentsWidget::setCurrentDocument(const QModelIndex &index)
 {
     Q_ASSERT(index.isValid());
 
-    Document *document = static_cast<Document *>(index.data(Qt::UserRole).value<void *>());
+    Document *document = static_cast<Document *>(index.data(DocumentPointerRole).value<void *>());
 
     if (document != NULL) {
         DocumentManager::setCurrentDocument(document);
@@ -143,6 +144,9 @@ void OpenDocumentsWidget::updateItemModification(bool modified)
     QStandardItem *item = m_items.value(document, NULL);
 
     if (item != NULL) {
+        QString fileName = item->data(FileNameRole).value<QString>();
+
+        item->setText(fileName + (modified ? "*" : ""));
         item->setForeground(modified ? Qt::red : palette().color(QPalette::Text));
     }
 }
