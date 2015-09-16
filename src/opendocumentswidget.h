@@ -20,6 +20,7 @@
 #define OPENDOCUMENTSWIDGET_H
 
 #include <QHash>
+#include <QRegExp>
 #include <QStandardItemModel>
 #include <QWidget>
 
@@ -45,6 +46,9 @@ private slots:
     void setCurrentDocument(const QModelIndex &index);
     void setCurrentItem(Document *document);
     void updateItemModification(bool modified);
+    void showModifiedDocumentsOnly(bool enable);
+    void setFilterPattern(const QString &pattern);
+    void setFilterEnabled(bool enable);
 
 private:
     enum {
@@ -52,10 +56,16 @@ private:
         FileNameRole
     };
 
+    void applyFilter();
+    bool filterAcceptsChild(const QModelIndex &index) const;
+
     Ui::OpenDocumentsWidget *m_ui;
     QStandardItemModel m_model;
     QHash<Document *, QStandardItem *> m_items; // values owned by QStandardItemModel
     QStandardItem *m_lastCurrentItem;
+    bool m_showModifiedDocumentsOnly;
+    QRegExp m_filterRegExp;
+    bool m_filterEnabled;
 };
 
 #endif // OPENDOCUMENTSWIDGET_H

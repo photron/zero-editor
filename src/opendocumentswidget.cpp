@@ -30,7 +30,10 @@
 OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     QWidget(parent),
     m_ui(new Ui::OpenDocumentsWidget),
-    m_lastCurrentItem(NULL)
+    m_lastCurrentItem(NULL),
+    m_showModifiedDocumentsOnly(false),
+    m_filterRegExp("", Qt::CaseSensitive, QRegExp::WildcardUnix),
+    m_filterEnabled(false)
 {
     m_ui->setupUi(this);
 
@@ -39,7 +42,10 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     m_ui->editFilter->setVisible(m_ui->checkFilter->isChecked());
     m_ui->treeDocuments->setModel(&m_model);
 
+    connect(m_ui->radioModified, &QRadioButton::toggled, this, &OpenDocumentsWidget::showModifiedDocumentsOnly);
+    connect(m_ui->checkFilter, &QCheckBox::toggled, this, &OpenDocumentsWidget::setFilterEnabled);
     connect(m_ui->checkFilter, &QCheckBox::toggled, m_ui->editFilter, &QLineEdit::setVisible);
+    connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenDocumentsWidget::setFilterPattern);
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
     connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &OpenDocumentsWidget::addDocument);
     connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &OpenDocumentsWidget::setCurrentItem);
@@ -149,4 +155,94 @@ void OpenDocumentsWidget::updateItemModification(bool modified)
         item->setText(fileName + (modified ? "*" : ""));
         item->setForeground(modified ? Qt::red : palette().color(QPalette::Text));
     }
+}
+
+// private slot
+void OpenDocumentsWidget::showModifiedDocumentsOnly(bool enable)
+{
+    if (m_showModifiedDocumentsOnly != enable) {
+        m_showModifiedDocumentsOnly = enable;
+
+        applyFilter();
+    }
+}
+
+// private slot
+void OpenDocumentsWidget::setFilterEnabled(bool enable)
+{
+    if (m_filterEnabled != enable) {
+        m_filterEnabled = enable;
+
+        applyFilter();
+    }
+}
+
+// private slot
+void OpenDocumentsWidget::setFilterPattern(const QString &pattern)
+{
+    if (m_filterRegExp.pattern() != pattern) {
+        bool wasValid = m_filterRegExp.isValid();
+
+        m_filterRegExp = QRegExp(pattern, Qt::CaseSensitive, QRegExp::WildcardUnix);
+
+        if (m_filterRegExp.isValid() != wasValid) {
+            m_ui->editFilter->setStyleSheet(m_filterRegExp.isValid() ? "" : "QLineEdit { color: red }");
+        }
+
+        if (m_filterEnabled) {
+            applyFilter();
+        }
+    }
+}
+
+// private
+void OpenDocumentsWidget::applyFilter()
+{
+    QStandardItem *root = m_model.invisibleRootItem();
+    int parentRowCount = root->rowCount();
+
+    for (int parentRow = 0; parentRow < parentRowCount; ++parentRow) {
+        QStandardItem *parent = root->child(parentRow);
+        int childRowCount = parent->rowCount();
+        bool hideParent = true;
+
+        for (int childRow = 0; childRow < childRowCount; ++childRow) {
+            QStandardItem *child = parent->child(childRow);
+            bool hideChild = !filterAcceptsChild(child->index());
+
+            if (!hideChild) {
+                hideParent = false;
+            }
+
+            m_ui->treeDocuments->setRowHidden(childRow, parent->index(), hideChild);
+        }
+
+        m_ui->treeDocuments->setRowHidden(parentRow, root->index(), hideParent);
+    }
+}
+
+// private
+bool OpenDocumentsWidget::filterAcceptsChild(const QModelIndex &index) const
+{
+    if (!m_showModifiedDocumentsOnly && !m_filterEnabled) {
+        return true;
+    }
+
+    Document *document = static_cast<Document *>(index.data(DocumentPointerRole).value<void *>());
+
+    Q_ASSERT(document != NULL);
+
+    if (m_showModifiedDocumentsOnly && !document->isModified()) {
+        return false;
+    }
+
+    if (m_filterEnabled && m_filterRegExp.isValid() && !m_filterRegExp.isEmpty()) {
+        QString fileName(index.data(FileNameRole).value<QString>());
+
+        if (!m_filterRegExp.exactMatch(fileName)) {
+            return false;
+        }
+    }
+
+    return true;
 }
