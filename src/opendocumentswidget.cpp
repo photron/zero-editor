@@ -98,6 +98,15 @@ void OpenDocumentsWidget::addDocument(Document *document)
     parent->sortChildren(0);
 
     connect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateItemModification);
+
+    // Apply current filter
+    if (!filterAcceptsChild(child->index())) {
+        m_ui->treeDocuments->setRowHidden(child->row(), parent->index(), true);
+
+        if (parent->rowCount() == 1) {
+            m_ui->treeDocuments->setRowHidden(parent->row(), m_model.invisibleRootItem()->index(), true);
+        }
+    }
 }
 
 // private slot
