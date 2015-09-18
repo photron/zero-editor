@@ -32,7 +32,6 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     m_ui(new Ui::OpenDocumentsWidget),
     m_lastCurrentItem(NULL),
     m_showModifiedDocumentsOnly(false),
-    m_filterRegExp("", Qt::CaseSensitive, QRegExp::WildcardUnix),
     m_filterEnabled(false)
 {
     m_ui->setupUi(this);
@@ -44,7 +43,6 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
 
     connect(m_ui->radioModified, &QRadioButton::toggled, this, &OpenDocumentsWidget::showModifiedDocumentsOnly);
     connect(m_ui->checkFilter, &QCheckBox::toggled, this, &OpenDocumentsWidget::setFilterEnabled);
-    connect(m_ui->checkFilter, &QCheckBox::toggled, m_ui->editFilter, &QLineEdit::setVisible);
     connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenDocumentsWidget::setFilterPattern);
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
     connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &OpenDocumentsWidget::addDocument);
@@ -69,6 +67,8 @@ void OpenDocumentsWidget::addDocument(Document *document)
     QFileInfo fileInfo(document->filePath());
     QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
     QString fileName(fileInfo.fileName());
+
+    // Find or create parent item
     QList<QStandardItem *> parents(m_model.findItems(absolutePath));
     QStandardItem *parent;
 
@@ -84,6 +84,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
         parent = parents.first();
     }
 
+    // Create child item
     QStandardItem *child = new QStandardItem(fileName);
 
     child->setIcon(QIcon(":/icons/16x16/file.png"));
@@ -116,6 +117,7 @@ void OpenDocumentsWidget::setCurrentItem(Document *document)
 {
     Q_ASSERT(document != NULL);
 
+    // Set last current item back to normal
     if (m_lastCurrentItem != NULL) {
         QFont font(m_lastCurrentItem->font());
 
@@ -124,6 +126,7 @@ void OpenDocumentsWidget::setCurrentItem(Document *document)
         m_lastCurrentItem->setFont(font);
     }
 
+    // Mark new current item as current
     QStandardItem *item = m_items.value(document, NULL);
 
     if (item != NULL) {
@@ -173,6 +176,12 @@ void OpenDocumentsWidget::setFilterEnabled(bool enable)
     if (m_filterEnabled != enable) {
         m_filterEnabled = enable;
 
+        m_ui->editFilter->setVisible(m_filterEnabled);
+
+        if (m_filterEnabled) {
+            m_ui->editFilter->setFocus();
+        }
+
         applyFilter();
     }
 }
@@ -180,18 +189,16 @@ void OpenDocumentsWidget::setFilterEnabled(bool enable)
 // private slot
 void OpenDocumentsWidget::setFilterPattern(const QString &pattern)
 {
-    if (m_filterRegExp.pattern() != pattern) {
-        bool wasValid = m_filterRegExp.isValid();
+    if (m_filterRegularExpression.pattern() != pattern) {
+        bool wasValid = m_filterRegularExpression.isValid();
 
-        m_filterRegExp = QRegExp(pattern, Qt::CaseSensitive, QRegExp::WildcardUnix);
+        m_filterRegularExpression = QRegularExpression(pattern);
 
-        if (m_filterRegExp.isValid() != wasValid) {
-            m_ui->editFilter->setStyleSheet(m_filterRegExp.isValid() ? "" : "QLineEdit { color: red }");
+        if (m_filterRegularExpression.isValid() != wasValid) {
+            m_ui->editFilter->setStyleSheet(m_filterRegularExpression.isValid() ? "" : "QLineEdit { color: red }");
         }
 
-        if (m_filterEnabled) {
-            applyFilter();
-        }
+        applyFilter();
     }
 }
 
@@ -236,12 +243,10 @@ bool OpenDocumentsWidget::filterAcceptsChild(const QModelIndex &index) const
         return false;
     }
 
-    if (m_filterEnabled && m_filterRegExp.isValid() && !m_filterRegExp.isEmpty()) {
+    if (m_filterEnabled && m_filterRegularExpression.isValid() && !m_filterRegularExpression.pattern().isEmpty()) {
         QString fileName(index.data(FileNameRole).value<QString>());
 
-        if (!m_filterRegExp.exactMatch(fileName)) {
-            return false;
-        }
+        return m_filterRegularExpression.match(fileName).hasMatch();
     }
 
     return true;
