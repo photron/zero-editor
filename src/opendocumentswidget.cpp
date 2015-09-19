@@ -110,7 +110,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     parent->appendRow(child);
     parent->sortChildren(0);
 
-    connect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::setModificationMarkerOfSender);
+    connect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateModificationMarkerOfSender);
 
     // Apply current filter
     if (!filterAcceptsChild(child->index())) {
@@ -122,7 +122,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     }
 
     // Show modification marker, if necessary
-    setModificationMarker(document, document->isModified());
+    updateModificationMarker(document);
 }
 
 // private slot
@@ -181,9 +181,9 @@ void OpenDocumentsWidget::updateCurrentParent(const QModelIndex &index)
 }
 
 // private slot
-void OpenDocumentsWidget::setModificationMarkerOfSender(bool enable)
+void OpenDocumentsWidget::updateModificationMarkerOfSender()
 {
-    setModificationMarker(qobject_cast<Document *>(sender()), enable);
+    updateModificationMarker(qobject_cast<Document *>(sender()));
 }
 
 // private slot
@@ -229,18 +229,18 @@ void OpenDocumentsWidget::setFilterPattern(const QString &pattern)
 }
 
 // private
-void OpenDocumentsWidget::setModificationMarker(Document *document, bool enable)
+void OpenDocumentsWidget::updateModificationMarker(Document *document)
 {
     Q_ASSERT(document != NULL);
 
     QStandardItem *child = m_children.value(document, NULL);
 
-    if (child != NULL) {
-        QString fileName = child->data(FileNameRole).value<QString>();
+    Q_ASSERT(child != NULL);
 
-        child->setText(fileName + (enable ? "*" : ""));
-        child->setForeground(enable ? Qt::red : palette().color(QPalette::Text));
-    }
+    QString fileName = child->data(FileNameRole).value<QString>();
+
+    child->setText(fileName + (document->isModified() ? "*" : ""));
+    child->setForeground(document->isModified() ? Qt::red : palette().color(QPalette::Text));
 }
 
 // private
