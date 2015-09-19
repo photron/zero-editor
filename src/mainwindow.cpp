@@ -38,6 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    connect(m_ui->actionNew, &QAction::triggered, this, &MainWindow::create);
+    connect(m_ui->actionNew_Tool, &QAction::triggered, this, &MainWindow::create);
     connect(m_ui->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
     connect(m_ui->actionOpen_Tool, &QAction::triggered, this, &MainWindow::openFile);
     connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
@@ -169,6 +171,12 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 }
 
 // private slot
+void MainWindow::create()
+{
+    DocumentManager::create();
+}
+
+// private slot
 void MainWindow::openFile()
 {
     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Open File");
@@ -274,11 +282,15 @@ void MainWindow::setCurrentDocument(Document *document)
 {
     Q_ASSERT(document);
 
-    QFileInfo fileInfo(document->filePath());
-    QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
-    QString fileName(fileInfo.fileName());
+    if (document->filePath().isEmpty()) {
+        setWindowTitle("unnamed - Zero Editor");
+    } else {
+        QFileInfo fileInfo(document->filePath());
+        QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
+        QString fileName(fileInfo.fileName());
 
-    setWindowTitle(fileName + " - " + absolutePath + " - Zero Editor");
+        setWindowTitle(fileName + " - " + absolutePath + " - Zero Editor");
+    }
 
     Editor *editor = DocumentManager::editorForDocument(document);
 

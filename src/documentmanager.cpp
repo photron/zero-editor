@@ -46,6 +46,20 @@ DocumentManager::~DocumentManager()
 }
 
 // static
+void DocumentManager::create()
+{
+    TextDocument *document = new TextDocument;
+    TextEditor *editor = new TextEditor(document);
+
+    s_instance->m_documents.append(document);
+    s_instance->m_editors.insert(document, editor);
+
+    emit s_instance->documentOpened(document);
+
+    setCurrentDocument(document);
+}
+
+// static
 bool DocumentManager::open(const QString &filePath, QString *error)
 {
     Q_ASSERT(!filePath.isEmpty());

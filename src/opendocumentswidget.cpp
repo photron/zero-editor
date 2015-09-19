@@ -64,9 +64,21 @@ void OpenDocumentsWidget::addDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    QFileInfo fileInfo(document->filePath());
-    QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
-    QString fileName(fileInfo.fileName());
+    QString absoluteFilePath;
+    QString absolutePath;
+    QString fileName;
+
+    if (document->filePath().isEmpty()) {
+        absoluteFilePath = "unnamed";
+        absolutePath = "unnamed";
+        fileName = "unnamed";
+    } else {
+        QFileInfo fileInfo(document->filePath());
+
+        absoluteFilePath = QDir::toNativeSeparators(fileInfo.absoluteFilePath());
+        absolutePath = QDir::toNativeSeparators(fileInfo.absolutePath());
+        fileName = fileInfo.fileName();
+    }
 
     // Find or create parent item
     QList<QStandardItem *> parents(m_model.findItems(absolutePath));
@@ -88,7 +100,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     QStandardItem *child = new QStandardItem(fileName);
 
     child->setIcon(QIcon(":/icons/16x16/file.png"));
-    child->setToolTip(QDir::toNativeSeparators(fileInfo.absoluteFilePath()));
+    child->setToolTip(absoluteFilePath);
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
     child->setData(fileName, FileNameRole);
 

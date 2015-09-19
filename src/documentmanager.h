@@ -36,6 +36,7 @@ public:
 
     static DocumentManager *instance() { return s_instance; }
 
+    static void create();
     static bool open(const QString &filePath, QString *error);
 
     static Editor *editorForDocument(Document *document);

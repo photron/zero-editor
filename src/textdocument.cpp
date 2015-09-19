@@ -38,6 +38,8 @@ TextDocument::TextDocument(QObject *parent) :
     option.setTabStop(MonospaceFontMetrics::charWidth() * 4);
 
     m_document->setDefaultTextOption(option);
+
+    connect(m_document, &QTextDocument::modificationChanged, this, &TextDocument::setModified);
 }
 
 TextDocument::~TextDocument()
@@ -79,13 +81,14 @@ bool TextDocument::open(const QString &filePath, QString *error)
 
     // FIXME: check for proper encoding and not containing undecodable data
 
-    // Setup internal QTextDocument before exposing it to the outside
+    disconnect(m_document, &QTextDocument::modificationChanged, this, &TextDocument::setModified);
+
     m_document->setPlainText(data);
     m_document->setModified(false);
 
-    setFilePath(filePath);
-
     connect(m_document, &QTextDocument::modificationChanged, this, &TextDocument::setModified);
+
+    setFilePath(filePath);
 
     return true;
 }
