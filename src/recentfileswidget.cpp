@@ -27,7 +27,7 @@ RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    QMenu *menuMode = new QMenu();
+    QMenu *menuMode = new QMenu;
 
     menuMode->addAction("Recently Viewed Files");
     menuMode->addAction("Recently Opened Files");

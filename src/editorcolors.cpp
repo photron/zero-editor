@@ -27,7 +27,7 @@ QColor EditorColors::s_outerWrapMarkerColor;
 // static
 void EditorColors::initialize()
 {
-    s_basicPalette = new QPalette(); // FIXME: This leaks memory
+    s_basicPalette = new QPalette; // FIXME: This leaks memory
 
     // Ensure that the (window) text is black
     s_basicPalette->setColor(QPalette::WindowText, Qt::black);

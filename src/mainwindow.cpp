@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionClose_Tool->setToolTip("Close \"brickd.c\"");
 
     // Setup toolbar go-to-line edit
-    QLineEdit *editGoToLine = new QLineEdit();
+    QLineEdit *editGoToLine = new QLineEdit;
 
     editGoToLine->installEventFilter(this);
     editGoToLine->setClearButtonEnabled(true);
@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     editGoToLine->setValidator(validatorGoToLine);
 
-    QWidget *widgetGoToLine = new QWidget();
+    QWidget *widgetGoToLine = new QWidget;
     QHBoxLayout *layoutGoToLine = new QHBoxLayout(widgetGoToLine);
 
     layoutGoToLine->setMargin(0);
@@ -108,13 +108,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->toolBar->insertAction(m_ui->actionGoToLine_Tool, actionGoToLine);
 
     // Setup toolbar find-quick edit
-    QLineEdit *editFindQuick = new QLineEdit();
+    QLineEdit *editFindQuick = new QLineEdit;
 
     editFindQuick->installEventFilter(this);
     editFindQuick->setClearButtonEnabled(true);
     editFindQuick->setPlaceholderText("Find");
 
-    QWidget *widgetFindQuick = new QWidget();
+    QWidget *widgetFindQuick = new QWidget;
     QHBoxLayout *layoutFindQuick = new QHBoxLayout(widgetFindQuick);
 
     layoutFindQuick->setMargin(0);
