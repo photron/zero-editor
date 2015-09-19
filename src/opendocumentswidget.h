@@ -45,7 +45,7 @@ private slots:
     void addDocument(Document *document);
     void setCurrentDocument(const QModelIndex &index);
     void setCurrentItem(Document *document);
-    void updateItemModification(bool modified);
+    void setModificationMarkerOfSender(bool enable);
     void showModifiedDocumentsOnly(bool enable);
     void setFilterEnabled(bool enable);
     void setFilterPattern(const QString &pattern);
@@ -56,6 +56,7 @@ private:
         FileNameRole
     };
 
+    void setModificationMarker(Document *document, bool enable);
     void applyFilter();
     bool filterAcceptsChild(const QModelIndex &index) const;
 

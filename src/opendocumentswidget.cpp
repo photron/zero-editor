@@ -109,7 +109,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     parent->appendRow(child);
     parent->sortChildren(0);
 
-    connect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateItemModification);
+    connect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::setModificationMarkerOfSender);
 
     // Apply current filter
     if (!filterAcceptsChild(child->index())) {
@@ -119,6 +119,9 @@ void OpenDocumentsWidget::addDocument(Document *document)
             m_ui->treeDocuments->setRowHidden(parent->row(), m_model.invisibleRootItem()->index(), true);
         }
     }
+
+    // Show modification marker, if necessary
+    setModificationMarker(document, document->isModified());
 }
 
 // private slot
@@ -165,20 +168,9 @@ void OpenDocumentsWidget::setCurrentItem(Document *document)
 }
 
 // private slot
-void OpenDocumentsWidget::updateItemModification(bool modified)
+void OpenDocumentsWidget::setModificationMarkerOfSender(bool enable)
 {
-    Document *document = qobject_cast<Document *>(sender());
-
-    Q_ASSERT(document != NULL);
-
-    QStandardItem *item = m_items.value(document, NULL);
-
-    if (item != NULL) {
-        QString fileName = item->data(FileNameRole).value<QString>();
-
-        item->setText(fileName + (modified ? "*" : ""));
-        item->setForeground(modified ? Qt::red : palette().color(QPalette::Text));
-    }
+    setModificationMarker(qobject_cast<Document *>(sender()), enable);
 }
 
 // private slot
@@ -224,6 +216,21 @@ void OpenDocumentsWidget::setFilterPattern(const QString &pattern)
 }
 
 // private
+void OpenDocumentsWidget::setModificationMarker(Document *document, bool enable)
+{
+    Q_ASSERT(document != NULL);
+
+    QStandardItem *item = m_items.value(document, NULL);
+
+    if (item != NULL) {
+        QString fileName = item->data(FileNameRole).value<QString>();
+
+        item->setText(fileName + (enable ? "*" : ""));
+        item->setForeground(enable ? Qt::red : palette().color(QPalette::Text));
+    }
+}
+
+// private
 void OpenDocumentsWidget::applyFilter()
 {
     QStandardItem *root = m_model.invisibleRootItem();
@@ -252,6 +259,8 @@ void OpenDocumentsWidget::applyFilter()
 // private
 bool OpenDocumentsWidget::filterAcceptsChild(const QModelIndex &index) const
 {
+    Q_ASSERT(index.isValid());
+
     if (!m_showModifiedDocumentsOnly && !m_filterEnabled) {
         return true;
     }
