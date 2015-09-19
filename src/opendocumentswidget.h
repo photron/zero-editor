@@ -44,7 +44,7 @@ public:
 private slots:
     void addDocument(Document *document);
     void setCurrentDocument(const QModelIndex &index);
-    void setCurrentItem(Document *document);
+    void setCurrentChild(Document *document);
     void setModificationMarkerOfSender(bool enable);
     void showModifiedDocumentsOnly(bool enable);
     void setFilterEnabled(bool enable);
@@ -63,8 +63,8 @@ private:
     Ui::OpenDocumentsWidget *m_ui;
 
     QStandardItemModel m_model;
-    QHash<Document *, QStandardItem *> m_items; // values owned by QStandardItemModel
-    QStandardItem *m_lastCurrentItem;
+    QHash<Document *, QStandardItem *> m_children; // values owned by QStandardItemModel
+    QStandardItem *m_lastCurrentChild;
 
     bool m_showModifiedDocumentsOnly;
 

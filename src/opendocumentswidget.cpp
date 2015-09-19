@@ -30,7 +30,7 @@
 OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     QWidget(parent),
     m_ui(new Ui::OpenDocumentsWidget),
-    m_lastCurrentItem(NULL),
+    m_lastCurrentChild(NULL),
     m_showModifiedDocumentsOnly(false),
     m_filterEnabled(false)
 {
@@ -46,7 +46,7 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenDocumentsWidget::setFilterPattern);
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
     connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &OpenDocumentsWidget::addDocument);
-    connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &OpenDocumentsWidget::setCurrentItem);
+    connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &OpenDocumentsWidget::setCurrentChild);
 }
 
 OpenDocumentsWidget::~OpenDocumentsWidget()
@@ -104,7 +104,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
     child->setData(fileName, FileNameRole);
 
-    m_items.insert(document, child);
+    m_children.insert(document, child);
 
     parent->appendRow(child);
     parent->sortChildren(0);
@@ -137,34 +137,34 @@ void OpenDocumentsWidget::setCurrentDocument(const QModelIndex &index)
 }
 
 // private slot
-void OpenDocumentsWidget::setCurrentItem(Document *document)
+void OpenDocumentsWidget::setCurrentChild(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    // Set last current item back to normal
-    if (m_lastCurrentItem != NULL) {
-        QFont font(m_lastCurrentItem->font());
+    // Set last current child back to normal
+    if (m_lastCurrentChild != NULL) {
+        QFont font(m_lastCurrentChild->font());
 
         font.setUnderline(false);
 
-        m_lastCurrentItem->setFont(font);
+        m_lastCurrentChild->setFont(font);
     }
 
-    // Mark new current item as current
-    QStandardItem *item = m_items.value(document, NULL);
+    // Mark new current child as current
+    QStandardItem *child = m_children.value(document, NULL);
 
-    Q_ASSERT(item != NULL);
+    Q_ASSERT(child != NULL);
 
-    QFont font(item->font());
+    QFont font(child->font());
 
     font.setUnderline(true);
 
-    item->setFont(font);
+    child->setFont(font);
 
-    m_ui->treeDocuments->expand(item->index());
-    m_ui->treeDocuments->scrollTo(item->index());
+    m_ui->treeDocuments->expand(child->index());
+    m_ui->treeDocuments->scrollTo(child->index());
 
-    m_lastCurrentItem = item;
+    m_lastCurrentChild = child;
 }
 
 // private slot
@@ -220,13 +220,13 @@ void OpenDocumentsWidget::setModificationMarker(Document *document, bool enable)
 {
     Q_ASSERT(document != NULL);
 
-    QStandardItem *item = m_items.value(document, NULL);
+    QStandardItem *child = m_children.value(document, NULL);
 
-    if (item != NULL) {
-        QString fileName = item->data(FileNameRole).value<QString>();
+    if (child != NULL) {
+        QString fileName = child->data(FileNameRole).value<QString>();
 
-        item->setText(fileName + (enable ? "*" : ""));
-        item->setForeground(enable ? Qt::red : palette().color(QPalette::Text));
+        child->setText(fileName + (enable ? "*" : ""));
+        child->setForeground(enable ? Qt::red : palette().color(QPalette::Text));
     }
 }
 
