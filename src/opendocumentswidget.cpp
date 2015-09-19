@@ -138,16 +138,16 @@ void OpenDocumentsWidget::setCurrentItem(Document *document)
     // Mark new current item as current
     QStandardItem *item = m_items.value(document, NULL);
 
-    if (item != NULL) {
-        QFont font(item->font());
+    Q_ASSERT(item != NULL);
 
-        font.setBold(true);
+    QFont font(item->font());
 
-        item->setFont(font);
+    font.setBold(true);
 
-        m_ui->treeDocuments->expand(item->index());
-        m_ui->treeDocuments->scrollTo(item->index());
-    }
+    item->setFont(font);
+
+    m_ui->treeDocuments->expand(item->index());
+    m_ui->treeDocuments->scrollTo(item->index());
 
     m_lastCurrentItem = item;
 }
