@@ -22,6 +22,7 @@
 #include "document.h"
 #include "documentmanager.h"
 #include "editor.h"
+#include "standarditem.h"
 
 #include <QDebug>
 #include <QDir>
@@ -82,24 +83,22 @@ void OpenDocumentsWidget::addDocument(Document *document)
 
     // Find or create parent item
     QList<QStandardItem *> parents(m_model.findItems(absolutePath));
-    QStandardItem *parent;
+    StandardItem *parent;
 
     if (parents.isEmpty()) {
-        parent = new QStandardItem(absolutePath);
+        parent = new StandardItem(QIcon(":/icons/16x16/folder.png"), absolutePath);
 
-        parent->setIcon(QIcon(":/icons/16x16/folder.png"));
         parent->setToolTip(absolutePath);
 
         m_model.appendRow(parent);
         m_model.sort(0);
     } else {
-        parent = parents.first();
+        parent = static_cast<StandardItem *>(parents.first());
     }
 
     // Create child item
-    QStandardItem *child = new QStandardItem(fileName);
+    StandardItem *child = new StandardItem(QIcon(":/icons/16x16/file.png"), fileName);
 
-    child->setIcon(QIcon(":/icons/16x16/file.png"));
     child->setToolTip(absoluteFilePath);
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
     child->setData(fileName, FileNameRole);
@@ -141,25 +140,18 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    // Set last current child back to normal
+    // Set last current child and parent back to normal
     if (m_lastCurrentChild != NULL) {
-        QFont font(m_lastCurrentChild->font());
-
-        font.setUnderline(false);
-
-        m_lastCurrentChild->setFont(font);
+        static_cast<StandardItem *>(m_lastCurrentChild->parent())->setFontUnderline(false);
+        m_lastCurrentChild->setFontUnderline(false);
     }
 
     // Mark new current child as current
-    QStandardItem *child = m_children.value(document, NULL);
+    StandardItem *child = m_children.value(document, NULL);
 
     Q_ASSERT(child != NULL);
 
-    QFont font(child->font());
-
-    font.setUnderline(true);
-
-    child->setFont(font);
+    child->setFontUnderline(true);
 
     m_ui->treeDocuments->expand(child->index());
     m_ui->treeDocuments->scrollTo(child->index());

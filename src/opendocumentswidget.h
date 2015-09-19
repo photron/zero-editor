@@ -25,6 +25,7 @@
 #include <QWidget>
 
 class Document;
+class StandardItem;
 
 namespace Ui {
 class OpenDocumentsWidget;
@@ -63,8 +64,8 @@ private:
     Ui::OpenDocumentsWidget *m_ui;
 
     QStandardItemModel m_model;
-    QHash<Document *, QStandardItem *> m_children; // values owned by QStandardItemModel
-    QStandardItem *m_lastCurrentChild;
+    QHash<Document *, StandardItem *> m_children; // values owned by QStandardItemModel
+    StandardItem *m_lastCurrentChild;
 
     bool m_showModifiedDocumentsOnly;
 
