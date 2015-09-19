@@ -46,6 +46,8 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     connect(m_ui->checkFilter, &QCheckBox::toggled, this, &OpenDocumentsWidget::setFilterEnabled);
     connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenDocumentsWidget::setFilterPattern);
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
+    connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateCurrentParent);
+    connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateCurrentParent);
     connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &OpenDocumentsWidget::addDocument);
     connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &OpenDocumentsWidget::setCurrentChild);
 }
@@ -153,10 +155,28 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 
     child->setFontUnderline(true);
 
-    m_ui->treeDocuments->expand(child->index());
+    m_ui->treeDocuments->expand(child->parent()->index());
     m_ui->treeDocuments->scrollTo(child->index());
 
     m_lastCurrentChild = child;
+}
+
+// private slot
+void OpenDocumentsWidget::updateCurrentParent(const QModelIndex &index)
+{
+    Q_ASSERT(index.isValid());
+
+    StandardItem *parent = static_cast<StandardItem *>(m_model.itemFromIndex(index));
+
+    if (parent->parent() != NULL) {
+        return; // Not a top-level item
+    }
+
+    if (m_ui->treeDocuments->isExpanded(index)) {
+        parent->setFontUnderline(false);
+    } else if (m_lastCurrentChild != NULL && m_lastCurrentChild->parent() == parent) {
+        parent->setFontUnderline(true);
+    }
 }
 
 // private slot

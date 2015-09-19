@@ -46,6 +46,7 @@ private slots:
     void addDocument(Document *document);
     void setCurrentDocument(const QModelIndex &index);
     void setCurrentChild(Document *document);
+    void updateCurrentParent(const QModelIndex &index);
     void setModificationMarkerOfSender(bool enable);
     void showModifiedDocumentsOnly(bool enable);
     void setFilterEnabled(bool enable);
