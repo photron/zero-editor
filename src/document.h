@@ -29,11 +29,6 @@ class Document : public QObject
 public:
     explicit Document(QObject *parent = NULL);
 
-    // Return true if the given file was successfully opened. Return false if an error occurred while opening the
-    // file and set error to a non-null QString describing the error. Also returns false if the file contains an
-    // unsupported document type and set error to a null QString.
-    virtual bool open(const QString &filePath, QString *error) = 0;
-
     QString filePath() const { return m_filePath; }
     bool isModified() const { return m_modified; }
 

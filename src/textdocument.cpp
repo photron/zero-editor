@@ -45,6 +45,9 @@ TextDocument::~TextDocument()
     delete m_document;
 }
 
+// Returns true if the given file was successfully opened. Returns false if an error occurred while opening the file
+// and sets error to a non-null QString describing the error. Also returns false if the file contains an unsupported
+// document type and sets error to a null QString.
 bool TextDocument::open(const QString &filePath, QString *error)
 {
     Q_ASSERT(!filePath.isEmpty());

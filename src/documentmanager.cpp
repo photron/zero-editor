@@ -53,11 +53,11 @@ bool DocumentManager::open(const QString &filePath, QString *error)
 
     // FIXME: check if file path is already open. if yes make it the current document
 
-    Document *document = new TextDocument;
+    TextDocument *document = new TextDocument;
     QString localError;
 
     if (document->open(filePath, &localError)) {
-        Editor *editor = new TextEditor(static_cast<TextDocument *>(document));
+        TextEditor *editor = new TextEditor(document);
 
         s_instance->m_documents.append(document);
         s_instance->m_editors.insert(document, editor);
@@ -74,10 +74,10 @@ bool DocumentManager::open(const QString &filePath, QString *error)
 
         return false;
     } else {
-        document = new BinaryDocument;
+        BinaryDocument *document = new BinaryDocument;
 
         if (document->open(filePath, &localError)) {
-            Editor *editor = new BinaryEditor(static_cast<BinaryDocument *>(document));
+            BinaryEditor *editor = new BinaryEditor(document);
 
             s_instance->m_documents.append(document);
             s_instance->m_editors.insert(document, editor);

@@ -26,6 +26,8 @@ BinaryDocument::BinaryDocument(QObject *parent) :
 {
 }
 
+// Returns true if the given file was successfully opened. Returns false if an error occurred while opening the file
+// and sets error to a non-null QString describing the error.
 bool BinaryDocument::open(const QString &filePath, QString *error)
 {
     Q_ASSERT(!filePath.isEmpty());
