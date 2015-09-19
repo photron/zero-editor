@@ -157,6 +157,7 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 
     m_ui->treeDocuments->expand(child->parent()->index());
     m_ui->treeDocuments->scrollTo(child->index());
+    m_ui->treeDocuments->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
 
     m_lastCurrentChild = child;
 }
