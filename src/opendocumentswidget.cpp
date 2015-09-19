@@ -145,7 +145,7 @@ void OpenDocumentsWidget::setCurrentItem(Document *document)
     if (m_lastCurrentItem != NULL) {
         QFont font(m_lastCurrentItem->font());
 
-        font.setBold(false);
+        font.setUnderline(false);
 
         m_lastCurrentItem->setFont(font);
     }
@@ -157,7 +157,7 @@ void OpenDocumentsWidget::setCurrentItem(Document *document)
 
     QFont font(item->font());
 
-    font.setBold(true);
+    font.setUnderline(true);
 
     item->setFont(font);
 
