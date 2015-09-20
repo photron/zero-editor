@@ -55,7 +55,8 @@ private:
     enum {
         DocumentPointerRole = Qt::UserRole,
         AbsolutePathRole, // for parents
-        FileNameRole // for children
+        FileNameRole, // for children
+        LowerCaseNameRole // for sorting
     };
 
     void updateModificationMarker(Document *document);

@@ -38,6 +38,8 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
 
     // FIXME: enable edit triggers to allow renaming files on disk from the open documents tree?
 
+    m_model.setSortRole(LowerCaseNameRole);
+
     m_ui->editFilter->setVisible(m_ui->checkFilter->isChecked());
     m_ui->treeDocuments->setModel(&m_model);
 
@@ -92,6 +94,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
 
         parent->setToolTip(absolutePath);
         parent->setData(absolutePath, AbsolutePathRole);
+        parent->setData(absolutePath.toLower(), LowerCaseNameRole);
 
         m_model.appendRow(parent);
         m_model.sort(0);
@@ -105,6 +108,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     child->setToolTip(absoluteFilePath);
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
     child->setData(fileName, FileNameRole);
+    child->setData(fileName.toLower(), LowerCaseNameRole);
 
     m_children.insert(document, child);
 
