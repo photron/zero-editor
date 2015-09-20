@@ -25,7 +25,6 @@
 #include <QWidget>
 
 class Document;
-class StandardItem;
 
 namespace Ui {
 class OpenDocumentsWidget;
@@ -46,7 +45,7 @@ private slots:
     void addDocument(Document *document);
     void setCurrentDocument(const QModelIndex &index);
     void setCurrentChild(Document *document);
-    void updateCurrentParent(const QModelIndex &index);
+    void updateParentMarkers(const QModelIndex &index);
     void updateModificationMarkerOfSender();
     void showModifiedDocumentsOnly(bool enable);
     void setFilterEnabled(bool enable);
@@ -55,18 +54,21 @@ private slots:
 private:
     enum {
         DocumentPointerRole = Qt::UserRole,
-        FileNameRole
+        AbsolutePathRole, // for parents
+        FileNameRole // for children
     };
 
     void updateModificationMarker(Document *document);
+    void markItemAsCurrent(QStandardItem *item, bool mark) const;
+    void markItemAsModified(QStandardItem *item, bool mark) const;
     void applyFilter();
     bool filterAcceptsChild(const QModelIndex &index) const;
 
     Ui::OpenDocumentsWidget *m_ui;
 
     QStandardItemModel m_model;
-    QHash<Document *, StandardItem *> m_children; // values owned by QStandardItemModel
-    StandardItem *m_lastCurrentChild;
+    QHash<Document *, QStandardItem *> m_children; // values owned by QStandardItemModel
+    QStandardItem *m_lastCurrentChild;
 
     bool m_showModifiedDocumentsOnly;
 

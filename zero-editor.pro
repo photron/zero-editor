@@ -17,7 +17,6 @@ SOURCES     += src/binaryeditor.cpp \
                src/monospacefontmetrics.cpp \
                src/opendocumentswidget.cpp \
                src/recentfileswidget.cpp \
-               src/standarditem.cpp \
                src/style.cpp \
                src/texteditor.cpp \
                src/texteditorwidget.cpp \
@@ -38,7 +37,6 @@ HEADERS     += src/binaryeditor.h \
                src/monospacefontmetrics.h \
                src/opendocumentswidget.h \
                src/recentfileswidget.h \
-               src/standarditem.h \
                src/style.h \
                src/texteditor.h \
                src/texteditorwidget.h \

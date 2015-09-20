@@ -22,7 +22,6 @@
 #include "document.h"
 #include "documentmanager.h"
 #include "editor.h"
-#include "standarditem.h"
 
 #include <QDebug>
 #include <QDir>
@@ -46,8 +45,8 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     connect(m_ui->checkFilter, &QCheckBox::toggled, this, &OpenDocumentsWidget::setFilterEnabled);
     connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenDocumentsWidget::setFilterPattern);
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
-    connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateCurrentParent);
-    connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateCurrentParent);
+    connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateParentMarkers);
+    connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateParentMarkers);
     connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &OpenDocumentsWidget::addDocument);
     connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &OpenDocumentsWidget::setCurrentChild);
 }
@@ -84,22 +83,24 @@ void OpenDocumentsWidget::addDocument(Document *document)
     }
 
     // Find or create parent item
-    QList<QStandardItem *> parents(m_model.findItems(absolutePath));
-    StandardItem *parent;
+    QModelIndexList parents = m_model.match(m_model.index(0, 0, QModelIndex()), AbsolutePathRole,
+                                            absolutePath, 1, Qt::MatchExactly);
+    QStandardItem *parent;
 
     if (parents.isEmpty()) {
-        parent = new StandardItem(QIcon(":/icons/16x16/folder.png"), absolutePath);
+        parent = new QStandardItem(QIcon(":/icons/16x16/folder.png"), absolutePath);
 
         parent->setToolTip(absolutePath);
+        parent->setData(absolutePath, AbsolutePathRole);
 
         m_model.appendRow(parent);
         m_model.sort(0);
     } else {
-        parent = static_cast<StandardItem *>(parents.first());
+        parent = m_model.itemFromIndex(parents.first());
     }
 
     // Create child item
-    StandardItem *child = new StandardItem(QIcon(":/icons/16x16/file.png"), fileName);
+    QStandardItem *child = new QStandardItem(QIcon(":/icons/16x16/file.png"), fileName);
 
     child->setToolTip(absoluteFilePath);
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
@@ -144,16 +145,16 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 
     // Set last current child and parent back to normal
     if (m_lastCurrentChild != NULL) {
-        static_cast<StandardItem *>(m_lastCurrentChild->parent())->setFontUnderline(false);
-        m_lastCurrentChild->setFontUnderline(false);
+        markItemAsCurrent(m_lastCurrentChild->parent(), false);
+        markItemAsCurrent(m_lastCurrentChild, false);
     }
 
     // Mark new current child as current
-    StandardItem *child = m_children.value(document, NULL);
+    QStandardItem *child = m_children.value(document, NULL);
 
     Q_ASSERT(child != NULL);
 
-    child->setFontUnderline(true);
+    markItemAsCurrent(child, true);
 
     m_ui->treeDocuments->expand(child->parent()->index());
     m_ui->treeDocuments->scrollTo(child->index());
@@ -163,20 +164,37 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 }
 
 // private slot
-void OpenDocumentsWidget::updateCurrentParent(const QModelIndex &index)
+void OpenDocumentsWidget::updateParentMarkers(const QModelIndex &index)
 {
     Q_ASSERT(index.isValid());
 
-    StandardItem *parent = static_cast<StandardItem *>(m_model.itemFromIndex(index));
+    QStandardItem *parent = m_model.itemFromIndex(index);
 
     if (parent->parent() != NULL) {
         return; // Not a top-level item
     }
 
     if (m_ui->treeDocuments->isExpanded(index)) {
-        parent->setFontUnderline(false);
-    } else if (m_lastCurrentChild != NULL && m_lastCurrentChild->parent() == parent) {
-        parent->setFontUnderline(true);
+        markItemAsCurrent(parent, false);
+        markItemAsModified(parent, false);
+    } else {
+        // Check if this is the parent of the current child
+        if (m_lastCurrentChild != NULL && m_lastCurrentChild->parent() == parent) {
+            markItemAsCurrent(parent, true);
+        }
+
+        // Check if this is a parent of modified children
+        int childRowCount = parent->rowCount();
+
+        for (int childRow = 0; childRow < childRowCount; ++childRow) {
+            QStandardItem *child = parent->child(childRow);
+            Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
+
+            if (document->isModified()) {
+                markItemAsModified(parent, true);
+                break;
+            }
+        }
     }
 }
 
@@ -237,10 +255,58 @@ void OpenDocumentsWidget::updateModificationMarker(Document *document)
 
     Q_ASSERT(child != NULL);
 
-    QString fileName = child->data(FileNameRole).value<QString>();
+    markItemAsModified(child, document->isModified());
 
-    child->setText(fileName + (document->isModified() ? "*" : ""));
-    child->setForeground(document->isModified() ? Qt::red : palette().color(QPalette::Text));
+    QStandardItem *parent = child->parent();
+
+    if (!m_ui->treeDocuments->isExpanded(parent->index())) {
+        if (document->isModified()) {
+            markItemAsModified(parent, true);
+        } else {
+            int childRowCount = parent->rowCount();
+
+            for (int childRow = 0; childRow < childRowCount; ++childRow) {
+                QStandardItem *otherChild = parent->child(childRow);
+                Document *otherDocument = static_cast<Document *>(otherChild->data(DocumentPointerRole).value<void *>());
+
+                if (otherDocument->isModified()) {
+                    return;
+                }
+            }
+
+            markItemAsModified(parent, false);
+        }
+    }
+}
+
+// private
+void OpenDocumentsWidget::markItemAsCurrent(QStandardItem *item, bool mark) const
+{
+    QFont font(item->font());
+
+    font.setUnderline(mark);
+
+    item->setFont(font);
+}
+
+// private
+void OpenDocumentsWidget::markItemAsModified(QStandardItem *item, bool mark) const
+{
+    QString text;
+
+    if (item->parent() == NULL) {
+        text = item->data(AbsolutePathRole).value<QString>();
+    } else {
+        text = item->data(FileNameRole).value<QString>();
+    }
+
+    if (mark) {
+        item->setText(text + "*");
+        item->setForeground(Qt::red);
+    } else {
+        item->setText(text);
+        item->setForeground(palette().color(QPalette::Text));
+    }
 }
 
 // private
