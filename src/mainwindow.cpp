@@ -38,10 +38,21 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
-    connect(m_ui->actionNew, &QAction::triggered, this, &MainWindow::create);
-    connect(m_ui->actionNew_Tool, &QAction::triggered, this, &MainWindow::create);
+    m_ui->actionClose->setEnabled(false);
+    m_ui->actionClose_Tool->setEnabled(false);
+
+    m_ui->actionToggleCase->setEnabled(false);
+    m_ui->actionToggleCase_Tool->setEnabled(false);
+
+    m_ui->actionWordWrapping->setEnabled(false);
+    m_ui->actionWordWrapping->setChecked(false);
+
+    connect(m_ui->actionNew, &QAction::triggered, this, &MainWindow::newDocument);
+    connect(m_ui->actionNew_Tool, &QAction::triggered, this, &MainWindow::newDocument);
     connect(m_ui->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
     connect(m_ui->actionOpen_Tool, &QAction::triggered, this, &MainWindow::openFile);
+    connect(m_ui->actionClose, &QAction::triggered, this, &MainWindow::closeDocument);
+    connect(m_ui->actionClose_Tool, &QAction::triggered, this, &MainWindow::closeDocument);
     connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
     connect(m_ui->actionToggleCase, &QAction::triggered, this, &MainWindow::toggleCase);
     connect(m_ui->actionToggleCase_Tool, &QAction::triggered, this, &MainWindow::toggleCase);
@@ -60,7 +71,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->widgetUnsavedDiff, &UnsavedDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
     connect(m_ui->widgetGitDiff, &GitDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
 
-    connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &MainWindow::addDocument);
+    connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &MainWindow::addEditor);
+    connect(DocumentManager::instance(), &DocumentManager::documentAboutToBeClosed, this, &MainWindow::removeEditor);
     connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &MainWindow::setCurrentDocument);
 
     m_ui->widgetOpenDocuments->installLineEditEventFilter(this);
@@ -77,8 +89,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionSaveAll_Tool->setText("Save All (2 Files)");
     m_ui->actionRevert->setText("Revert \"brickd.c\"");
     m_ui->actionRevert_Tool->setToolTip("Revert \"brickd.c\"");
-    m_ui->actionClose->setText("Close \"brickd.c\"");
-    m_ui->actionClose_Tool->setToolTip("Close \"brickd.c\"");
 
     // Setup toolbar go-to-line edit
     QLineEdit *editGoToLine = new QLineEdit;
@@ -171,7 +181,7 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 }
 
 // private slot
-void MainWindow::create()
+void MainWindow::newDocument()
 {
     DocumentManager::create();
 }
@@ -194,17 +204,25 @@ void MainWindow::openFile()
 }
 
 // private slot
+void MainWindow::closeDocument()
+{
+    Document *document = DocumentManager::currentDocument();
+
+    Q_ASSERT(document != NULL);
+
+    DocumentManager::close(document);
+}
+
+// private slot
 void MainWindow::toggleCase()
 {
     Document *document = DocumentManager::currentDocument();
 
-    if (document == NULL) {
-        return;
-    }
+    Q_ASSERT(document != NULL);
 
     Editor *editor = DocumentManager::editorForDocument(document);
 
-    Q_ASSERT(editor);
+    Q_ASSERT(editor != NULL);
 
     editor->toggleCase();
 }
@@ -266,41 +284,78 @@ void MainWindow::showGitDiffWidget()
 }
 
 // private slot
-void MainWindow::addDocument(Document *document)
+void MainWindow::addEditor(Document *document)
 {
-    Q_ASSERT(document);
+    Q_ASSERT(document != NULL);
 
     Editor *editor = DocumentManager::editorForDocument(document);
 
-    Q_ASSERT(editor);
+    Q_ASSERT(editor != NULL);
 
     m_ui->widgetStackedEditors->addWidget(editor->widget());
 }
 
 // private slot
-void MainWindow::setCurrentDocument(Document *document)
+void MainWindow::removeEditor(Document *document)
 {
-    Q_ASSERT(document);
-
-    if (document->filePath().isEmpty()) {
-        setWindowTitle("unnamed - Zero Editor");
-    } else {
-        QFileInfo fileInfo(document->filePath());
-        QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
-        QString fileName(fileInfo.fileName());
-
-        setWindowTitle(fileName + " - " + absolutePath + " - Zero Editor");
-    }
+    Q_ASSERT(document != NULL);
 
     Editor *editor = DocumentManager::editorForDocument(document);
 
-    Q_ASSERT(editor);
+    Q_ASSERT(editor != NULL);
 
-    m_ui->widgetStackedEditors->setCurrentWidget(editor->widget());
+    m_ui->widgetStackedEditors->removeWidget(editor->widget());
+}
 
-    m_ui->actionToggleCase->setEnabled(editor->hasFeature(Editor::ToggleCase));
-    m_ui->actionToggleCase_Tool->setEnabled(editor->hasFeature(Editor::ToggleCase));
+// private slot
+void MainWindow::setCurrentDocument(Document *document)
+{
+    if (document == NULL) {
+        setWindowTitle("Zero Editor");
 
-    m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
-    m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
+        m_ui->actionClose->setEnabled(false);
+        m_ui->actionClose_Tool->setEnabled(false);
+
+        m_ui->actionClose->setText("Close");
+        m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
+
+        m_ui->actionToggleCase->setEnabled(false);
+        m_ui->actionToggleCase_Tool->setEnabled(false);
+
+        m_ui->actionWordWrapping->setEnabled(false);
+        m_ui->actionWordWrapping->setChecked(false);
+    } else {
+        QString fileName;
+
+        if (document->filePath().isEmpty()) {
+            fileName = "unnamed";
+
+            setWindowTitle("unnamed - Zero Editor");
+        } else {
+            QFileInfo fileInfo(document->filePath());
+            QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
+
+            fileName = fileInfo.fileName();
+
+            setWindowTitle(fileName + " - " + absolutePath + " - Zero Editor");
+        }
+
+        Editor *editor = DocumentManager::editorForDocument(document);
+
+        Q_ASSERT(editor != NULL);
+
+        m_ui->widgetStackedEditors->setCurrentWidget(editor->widget());
+
+        m_ui->actionClose->setEnabled(true);
+        m_ui->actionClose_Tool->setEnabled(true);
+
+        m_ui->actionClose->setText(QString("Close \"%1\"").arg(fileName));
+        m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
+
+        m_ui->actionToggleCase->setEnabled(editor->hasFeature(Editor::ToggleCase));
+        m_ui->actionToggleCase_Tool->setEnabled(editor->hasFeature(Editor::ToggleCase));
+
+        m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
+        m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
+    }
 }

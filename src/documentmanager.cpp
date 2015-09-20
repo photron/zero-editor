@@ -38,9 +38,8 @@ DocumentManager::~DocumentManager()
 {
     foreach (Document *document, m_documents) {
         delete document;
+        delete s_instance->m_editors.take(document);
     }
-
-    // FIXME: delete editors
 
     s_instance = NULL;
 }
@@ -116,6 +115,35 @@ bool DocumentManager::open(const QString &filePath, QString *error)
 }
 
 // static
+void DocumentManager::close(Document *document)
+{
+    Q_ASSERT(document != NULL);
+    Q_ASSERT(s_instance->m_documents.contains(document));
+
+    if (document == s_instance->m_currentDocument) {
+        foreach (Document *otherDocument, s_instance->m_documents) {
+            if (otherDocument != document) {
+                setCurrentDocument(otherDocument);
+                break;
+            }
+        }
+
+        if (document == s_instance->m_currentDocument) {
+            setCurrentDocument(NULL);
+        }
+    }
+
+    emit s_instance->documentAboutToBeClosed(document);
+
+    s_instance->m_documents.removeAll(document);
+
+    Editor *editor = s_instance->m_editors.take(document);
+
+    delete editor;
+    delete document;
+}
+
+// static
 Editor *DocumentManager::editorForDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
@@ -127,8 +155,7 @@ Editor *DocumentManager::editorForDocument(Document *document)
 // static
 void DocumentManager::setCurrentDocument(Document *document)
 {
-    Q_ASSERT(document != NULL);
-    Q_ASSERT(s_instance->m_documents.contains(document));
+    Q_ASSERT(document == NULL || s_instance->m_documents.contains(document));
 
     if (document != s_instance->m_currentDocument) {
         s_instance->m_currentDocument = document;

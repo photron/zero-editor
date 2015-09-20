@@ -30,7 +30,7 @@
 OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     QWidget(parent),
     m_ui(new Ui::OpenDocumentsWidget),
-    m_lastCurrentChild(NULL),
+    m_currentChild(NULL),
     m_showModifiedDocumentsOnly(false),
     m_filterEnabled(false)
 {
@@ -50,6 +50,7 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateParentMarkers);
     connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateParentMarkers);
     connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &OpenDocumentsWidget::addDocument);
+    connect(DocumentManager::instance(), &DocumentManager::documentAboutToBeClosed, this, &OpenDocumentsWidget::removeDocument);
     connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &OpenDocumentsWidget::setCurrentChild);
 }
 
@@ -131,6 +132,33 @@ void OpenDocumentsWidget::addDocument(Document *document)
 }
 
 // private slot
+void OpenDocumentsWidget::removeDocument(Document *document)
+{
+    Q_ASSERT(document != NULL);
+
+    QStandardItem *child = m_children.value(document, NULL);
+
+    Q_ASSERT(child != NULL);
+    Q_ASSERT(child != m_currentChild);
+
+    QStandardItem *parent = child->parent();
+
+    parent->removeRow(child->row());
+
+    if (parent->rowCount() > 0) {
+        updateParentMarkers(parent->index());
+    } else {
+        m_model.removeRow(parent->row());
+    }
+
+    m_children.remove(document);
+
+    if (m_currentChild != NULL) {
+        m_ui->treeDocuments->selectionModel()->select(m_currentChild->index(), QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+// private slot
 void OpenDocumentsWidget::setCurrentDocument(const QModelIndex &index)
 {
     Q_ASSERT(index.isValid());
@@ -145,26 +173,28 @@ void OpenDocumentsWidget::setCurrentDocument(const QModelIndex &index)
 // private slot
 void OpenDocumentsWidget::setCurrentChild(Document *document)
 {
-    Q_ASSERT(document != NULL);
+    // Set current child and parent back to normal
+    if (m_currentChild != NULL) {
+        markItemAsCurrent(m_currentChild->parent(), false);
+        markItemAsCurrent(m_currentChild, false);
 
-    // Set last current child and parent back to normal
-    if (m_lastCurrentChild != NULL) {
-        markItemAsCurrent(m_lastCurrentChild->parent(), false);
-        markItemAsCurrent(m_lastCurrentChild, false);
+        m_currentChild = NULL;
     }
 
     // Mark new current child as current
-    QStandardItem *child = m_children.value(document, NULL);
+    if (document != NULL) {
+        QStandardItem *child = m_children.value(document, NULL);
 
-    Q_ASSERT(child != NULL);
+        Q_ASSERT(child != NULL);
 
-    markItemAsCurrent(child, true);
+        markItemAsCurrent(child, true);
 
-    m_ui->treeDocuments->expand(child->parent()->index());
-    m_ui->treeDocuments->scrollTo(child->index());
-    m_ui->treeDocuments->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
+        m_ui->treeDocuments->expand(child->parent()->index());
+        m_ui->treeDocuments->scrollTo(child->index());
+        m_ui->treeDocuments->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
 
-    m_lastCurrentChild = child;
+        m_currentChild = child;
+    }
 }
 
 // private slot
@@ -183,22 +213,23 @@ void OpenDocumentsWidget::updateParentMarkers(const QModelIndex &index)
         markItemAsModified(parent, false);
     } else {
         // Check if this is the parent of the current child
-        if (m_lastCurrentChild != NULL && m_lastCurrentChild->parent() == parent) {
-            markItemAsCurrent(parent, true);
-        }
+        markItemAsCurrent(parent, m_currentChild != NULL && m_currentChild->parent() == parent);
 
         // Check if this is a parent of modified children
         int childRowCount = parent->rowCount();
+        bool hasModifiedChild = false;
 
         for (int childRow = 0; childRow < childRowCount; ++childRow) {
             QStandardItem *child = parent->child(childRow);
             Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
 
             if (document->isModified()) {
-                markItemAsModified(parent, true);
+                hasModifiedChild = true;
                 break;
             }
         }
+
+        markItemAsModified(parent, hasModifiedChild);
     }
 }
 

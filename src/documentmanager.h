@@ -38,6 +38,7 @@ public:
 
     static void create();
     static bool open(const QString &filePath, QString *error);
+    static void close(Document *document);
 
     static Editor *editorForDocument(Document *document);
 
@@ -46,6 +47,7 @@ public:
 
 signals:
     void documentOpened(Document *document);
+    void documentAboutToBeClosed(Document *document);
     void currentDocumentChanged(Document *document);
 
 private:

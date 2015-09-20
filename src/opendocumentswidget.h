@@ -43,6 +43,7 @@ public:
 
 private slots:
     void addDocument(Document *document);
+    void removeDocument(Document *document);
     void setCurrentDocument(const QModelIndex &index);
     void setCurrentChild(Document *document);
     void updateParentMarkers(const QModelIndex &index);
@@ -69,7 +70,7 @@ private:
 
     QStandardItemModel m_model;
     QHash<Document *, QStandardItem *> m_children; // values owned by QStandardItemModel
-    QStandardItem *m_lastCurrentChild;
+    QStandardItem *m_currentChild;
 
     bool m_showModifiedDocumentsOnly;
 

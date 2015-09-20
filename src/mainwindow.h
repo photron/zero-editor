@@ -40,8 +40,9 @@ protected:
     bool eventFilter(QObject *object, QEvent *event);
 
 private slots:
-    void create();
+    void newDocument();
     void openFile();
+    void closeDocument();
 
     void toggleCase();
 
@@ -54,7 +55,8 @@ private slots:
     void showUnsavedDiffWidget();
     void showGitDiffWidget();
 
-    void addDocument(Document *document);
+    void addEditor(Document *document);
+    void removeEditor(Document *document);
     void setCurrentDocument(Document *document);
 
 private:
