@@ -95,7 +95,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
 
         parent->setToolTip(absolutePath);
         parent->setData(absolutePath, AbsolutePathRole);
-        parent->setData(absolutePath.toLower(), LowerCaseNameRole);
+        parent->setData(document->filePath().isEmpty() ? "" : absolutePath.toLower(), LowerCaseNameRole);
 
         m_model.appendRow(parent);
         m_model.sort(0);
@@ -109,7 +109,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     child->setToolTip(absoluteFilePath);
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
     child->setData(fileName, FileNameRole);
-    child->setData(fileName.toLower(), LowerCaseNameRole);
+    child->setData(document->filePath().isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
 
     m_children.insert(document, child);
 
