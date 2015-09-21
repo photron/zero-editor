@@ -38,11 +38,19 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    m_ui->actionSave->setEnabled(false);
+    m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
+
+    m_ui->actionSaveAs->setEnabled(false);
+
+    m_ui->actionSaveAll->setEnabled(false);
+    m_ui->actionSaveAll_Tool->setEnabled(m_ui->actionSaveAll->isEnabled());
+
     m_ui->actionClose->setEnabled(false);
-    m_ui->actionClose_Tool->setEnabled(false);
+    m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
 
     m_ui->actionToggleCase->setEnabled(false);
-    m_ui->actionToggleCase_Tool->setEnabled(false);
+    m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
     m_ui->actionWordWrapping->setEnabled(false);
     m_ui->actionWordWrapping->setChecked(false);
@@ -82,11 +90,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->widgetBookmarks->hide();
     m_ui->widgetStackedHelpers->hide();
 
-    m_ui->actionSave->setText("Save \"brickd.c\"");
-    m_ui->actionSave_Tool->setToolTip("Save \"brickd.c\"");
-    m_ui->actionSaveAs->setText("Save \"brickd.c\" As...");
-    m_ui->actionSaveAll->setText("Save All (2 Files)");
-    m_ui->actionSaveAll_Tool->setText("Save All (2 Files)");
     m_ui->actionRevert->setText("Revert \"brickd.c\"");
     m_ui->actionRevert_Tool->setToolTip("Revert \"brickd.c\"");
 
@@ -313,14 +316,21 @@ void MainWindow::setCurrentDocument(Document *document)
     if (document == NULL) {
         setWindowTitle("Zero Editor");
 
-        m_ui->actionClose->setEnabled(false);
-        m_ui->actionClose_Tool->setEnabled(false);
+        m_ui->actionSave->setEnabled(false);
+        m_ui->actionSave->setText("Save");
+        m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
+        m_ui->actionSave_Tool->setToolTip(m_ui->actionSave->text());
 
+        m_ui->actionSaveAs->setEnabled(false);
+        m_ui->actionSaveAs->setText("Save As...");
+
+        m_ui->actionClose->setEnabled(false);
         m_ui->actionClose->setText("Close");
+        m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
         m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
 
         m_ui->actionToggleCase->setEnabled(false);
-        m_ui->actionToggleCase_Tool->setEnabled(false);
+        m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
         m_ui->actionWordWrapping->setEnabled(false);
         m_ui->actionWordWrapping->setChecked(false);
@@ -346,10 +356,17 @@ void MainWindow::setCurrentDocument(Document *document)
 
         m_ui->widgetStackedEditors->setCurrentWidget(editor->widget());
 
-        m_ui->actionClose->setEnabled(true);
-        m_ui->actionClose_Tool->setEnabled(true);
+        m_ui->actionSave->setEnabled(document->isModified());
+        m_ui->actionSave->setText(QString("Save \"%1\"").arg(fileName));
+        m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
+        m_ui->actionSave_Tool->setToolTip(m_ui->actionSave->text());
 
+        m_ui->actionSaveAs->setEnabled(true);
+        m_ui->actionSaveAs->setText(QString("Save \"%1\" As...").arg(fileName));
+
+        m_ui->actionClose->setEnabled(true);
         m_ui->actionClose->setText(QString("Close \"%1\"").arg(fileName));
+        m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
         m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
 
         m_ui->actionToggleCase->setEnabled(editor->hasFeature(Editor::ToggleCase));
