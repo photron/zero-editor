@@ -20,6 +20,7 @@
 #include "ui_mainwindow.h"
 
 #include "document.h"
+#include "documentmanager.h"
 #include "editor.h"
 
 #include <QContextMenuEvent>
@@ -34,7 +35,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
-    m_documentManager(new DocumentManager(this))
+    m_documentManager(new DocumentManager(this)),
+    m_lastCurrentDocument(NULL)
 {
     m_ui->setupUi(this);
 
@@ -314,6 +316,13 @@ void MainWindow::removeEditor(Document *document)
 // private slot
 void MainWindow::setCurrentDocument(Document *document)
 {
+    if (m_lastCurrentDocument != NULL) {
+        disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
+        disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
+
+        m_lastCurrentDocument = NULL;
+    }
+
     if (document == NULL) {
         setWindowTitle("Zero Editor");
 
@@ -375,6 +384,11 @@ void MainWindow::setCurrentDocument(Document *document)
 
         m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
         m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
+
+        connect(document, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
+        connect(document, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
+
+        m_lastCurrentDocument = document;
     }
 }
 
