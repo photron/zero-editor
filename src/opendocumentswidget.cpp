@@ -136,6 +136,8 @@ void OpenDocumentsWidget::removeDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
 
+    disconnect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateModificationMarkerOfSender);
+
     QStandardItem *child = m_children.value(document, NULL);
 
     Q_ASSERT(child != NULL);
