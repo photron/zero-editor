@@ -49,9 +49,9 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
     connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateParentMarkers);
     connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateParentMarkers);
-    connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &OpenDocumentsWidget::addDocument);
-    connect(DocumentManager::instance(), &DocumentManager::documentAboutToBeClosed, this, &OpenDocumentsWidget::removeDocument);
-    connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &OpenDocumentsWidget::setCurrentChild);
+    connect(DocumentManager::instance(), &DocumentManager::opened, this, &OpenDocumentsWidget::addDocument);
+    connect(DocumentManager::instance(), &DocumentManager::aboutToBeClosed, this, &OpenDocumentsWidget::removeDocument);
+    connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &OpenDocumentsWidget::setCurrentChild);
 }
 
 OpenDocumentsWidget::~OpenDocumentsWidget()
@@ -166,7 +166,7 @@ void OpenDocumentsWidget::setCurrentDocument(const QModelIndex &index)
     Document *document = static_cast<Document *>(index.data(DocumentPointerRole).value<void *>());
 
     if (document != NULL) {
-        DocumentManager::setCurrentDocument(document);
+        DocumentManager::setCurrent(document);
     }
 }
 

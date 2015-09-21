@@ -71,9 +71,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->widgetUnsavedDiff, &UnsavedDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
     connect(m_ui->widgetGitDiff, &GitDiffWidget::hideClicked, m_ui->widgetStackedHelpers, &QStackedWidget::hide);
 
-    connect(DocumentManager::instance(), &DocumentManager::documentOpened, this, &MainWindow::addEditor);
-    connect(DocumentManager::instance(), &DocumentManager::documentAboutToBeClosed, this, &MainWindow::removeEditor);
-    connect(DocumentManager::instance(), &DocumentManager::currentDocumentChanged, this, &MainWindow::setCurrentDocument);
+    connect(DocumentManager::instance(), &DocumentManager::opened, this, &MainWindow::addEditor);
+    connect(DocumentManager::instance(), &DocumentManager::aboutToBeClosed, this, &MainWindow::removeEditor);
+    connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &MainWindow::setCurrentDocument);
 
     m_ui->widgetOpenDocuments->installLineEditEventFilter(this);
     m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
@@ -206,7 +206,7 @@ void MainWindow::openFile()
 // private slot
 void MainWindow::closeDocument()
 {
-    Document *document = DocumentManager::currentDocument();
+    Document *document = DocumentManager::current();
 
     Q_ASSERT(document != NULL);
 
@@ -216,11 +216,11 @@ void MainWindow::closeDocument()
 // private slot
 void MainWindow::toggleCase()
 {
-    Document *document = DocumentManager::currentDocument();
+    Document *document = DocumentManager::current();
 
     Q_ASSERT(document != NULL);
 
-    Editor *editor = DocumentManager::editorForDocument(document);
+    Editor *editor = DocumentManager::editor(document);
 
     Q_ASSERT(editor != NULL);
 
@@ -246,13 +246,13 @@ void MainWindow::showFindInFilesWidget()
 // private slot
 void MainWindow::setWordWrapping(bool enable)
 {
-    Document *document = DocumentManager::currentDocument();
+    Document *document = DocumentManager::current();
 
     if (document == NULL) {
         return;
     }
 
-    Editor *editor = DocumentManager::editorForDocument(document);
+    Editor *editor = DocumentManager::editor(document);
 
     Q_ASSERT(editor);
 
@@ -288,7 +288,7 @@ void MainWindow::addEditor(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    Editor *editor = DocumentManager::editorForDocument(document);
+    Editor *editor = DocumentManager::editor(document);
 
     Q_ASSERT(editor != NULL);
 
@@ -300,7 +300,7 @@ void MainWindow::removeEditor(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    Editor *editor = DocumentManager::editorForDocument(document);
+    Editor *editor = DocumentManager::editor(document);
 
     Q_ASSERT(editor != NULL);
 
@@ -340,7 +340,7 @@ void MainWindow::setCurrentDocument(Document *document)
             setWindowTitle(fileName + " - " + absolutePath + " - Zero Editor");
         }
 
-        Editor *editor = DocumentManager::editorForDocument(document);
+        Editor *editor = DocumentManager::editor(document);
 
         Q_ASSERT(editor != NULL);
 

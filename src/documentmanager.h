@@ -40,22 +40,22 @@ public:
     static bool open(const QString &filePath, QString *error);
     static void close(Document *document);
 
-    static Editor *editorForDocument(Document *document);
+    static Editor *editor(Document *document);
 
-    static Document *currentDocument() { return s_instance->m_currentDocument; }
-    static void setCurrentDocument(Document *document);
+    static Document *current() { return s_instance->m_current; }
+    static void setCurrent(Document *document);
 
 signals:
-    void documentOpened(Document *document);
-    void documentAboutToBeClosed(Document *document);
-    void currentDocumentChanged(Document *document);
+    void opened(Document *document);
+    void aboutToBeClosed(Document *document);
+    void currentChanged(Document *document);
 
 private:
     static DocumentManager *s_instance;
 
     QList<Document *> m_documents;
     QHash<Document *, Editor *> m_editors;
-    Document *m_currentDocument; // can be NULL if there is no current document
+    Document *m_current; // can be NULL if there is no current document
 };
 
 #endif // DOCUMENTMANAGER_H

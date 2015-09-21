@@ -29,7 +29,7 @@ DocumentManager *DocumentManager::s_instance = NULL;
 
 DocumentManager::DocumentManager(QObject *parent) :
     QObject(parent),
-    m_currentDocument(NULL)
+    m_current(NULL)
 {
     s_instance = this;
 }
@@ -53,9 +53,9 @@ void DocumentManager::create()
     s_instance->m_documents.append(document);
     s_instance->m_editors.insert(document, editor);
 
-    emit s_instance->documentOpened(document);
+    emit s_instance->opened(document);
 
-    setCurrentDocument(document);
+    setCurrent(document);
 }
 
 // static
@@ -75,9 +75,9 @@ bool DocumentManager::open(const QString &filePath, QString *error)
         s_instance->m_documents.append(document);
         s_instance->m_editors.insert(document, editor);
 
-        emit s_instance->documentOpened(document);
+        emit s_instance->opened(document);
 
-        setCurrentDocument(document);
+        setCurrent(document);
 
         return true;
     } else if (!localError.isNull()) {
@@ -95,9 +95,9 @@ bool DocumentManager::open(const QString &filePath, QString *error)
             s_instance->m_documents.append(document);
             s_instance->m_editors.insert(document, editor);
 
-            emit s_instance->documentOpened(document);
+            emit s_instance->opened(document);
 
-            setCurrentDocument(document);
+            setCurrent(document);
 
             return true;
         } else if (!localError.isNull()) {
@@ -120,20 +120,20 @@ void DocumentManager::close(Document *document)
     Q_ASSERT(document != NULL);
     Q_ASSERT(s_instance->m_documents.contains(document));
 
-    if (document == s_instance->m_currentDocument) {
+    if (document == s_instance->m_current) {
         foreach (Document *otherDocument, s_instance->m_documents) {
             if (otherDocument != document) {
-                setCurrentDocument(otherDocument);
+                setCurrent(otherDocument);
                 break;
             }
         }
 
-        if (document == s_instance->m_currentDocument) {
-            setCurrentDocument(NULL);
+        if (document == s_instance->m_current) {
+            setCurrent(NULL);
         }
     }
 
-    emit s_instance->documentAboutToBeClosed(document);
+    emit s_instance->aboutToBeClosed(document);
 
     s_instance->m_documents.removeAll(document);
 
@@ -144,7 +144,7 @@ void DocumentManager::close(Document *document)
 }
 
 // static
-Editor *DocumentManager::editorForDocument(Document *document)
+Editor *DocumentManager::editor(Document *document)
 {
     Q_ASSERT(document != NULL);
     Q_ASSERT(s_instance->m_documents.contains(document));
@@ -153,13 +153,13 @@ Editor *DocumentManager::editorForDocument(Document *document)
 }
 
 // static
-void DocumentManager::setCurrentDocument(Document *document)
+void DocumentManager::setCurrent(Document *document)
 {
     Q_ASSERT(document == NULL || s_instance->m_documents.contains(document));
 
-    if (document != s_instance->m_currentDocument) {
-        s_instance->m_currentDocument = document;
+    if (document != s_instance->m_current) {
+        s_instance->m_current = document;
 
-        emit s_instance->currentDocumentChanged(s_instance->m_currentDocument);
+        emit s_instance->currentChanged(s_instance->m_current);
     }
 }
