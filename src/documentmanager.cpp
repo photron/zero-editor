@@ -53,6 +53,8 @@ void DocumentManager::create()
     s_instance->m_documents.append(document);
     s_instance->m_editors.insert(document, editor);
 
+    connect(document, &Document::modificationChanged, s_instance, &DocumentManager::updateModificationCount);
+
     emit s_instance->opened(document);
 
     setCurrent(document);
@@ -75,6 +77,8 @@ bool DocumentManager::open(const QString &filePath, QString *error)
         s_instance->m_documents.append(document);
         s_instance->m_editors.insert(document, editor);
 
+        connect(document, &Document::modificationChanged, s_instance, &DocumentManager::updateModificationCount);
+
         emit s_instance->opened(document);
 
         setCurrent(document);
@@ -94,6 +98,8 @@ bool DocumentManager::open(const QString &filePath, QString *error)
 
             s_instance->m_documents.append(document);
             s_instance->m_editors.insert(document, editor);
+
+            connect(document, &Document::modificationChanged, s_instance, &DocumentManager::updateModificationCount);
 
             emit s_instance->opened(document);
 
@@ -141,6 +147,8 @@ void DocumentManager::close(Document *document)
 
     delete editor;
     delete document;
+
+    s_instance->updateModificationCount();
 }
 
 // static
@@ -161,5 +169,23 @@ void DocumentManager::setCurrent(Document *document)
         s_instance->m_current = document;
 
         emit s_instance->currentChanged(s_instance->m_current);
+    }
+}
+
+// private slot
+void DocumentManager::updateModificationCount()
+{
+    int modificationCount = 0;
+
+    foreach (Document *document, m_documents) {
+        if (document->isModified()) {
+            ++modificationCount;
+        }
+    }
+
+    if (m_modificationCount != modificationCount) {
+        m_modificationCount = modificationCount;
+
+        emit modificationCountChanged(m_modificationCount);
     }
 }

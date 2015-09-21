@@ -82,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(DocumentManager::instance(), &DocumentManager::opened, this, &MainWindow::addEditor);
     connect(DocumentManager::instance(), &DocumentManager::aboutToBeClosed, this, &MainWindow::removeEditor);
     connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &MainWindow::setCurrentDocument);
+    connect(DocumentManager::instance(), &DocumentManager::modificationCountChanged, this, &MainWindow::updateSaveAllAction);
 
     m_ui->widgetOpenDocuments->installLineEditEventFilter(this);
     m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
@@ -375,4 +376,13 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
         m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
     }
+}
+
+// private slot
+void MainWindow::updateSaveAllAction(int modificationCount)
+{
+    m_ui->actionSaveAll->setEnabled(modificationCount > 0);
+    m_ui->actionSaveAll->setText(modificationCount > 0 ? QString("Save All (%1)").arg(modificationCount) : "Save All");
+    m_ui->actionSaveAll_Tool->setEnabled(m_ui->actionSaveAll->isEnabled());
+    m_ui->actionSaveAll_Tool->setToolTip(m_ui->actionSaveAll->text());
 }

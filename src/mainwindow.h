@@ -59,6 +59,8 @@ private slots:
     void removeEditor(Document *document);
     void setCurrentDocument(Document *document);
 
+    void updateSaveAllAction(int modificationCount);
+
 private:
     Ui::MainWindow *m_ui;
     DocumentManager *m_documentManager;

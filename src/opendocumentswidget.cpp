@@ -49,9 +49,11 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
     connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateParentMarkers);
     connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateParentMarkers);
+
     connect(DocumentManager::instance(), &DocumentManager::opened, this, &OpenDocumentsWidget::addDocument);
     connect(DocumentManager::instance(), &DocumentManager::aboutToBeClosed, this, &OpenDocumentsWidget::removeDocument);
     connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &OpenDocumentsWidget::setCurrentChild);
+    connect(DocumentManager::instance(), &DocumentManager::modificationCountChanged, this, &OpenDocumentsWidget::updateModifiedButton);
 }
 
 OpenDocumentsWidget::~OpenDocumentsWidget()
@@ -197,6 +199,12 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 
         m_currentChild = child;
     }
+}
+
+// private slot
+void OpenDocumentsWidget::updateModifiedButton(int modificationCount)
+{
+    m_ui->radioModified->setText(modificationCount ? QString("Modified (%1)").arg(modificationCount) : "Modified");
 }
 
 // private slot

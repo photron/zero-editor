@@ -45,10 +45,16 @@ public:
     static Document *current() { return s_instance->m_current; }
     static void setCurrent(Document *document);
 
+    static int modificationCount() { return s_instance->m_modificationCount; }
+
 signals:
     void opened(Document *document);
     void aboutToBeClosed(Document *document);
     void currentChanged(Document *document);
+    void modificationCountChanged(int count);
+
+private slots:
+    void updateModificationCount();
 
 private:
     static DocumentManager *s_instance;
@@ -56,6 +62,7 @@ private:
     QList<Document *> m_documents;
     QHash<Document *, Editor *> m_editors;
     Document *m_current; // can be NULL if there is no current document
+    int m_modificationCount;
 };
 
 #endif // DOCUMENTMANAGER_H
