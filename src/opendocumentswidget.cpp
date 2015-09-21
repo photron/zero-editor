@@ -373,6 +373,10 @@ void OpenDocumentsWidget::applyFilter()
                 hideParent = false;
             }
 
+            if (child == m_currentChild && m_ui->treeDocuments->isExpanded(parent->index())) {
+                markItemAsCurrent(parent, hideChild);
+            }
+
             m_ui->treeDocuments->setRowHidden(childRow, parent->index(), hideChild);
         }
 
