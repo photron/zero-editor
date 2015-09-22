@@ -37,13 +37,6 @@ public:
     Document *document() const { return m_document; }
     QWidget *widget() const { return m_widget; }
 
-    bool hasFeature(Feature feature) const { Q_UNUSED(feature) return false; }
-
-    bool isWordWrapping() const { return false; }
-    void setWordWrapping(bool enable) { Q_UNUSED(enable) }
-
-    void toggleCase() { }
-
 private:
     QPointer<BinaryDocument> m_document; // owned by DocumentManager
     QPointer<BinaryEditorWidget> m_widget; // owned by its parent widget if any

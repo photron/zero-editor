@@ -19,6 +19,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "editor.h"
+
 #include <QMainWindow>
 
 class Document;
@@ -45,6 +47,13 @@ private slots:
     void openFile();
     void closeDocument();
 
+    void undo();
+    void redo();
+    void cut();
+    void copy();
+    void paste();
+    void delete_();
+    void selectAll();
     void toggleCase();
 
     void showFindAndReplaceWidget();
@@ -61,6 +70,7 @@ private slots:
     void setCurrentDocument(Document *document);
 
     void updateSaveAllAction(int modificationCount);
+    void updateEditMenuAction(Editor::Action action, bool available);
 
 private:
     Ui::MainWindow *m_ui;

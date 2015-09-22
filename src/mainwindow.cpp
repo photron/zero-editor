@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    // File menu
     m_ui->actionSave->setEnabled(false);
     m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
 
@@ -51,9 +52,19 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionClose->setEnabled(false);
     m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
 
+    // Edit menu
+    m_ui->actionUndo->setEnabled(false);
+    m_ui->actionRedo->setEnabled(false);
+    m_ui->actionCut->setEnabled(false);
+    m_ui->actionCopy->setEnabled(false);
+    m_ui->actionPaste->setEnabled(false);
+    m_ui->actionDelete->setEnabled(false);
+    m_ui->actionSelectAll->setEnabled(false);
+
     m_ui->actionToggleCase->setEnabled(false);
     m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
+    // Options menu
     m_ui->actionWordWrapping->setEnabled(false);
     m_ui->actionWordWrapping->setChecked(false);
 
@@ -64,11 +75,22 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->actionClose, &QAction::triggered, this, &MainWindow::closeDocument);
     connect(m_ui->actionClose_Tool, &QAction::triggered, this, &MainWindow::closeDocument);
     connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+
+    connect(m_ui->actionUndo, &QAction::triggered, this, &MainWindow::undo);
+    connect(m_ui->actionRedo, &QAction::triggered, this, &MainWindow::redo);
+    connect(m_ui->actionCut, &QAction::triggered, this, &MainWindow::cut);
+    connect(m_ui->actionCopy, &QAction::triggered, this, &MainWindow::copy);
+    connect(m_ui->actionPaste, &QAction::triggered, this, &MainWindow::paste);
+    connect(m_ui->actionDelete, &QAction::triggered, this, &MainWindow::delete_);
+    connect(m_ui->actionSelectAll, &QAction::triggered, this, &MainWindow::selectAll);
     connect(m_ui->actionToggleCase, &QAction::triggered, this, &MainWindow::toggleCase);
     connect(m_ui->actionToggleCase_Tool, &QAction::triggered, this, &MainWindow::toggleCase);
+
     connect(m_ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
     connect(m_ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
+
     connect(m_ui->actionWordWrapping, &QAction::triggered, this, &MainWindow::setWordWrapping);
+
     connect(m_ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionUnsavedDiff, &QAction::triggered, this, &MainWindow::showUnsavedDiffWidget);
@@ -220,13 +242,79 @@ void MainWindow::closeDocument()
 }
 
 // private slot
+void MainWindow::undo()
+{
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
+
+    Q_ASSERT(editor != NULL);
+
+    editor->undo();
+}
+
+// private slot
+void MainWindow::redo()
+{
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
+
+    Q_ASSERT(editor != NULL);
+
+    editor->redo();
+}
+
+// private slot
+void MainWindow::cut()
+{
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
+
+    Q_ASSERT(editor != NULL);
+
+    editor->cut();
+}
+
+// private slot
+void MainWindow::copy()
+{
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
+
+    Q_ASSERT(editor != NULL);
+
+    editor->copy();
+}
+
+// private slot
+void MainWindow::paste()
+{
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
+
+    Q_ASSERT(editor != NULL);
+
+    editor->paste();
+}
+
+// private slot
+void MainWindow::delete_()
+{
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
+
+    Q_ASSERT(editor != NULL);
+
+    editor->delete_();
+}
+
+// private slot
+void MainWindow::selectAll()
+{
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
+
+    Q_ASSERT(editor != NULL);
+
+    editor->selectAll();
+}
+
+// private slot
 void MainWindow::toggleCase()
 {
-    Document *document = DocumentManager::current();
-
-    Q_ASSERT(document != NULL);
-
-    Editor *editor = DocumentManager::editor(document);
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
 
     Q_ASSERT(editor != NULL);
 
@@ -252,13 +340,7 @@ void MainWindow::showFindInFilesWidget()
 // private slot
 void MainWindow::setWordWrapping(bool enable)
 {
-    Document *document = DocumentManager::current();
-
-    if (document == NULL) {
-        return;
-    }
-
-    Editor *editor = DocumentManager::editor(document);
+    Editor *editor = DocumentManager::editor(DocumentManager::current());
 
     Q_ASSERT(editor);
 
@@ -317,8 +399,13 @@ void MainWindow::removeEditor(Document *document)
 void MainWindow::setCurrentDocument(Document *document)
 {
     if (m_lastCurrentDocument != NULL) {
+        Editor *editor = DocumentManager::editor(m_lastCurrentDocument);
+
+        Q_ASSERT(editor != NULL);
+
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
+        disconnect(editor, &Editor::actionAvailabilityChanged, this, &MainWindow::updateEditMenuAction);
 
         m_lastCurrentDocument = NULL;
     }
@@ -326,6 +413,7 @@ void MainWindow::setCurrentDocument(Document *document)
     if (document == NULL) {
         setWindowTitle("Zero Editor");
 
+        // File menu
         m_ui->actionSave->setEnabled(false);
         m_ui->actionSave->setText("Save");
         m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
@@ -339,9 +427,19 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
         m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
 
+        // Edit menu
+        m_ui->actionUndo->setEnabled(false);
+        m_ui->actionRedo->setEnabled(false);
+        m_ui->actionCut->setEnabled(false);
+        m_ui->actionCopy->setEnabled(false);
+        m_ui->actionPaste->setEnabled(false);
+        m_ui->actionDelete->setEnabled(false);
+        m_ui->actionSelectAll->setEnabled(false);
+
         m_ui->actionToggleCase->setEnabled(false);
         m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
+        // Options menu
         m_ui->actionWordWrapping->setEnabled(false);
         m_ui->actionWordWrapping->setChecked(false);
     } else {
@@ -366,6 +464,7 @@ void MainWindow::setCurrentDocument(Document *document)
 
         m_ui->widgetStackedEditors->setCurrentWidget(editor->widget());
 
+        // File menu
         m_ui->actionSave->setEnabled(document->isModified());
         m_ui->actionSave->setText(QString("Save \"%1\"").arg(fileName));
         m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
@@ -379,14 +478,25 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
         m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
 
-        m_ui->actionToggleCase->setEnabled(editor->hasFeature(Editor::ToggleCase));
-        m_ui->actionToggleCase_Tool->setEnabled(editor->hasFeature(Editor::ToggleCase));
+        // Edit menu
+        m_ui->actionUndo->setEnabled(editor->isActionAvailable(Editor::Undo));
+        m_ui->actionRedo->setEnabled(editor->isActionAvailable(Editor::Redo));
+        m_ui->actionCut->setEnabled(editor->isActionAvailable(Editor::Cut));
+        m_ui->actionCopy->setEnabled(editor->isActionAvailable(Editor::Copy));
+        m_ui->actionPaste->setEnabled(editor->isActionAvailable(Editor::Paste));
+        m_ui->actionDelete->setEnabled(editor->isActionAvailable(Editor::Delete));
+        m_ui->actionSelectAll->setEnabled(editor->isActionAvailable(Editor::SelectAll));
 
+        m_ui->actionToggleCase->setEnabled(editor->isActionAvailable(Editor::ToggleCase));
+        m_ui->actionToggleCase_Tool->setEnabled(editor->isActionAvailable(Editor::ToggleCase));
+
+        // Options menu
         m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
         m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
 
         connect(document, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         connect(document, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
+        connect(editor, &Editor::actionAvailabilityChanged, this, &MainWindow::updateEditMenuAction);
 
         m_lastCurrentDocument = document;
     }
@@ -399,4 +509,43 @@ void MainWindow::updateSaveAllAction(int modificationCount)
     m_ui->actionSaveAll->setText(modificationCount > 0 ? QString("Save All (%1)").arg(modificationCount) : "Save All");
     m_ui->actionSaveAll_Tool->setEnabled(m_ui->actionSaveAll->isEnabled());
     m_ui->actionSaveAll_Tool->setToolTip(m_ui->actionSaveAll->text());
+}
+
+// private slot
+void MainWindow::updateEditMenuAction(Editor::Action action, bool available)
+{
+    switch (action) {
+    case Editor::Undo:
+        m_ui->actionUndo->setEnabled(available);
+        break;
+
+    case Editor::Redo:
+        m_ui->actionRedo->setEnabled(available);
+        break;
+
+    case Editor::Cut:
+        m_ui->actionCut->setEnabled(available);
+        break;
+
+    case Editor::Copy:
+        m_ui->actionCopy->setEnabled(available);
+        break;
+
+    case Editor::Paste:
+        m_ui->actionPaste->setEnabled(available);
+        break;
+
+    case Editor::Delete:
+        m_ui->actionDelete->setEnabled(available);
+        break;
+
+    case Editor::SelectAll:
+        m_ui->actionSelectAll->setEnabled(available);
+        break;
+
+    case Editor::ToggleCase:
+        m_ui->actionToggleCase->setEnabled(available);
+        m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
+        break;
+    }
 }

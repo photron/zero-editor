@@ -30,9 +30,19 @@ class Editor : public QObject
     Q_DISABLE_COPY(Editor)
 
 public:
-    enum Feature {
-        WordWrapping,
+    enum Action {
+        Undo,
+        Redo,
+        Cut,
+        Copy,
+        Paste,
+        Delete,
+        SelectAll,
         ToggleCase
+    };
+
+    enum Feature {
+        WordWrapping
     };
 
     explicit Editor(QObject *parent = NULL);
@@ -40,12 +50,24 @@ public:
     virtual Document *document() const = 0;
     virtual QWidget *widget() const = 0;
 
-    virtual bool hasFeature(Feature feature) const = 0;
+    virtual bool isActionAvailable(Action action) const { Q_UNUSED(action) return false; }
 
-    virtual bool isWordWrapping() const = 0;
-    virtual void setWordWrapping(bool enable) = 0;
+    virtual void undo() { }
+    virtual void redo() { }
+    virtual void cut() { }
+    virtual void copy() { }
+    virtual void paste() { }
+    virtual void delete_() { }
+    virtual void selectAll() { }
+    virtual void toggleCase() { }
 
-    virtual void toggleCase() = 0;
+    virtual bool hasFeature(Feature feature) const { Q_UNUSED(feature) return false; }
+
+    virtual bool isWordWrapping() const { return false; }
+    virtual void setWordWrapping(bool enable) { Q_UNUSED(enable) }
+
+signals:
+    void actionAvailabilityChanged(Action action, bool available);
 };
 
 #endif // EDITOR_H

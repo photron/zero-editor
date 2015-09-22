@@ -37,16 +37,35 @@ public:
     Document *document() const { return m_document; }
     QWidget *widget() const { return m_widget; }
 
+    bool isActionAvailable(Action action) const;
+
+    void undo();
+    void redo();
+    void cut();
+    void copy();
+    void paste();
+    void delete_();
+    void selectAll();
+    void toggleCase();
+
     bool hasFeature(Feature feature) const;
 
     bool isWordWrapping() const;
     void setWordWrapping(bool enable);
 
-    void toggleCase();
+private slots:
+    void updateUndoActionAvailability(bool available);
+    void updateRedoActionAvailability(bool available);
+    void updateSelectionActionsAvailability();
+    void updatePasteActionAvailability();
+    void updateSelectAllActionAvailability();
 
 private:
     QPointer<TextDocument> m_document; // owned by DocumentManager
     QPointer<TextEditorWidget> m_widget; // owned by its parent widget if any
+
+    bool m_pasteAvailable;
+    bool m_selectAllAvailable;
 };
 
 #endif // TEXTEDITOR_H
