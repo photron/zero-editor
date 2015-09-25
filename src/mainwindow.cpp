@@ -190,11 +190,26 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
 
             for (int i = actions.length() - 1; i >= 0; --i) {
                 QAction *action = actions.at(i);
+                QString text(action->text().split('\t').first());
 
-                if (action->text() == "Select All") {
+                // Qt only sets shortcuts for the QLineEdit context menu QActions if there isn't another active
+                // shortcut with the same key sequence. But because as such shortcuts still work if the QLineEdit has
+                // focus there is no reason to not have them set for the context menu QActions.
+                if (text == "&Undo") {
+                    action->setShortcut(QKeySequence::Undo);
+                } else if (text == "&Redo") {
+                    action->setShortcut(QKeySequence::Redo);
+                } else if (text == "Cu&t") {
+                    action->setShortcut(QKeySequence::Cut);
+                } else if (text == "&Copy") {
+                    action->setShortcut(QKeySequence::Copy);
+                } else if (text == "&Paste") {
+                    action->setShortcut(QKeySequence::Paste);
+                } else if (text == "Select All") {
+                    action->setShortcut(QKeySequence::SelectAll);
+
+                    // Qt doesn't add an icon for the select all action. So it's set here.
                     action->setIcon(QIcon(":/icons/16x16/select-all.png"));
-
-                    break;
                 }
             }
 

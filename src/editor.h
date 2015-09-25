@@ -51,7 +51,11 @@ public:
     virtual QWidget *widget() const = 0;
 
     virtual bool isActionAvailable(Action action) const { Q_UNUSED(action) return false; }
+    virtual bool hasFeature(Feature feature) const { Q_UNUSED(feature) return false; }
 
+    virtual bool isWordWrapping() const { return false; }
+
+public slots:
     virtual void undo() { }
     virtual void redo() { }
     virtual void cut() { }
@@ -61,9 +65,6 @@ public:
     virtual void selectAll() { }
     virtual void toggleCase() { }
 
-    virtual bool hasFeature(Feature feature) const { Q_UNUSED(feature) return false; }
-
-    virtual bool isWordWrapping() const { return false; }
     virtual void setWordWrapping(bool enable) { Q_UNUSED(enable) }
 
 signals:

@@ -38,7 +38,11 @@ public:
     QWidget *widget() const { return m_widget; }
 
     bool isActionAvailable(Action action) const;
+    bool hasFeature(Feature feature) const;
 
+    bool isWordWrapping() const;
+
+public slots:
     void undo();
     void redo();
     void cut();
@@ -48,10 +52,10 @@ public:
     void selectAll();
     void toggleCase();
 
-    bool hasFeature(Feature feature) const;
-
-    bool isWordWrapping() const;
     void setWordWrapping(bool enable);
+
+protected:
+    bool eventFilter(QObject *object, QEvent *event);
 
 private slots:
     void updateUndoActionAvailability(bool available);

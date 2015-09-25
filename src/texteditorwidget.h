@@ -45,7 +45,6 @@ protected:
     void focusInEvent(QFocusEvent *event);
     void focusOutEvent(QFocusEvent *event);
     void timerEvent(QTimerEvent *event);
-    void contextMenuEvent(QContextMenuEvent *event);
 
 private slots:
     void redrawExtraAreaRect(const QRect &rect, int dy);
