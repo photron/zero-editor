@@ -197,10 +197,22 @@
      <addaction name="actionCR"/>
      <addaction name="actionCRLF"/>
     </widget>
+    <widget class="QMenu" name="menuEncoding">
+     <property name="title">
+      <string>Encoding</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icons/icons.qrc">
+       <normaloff>:/icons/16x16/encoding.png</normaloff>:/icons/16x16/encoding.png</iconset>
+     </property>
+     <addaction name="actionUnicodeBOM"/>
+     <addaction name="separator"/>
+    </widget>
     <addaction name="menuIndentation"/>
     <addaction name="separator"/>
     <addaction name="menuSyntax"/>
     <addaction name="separator"/>
+    <addaction name="menuEncoding"/>
     <addaction name="menuLineEndings"/>
     <addaction name="separator"/>
     <addaction name="actionWordWrapping"/>
@@ -792,6 +804,14 @@
    </property>
    <property name="text">
     <string>Git Diff</string>
+   </property>
+  </action>
+  <action name="actionUnicodeBOM">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Unicode BOM</string>
    </property>
   </action>
  </widget>

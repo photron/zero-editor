@@ -29,6 +29,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QProcess>
+#include <QTextCodec>
 #include <QToolButton>
 #include <QWidgetAction>
 
@@ -65,6 +66,43 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
     // Options menu
+    QByteArrayList codecNames;
+
+    foreach (int mib, QTextCodec::availableMibs()) {
+        codecNames.append(QTextCodec::codecForMib(mib)->name());
+    }
+
+    qSort(codecNames);
+
+    QHash<QByteArray, QMenu *> codecSubmenus;
+    QByteArrayList codecSubmenuPrefixes = QByteArrayList() << "Big5" << "EUC" << "GB" << "IBM" << "ISO" << "iscii"
+                                                           << "KOI8" << "UTF" << "windows";
+
+    foreach (QByteArray codecName, codecNames) {
+        QByteArrayList aliases = QTextCodec::codecForName(codecName)->aliases();
+        bool handled = false;
+
+        foreach (QByteArray prefix, codecSubmenuPrefixes) {
+            if (codecName.startsWith(prefix)) {
+                QMenu *submenu = codecSubmenus.value(prefix);
+
+                if (submenu == NULL) {
+                    submenu = m_ui->menuEncoding->addMenu(prefix);
+                    codecSubmenus.insert(prefix, submenu);
+                }
+
+                submenu->addAction(((QByteArrayList() << codecName) + aliases).join(" / "));
+                handled = true;
+
+                break;
+            }
+        }
+
+        if (!handled) {
+            m_ui->menuEncoding->addAction(((QByteArrayList() << codecName) + aliases).join(" / "));
+        }
+    }
+
     m_ui->actionWordWrapping->setEnabled(false);
     m_ui->actionWordWrapping->setChecked(false);
 

@@ -11,6 +11,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 16x16/copy.png                -> 16x16/actions/edit-copy.png
 16x16/cut.png                 -> 16x16/actions/edit-cut.png
 16x16/delete.png              -> 16x16/actions/edit-delete.png
+16x16/encoding.png            -> 16x16/actions/document-properties.png
 16x16/exit.png                -> 16x16/actions/application-exit.png
 16x16/file.png                -> 16x16/mimetypes/text-x-generic.png
 16x16/find-and-replace.png    -> 16x16/actions/edit-replace.png
@@ -45,6 +46,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 24x24/copy.png                -> 24x24/actions/edit-copy.png
 24x24/cut.png                 -> 24x24/actions/edit-cut.png
 24x24/delete.png              -> 24x24/actions/edit-delete.png
+24x24/encoding.png            -> 24x24/actions/document-properties.png
 24x24/exit.png                -> 24x24/actions/application-exit.png
 24x24/file.png                -> 24x24/mimetypes/text-x-generic.png
 24x24/find-and-replace.png    -> 24x24/actions/edit-replace.png

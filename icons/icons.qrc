@@ -8,6 +8,7 @@
         <file>16x16/copy.png</file>
         <file>16x16/cut.png</file>
         <file>16x16/delete.png</file>
+        <file>16x16/encoding.png</file>
         <file>16x16/exit.png</file>
         <file>16x16/file.png</file>
         <file>16x16/find-and-replace.png</file>
@@ -42,6 +43,7 @@
         <file>24x24/copy.png</file>
         <file>24x24/cut.png</file>
         <file>24x24/delete.png</file>
+        <file>24x24/encoding.png</file>
         <file>24x24/exit.png</file>
         <file>24x24/file.png</file>
         <file>24x24/find-and-replace.png</file>
