@@ -33,7 +33,7 @@ TextEditor::TextEditor(TextDocument *document, QObject *parent) :
 
     connect(m_document->document(), &QTextDocument::undoAvailable, this, &TextEditor::updateUndoActionAvailability);
     connect(m_document->document(), &QTextDocument::redoAvailable, this, &TextEditor::updateRedoActionAvailability);
-    connect(m_widget, &QPlainTextEdit::selectionChanged, this, &TextEditor::updateSelectionActionsAvailability);
+    connect(m_widget.data(), &QPlainTextEdit::selectionChanged, this, &TextEditor::updateSelectionActionsAvailability);
     connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &TextEditor::updatePasteActionAvailability);
     connect(m_document->document(), &QTextDocument::contentsChanged, this, &TextEditor::updateSelectAllActionAvailability);
 
