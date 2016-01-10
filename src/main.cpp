@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     application.setWindowIcon(QIcon(":/icons/zero-editor.ico"));
 
     if (QFontDatabase::addApplicationFont(":/fonts/DejaVuSansMono.ttf") < 0) {
-        qDebug() << "Loading DejaVuSansMono.ttf failed";
+        qDebug() << "main: Loading DejaVuSansMono.ttf failed";
     }
 
     MonospaceFontMetrics::initialize();
