@@ -21,36 +21,44 @@
 #include "monospacefontmetrics.h"
 
 #include <QFile>
+#include <QDebug>
 #include <QDir>
 #include <QPlainTextDocumentLayout>
+#include <QTextCodec>
+#include <QTextDocument>
 
 TextDocument::TextDocument(QObject *parent) :
     Document(Text, parent),
-    m_document(new QTextDocument)
+    m_internalDocument(new QTextDocument),
+    m_contentsModified(false),
+    m_codec(QTextCodec::codecForName("UTF-8")),
+    m_byteOrderMark(false),
+    m_hasDecodingError(false),
+    m_encodingModified(false)
 {
-    m_document->setDocumentLayout(new QPlainTextDocumentLayout(m_document));
+    m_internalDocument->setDocumentLayout(new QPlainTextDocumentLayout(m_internalDocument));
 
     // Show tabs and spaces and set tab size to 4 spaces
-    QTextOption option = m_document->defaultTextOption();
+    QTextOption option = m_internalDocument->defaultTextOption();
 
     // FIXME: trailing spaces in a wrapped line are not shown
     option.setFlags(option.flags() | QTextOption::ShowTabsAndSpaces);
     option.setTabStop(MonospaceFontMetrics::charWidth() * 4);
 
-    m_document->setDefaultTextOption(option);
+    m_internalDocument->setDefaultTextOption(option);
 
-    connect(m_document, &QTextDocument::modificationChanged, this, &TextDocument::setModified);
+    connect(m_internalDocument, &QTextDocument::modificationChanged, this, &TextDocument::setContentsModified);
 }
 
 TextDocument::~TextDocument()
 {
-    delete m_document;
+    delete m_internalDocument;
 }
 
-// Returns true if the given file was successfully opened. Returns false if an error occurred while opening the file
-// and sets error to a non-null QString describing the error. Also returns false if the file contains an unsupported
-// document type and sets error to a null QString.
-bool TextDocument::open(const QString &filePath, QString *error)
+// Returns true if the given file was successfully opened. If codec is non-null then it is used to decode the document
+// data, otherwise the encoding of the document is guessed based on the presence of a Unicode BOM. Returns false if an
+// error occurred while opening the file and sets error to a non-null QString describing the error.
+bool TextDocument::open(const QString &filePath, QTextCodec *codec, QString *error)
 {
     Q_ASSERT(!filePath.isEmpty());
     Q_ASSERT(error != NULL);
@@ -64,7 +72,7 @@ bool TextDocument::open(const QString &filePath, QString *error)
         return false;
     }
 
-    // FIXME: do this in a way that doesn't block the UI if the file is big
+    // FIXME: do this in chunks to avoid blocking the UI if the file is big
     QByteArray data = file.readAll();
 
     if (file.error() != QFile::NoError) {
@@ -73,22 +81,76 @@ bool TextDocument::open(const QString &filePath, QString *error)
         return false;
     }
 
-    if (data.contains('\0')) {
-        *error = QString();
+    if (codec != NULL) {
+        m_codec = codec;
+        m_byteOrderMark = false;
+    } else {
+        m_codec = QTextCodec::codecForUtfText(data, NULL);
+        m_byteOrderMark = false;
 
-        return false;
+        if (m_codec == NULL) {
+            m_codec = QTextCodec::codecForName("UTF-8");
+        } else {
+            // QTextCodec::codecForUtfText() detects the encoding based on the Unicode BOM. If it can detect the
+            // encoding then a Unicode BOM is present.
+            m_byteOrderMark = true;
+        }
     }
 
-    // FIXME: check for proper encoding and not containing undecodable data
+    // FIXME: do this in chunks to avoid blocking the UI if the file is big
+    QTextCodec::ConverterState state;
+    QString text = m_codec->toUnicode(data.constData(), data.length(), &state);
 
-    disconnect(m_document, &QTextDocument::modificationChanged, this, &TextDocument::setModified);
+    m_hasDecodingError = state.invalidChars != 0 || state.remainingChars != 0;
 
-    m_document->setPlainText(data);
-    m_document->setModified(false);
+    disconnect(m_internalDocument, &QTextDocument::modificationChanged, this, &TextDocument::setContentsModified);
 
-    connect(m_document, &QTextDocument::modificationChanged, this, &TextDocument::setModified);
+    m_internalDocument->setPlainText(text);
+    m_internalDocument->setModified(false);
+
+    connect(m_internalDocument, &QTextDocument::modificationChanged, this, &TextDocument::setContentsModified);
 
     setFilePath(filePath);
 
     return true;
+}
+
+void TextDocument::setCodec(QTextCodec *codec)
+{
+    Q_ASSERT(codec != NULL);
+
+    if (m_codec != codec) {
+        m_codec = codec;
+
+        setEncodingModified(true);
+    }
+}
+
+void TextDocument::setByteOrderMark(bool enable)
+{
+    if (m_byteOrderMark != enable) {
+        m_byteOrderMark = enable;
+
+        setEncodingModified(true);
+    }
+}
+
+// private slot
+void TextDocument::setContentsModified(bool modified)
+{
+    if (m_contentsModified != modified) {
+        m_contentsModified = modified;
+
+        setModified(m_contentsModified || m_encodingModified);
+    }
+}
+
+// private
+void TextDocument::setEncodingModified(bool modified)
+{
+    if (m_encodingModified != modified) {
+        m_encodingModified = modified;
+
+        setModified(m_contentsModified || m_encodingModified);
+    }
 }

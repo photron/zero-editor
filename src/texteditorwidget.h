@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 class TextDocument;
 class TextEditorExtraArea;
+class TextEditorInfoArea;
 
 class TextEditorWidget : public QPlainTextEdit
 {
@@ -39,6 +40,9 @@ public:
     void extraAreaMouseMoveEvent(QMouseEvent *event);
     void extraAreaMouseReleaseEvent(QMouseEvent *event);
 
+    int infoAreaHeight() const;
+    void infoAreaPaintEvent(QPaintEvent *event);
+
 protected:
     void resizeEvent(QResizeEvent *event);
     void paintEvent(QPaintEvent *event);
@@ -46,9 +50,12 @@ protected:
     void focusOutEvent(QFocusEvent *event);
     void timerEvent(QTimerEvent *event);
 
+public slots:
+    void updateViewportMargins();
+    void performInfoAreaAction();
+
 private slots:
     void redrawExtraAreaRect(const QRect &rect, int dy);
-    void updateExtraAreaWidth();
     void updateExtraAreaSelectionHighlight();
     void updateCurrentLineHighlight();
 
@@ -61,6 +68,8 @@ private:
     TextEditorExtraArea *m_extraArea;
     int m_extraAreaSelectionAnchorBlockNumber;
     QBasicTimer m_extraAreaAutoScrollTimer;
+
+    TextEditorInfoArea *m_infoArea;
 
     int m_lastCursorBlockNumber;
     int m_lastCursorPositionInBlock;

@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "texteditor.h"
 
 #include <QDebug>
+#include <QFileInfo>
 
 DocumentManager *DocumentManager::s_instance = NULL;
 
@@ -37,7 +38,6 @@ DocumentManager::DocumentManager(QObject *parent) :
 DocumentManager::~DocumentManager()
 {
     foreach (Document *document, m_documents) {
-        delete document;
         delete s_instance->m_editors.take(document);
     }
 
@@ -60,64 +60,89 @@ void DocumentManager::create()
     setCurrent(document);
 }
 
+// Returns true if the given file was successfully opened. Returns false if an error occurred while opening the file
+// and sets error to a non-null QString describing the error.
+//
 // static
-bool DocumentManager::open(const QString &filePath, QString *error)
+bool DocumentManager::open(const QString &filePath, Document::Type type, QTextCodec *codec, QString *error)
 {
     Q_ASSERT(!filePath.isEmpty());
+    Q_ASSERT(type == Document::Text || codec == NULL);
     Q_ASSERT(error != NULL);
 
-    // FIXME: check if file path is already open. if yes make it the current document
+    // Check if a document for the given file is already open with the requested type and codec. If yes make it the
+    // current document, otherwise (re-)open it with the requested type and codec. Use QFileInfo for file path
+    // comparison to avoid treating file paths as different if they only differ in case but are located on a caseless
+    // file system are actually identical. QFileInfo handles this case correctly.
+    QFileInfo fileInfo(filePath);
 
-    TextDocument *document = new TextDocument;
-    QString localError;
+    foreach (Document *other, s_instance->m_documents) {
+        if (QFileInfo(other->filePath()) == fileInfo) {
+            // Reopen document, if type doesn't match
+            if (other->type() != type) {
+                close(other); // FIXME: need to preserve document content, if modified
 
-    if (document->open(filePath, &localError)) {
-        TextEditor *editor = new TextEditor(document);
+                break;
+            }
 
-        s_instance->m_documents.append(document);
-        s_instance->m_editors.insert(document, editor);
+            // Reopen text document, if codec is specified, but doesn't match
+            if (other->type() == Document::Text && codec != NULL) {
+                TextDocument *document = qobject_cast<TextDocument *>(other);
 
-        connect(document, &Document::modificationChanged, s_instance, &DocumentManager::updateModificationCount);
+                Q_ASSERT(document != NULL);
 
-        emit s_instance->opened(document);
+                if (document->codec() != codec) {
+                    close(other); // FIXME: need to preserve document content, if modified
 
-        setCurrent(document);
+                    break;
+                }
+            }
 
-        return true;
-    } else if (!localError.isNull()) {
-        delete document;
-
-        *error = localError;
-
-        return false;
-    } else {
-        BinaryDocument *document = new BinaryDocument;
-
-        if (document->open(filePath, &localError)) {
-            BinaryEditor *editor = new BinaryEditor(document);
-
-            s_instance->m_documents.append(document);
-            s_instance->m_editors.insert(document, editor);
-
-            connect(document, &Document::modificationChanged, s_instance, &DocumentManager::updateModificationCount);
-
-            emit s_instance->opened(document);
-
-            setCurrent(document);
+            setCurrent(other);
 
             return true;
-        } else if (!localError.isNull()) {
-            delete document;
+        }
+    }
 
-            *error = localError;
+    Document *document;
+    Editor *editor;
 
-            return false;
-        } else {
-            *error = QString("Could not open '%1': Unsupported document type").arg(filePath);
+    if (type == Document::Text) {
+        TextDocument *textDocument = new TextDocument;
+
+        if (!textDocument->open(filePath, codec, error)) {
+            delete textDocument;
 
             return false;
         }
+
+        document = textDocument;
+        editor = new TextEditor(textDocument);
+    } else if (type == Document::Binary) {
+        BinaryDocument *binaryDocument = new BinaryDocument;
+
+        if (!binaryDocument->open(filePath, error)) {
+            delete binaryDocument;
+
+            return false;
+        }
+
+        document = binaryDocument;
+        editor = new BinaryEditor(binaryDocument);
+    } else {
+        Q_ASSERT(false);
     }
+
+    s_instance->m_documents.append(document);
+    s_instance->m_editors.insert(document, editor);
+
+    connect(document, &Document::modificationChanged, s_instance, &DocumentManager::updateModificationCount);
+
+    emit s_instance->opened(document);
+
+    setCurrent(document);
+
+    return true;
 }
 
 // static
@@ -126,15 +151,15 @@ void DocumentManager::close(Document *document)
     Q_ASSERT(document != NULL);
     Q_ASSERT(s_instance->m_documents.contains(document));
 
-    if (document == s_instance->m_current) {
-        foreach (Document *otherDocument, s_instance->m_documents) {
-            if (otherDocument != document) {
-                setCurrent(otherDocument);
+    if (s_instance->m_current == document) {
+        foreach (Document *other, s_instance->m_documents) {
+            if (other != document) {
+                setCurrent(other);
                 break;
             }
         }
 
-        if (document == s_instance->m_current) {
+        if (s_instance->m_current == document) {
             setCurrent(NULL);
         }
     }
@@ -143,10 +168,9 @@ void DocumentManager::close(Document *document)
 
     s_instance->m_documents.removeAll(document);
 
-    Editor *editor = s_instance->m_editors.take(document);
-
-    delete editor;
-    delete document;
+    // Need to delete-later the editor and the document here to avoid deleting them too early in the middle of a reopen
+    // cycle, which in turn would trigger a segfault.
+    s_instance->m_editors.take(document)->deleteLater();
 
     s_instance->updateModificationCount();
 }

@@ -9,6 +9,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/documentmanager.cpp \
                src/editor.cpp \
                src/editorcolors.cpp \
+               src/encodingdialog.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
                src/gitdiffwidget.cpp \
@@ -30,6 +31,7 @@ HEADERS     += src/binaryeditor.h \
                src/documentmanager.h \
                src/editor.h \
                src/editorcolors.h \
+               src/encodingdialog.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
                src/gitdiffwidget.h \
@@ -43,6 +45,7 @@ HEADERS     += src/binaryeditor.h \
                src/textdocument.h \
                src/unsaveddiffwidget.h
 FORMS       += src/bookmarkswidget.ui \
+               src/encodingdialog.ui \
                src/findandreplacewidget.ui \
                src/findinfileswidget.ui \
                src/gitdiffwidget.ui \

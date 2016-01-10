@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@
 #include <QHash>
 #include <QObject>
 
-class Document;
+#include "document.h"
+
 class Editor;
 
 class DocumentManager : public QObject
@@ -37,7 +38,7 @@ public:
     static DocumentManager *instance() { return s_instance; }
 
     static void create();
-    static bool open(const QString &filePath, QString *error);
+    static bool open(const QString &filePath, Document::Type type, QTextCodec *codec, QString *error);
     static void close(Document *document);
 
     static Editor *editor(Document *document);

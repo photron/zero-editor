@@ -42,7 +42,7 @@ bool BinaryDocument::open(const QString &filePath, QString *error)
         return false;
     }
 
-    // FIXME: do this in a way that doesn't block the UI if the file is big
+    // FIXME: do this in chunks to avoid blocking the UI if the file is big
     QByteArray data = file.readAll();
 
     if (file.error() != QFile::NoError) {

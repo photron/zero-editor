@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,13 +29,13 @@ TextEditor::TextEditor(TextDocument *document, QObject *parent) :
     m_widget(new TextEditorWidget(document))
 {
     m_pasteAvailable = m_widget->canPaste();
-    m_selectAllAvailable = !m_document->document()->isEmpty();
+    m_selectAllAvailable = !m_document->internalDocument()->isEmpty();
 
-    connect(m_document->document(), &QTextDocument::undoAvailable, this, &TextEditor::updateUndoActionAvailability);
-    connect(m_document->document(), &QTextDocument::redoAvailable, this, &TextEditor::updateRedoActionAvailability);
+    connect(m_document->internalDocument(), &QTextDocument::undoAvailable, this, &TextEditor::updateUndoActionAvailability);
+    connect(m_document->internalDocument(), &QTextDocument::redoAvailable, this, &TextEditor::updateRedoActionAvailability);
     connect(m_widget.data(), &QPlainTextEdit::selectionChanged, this, &TextEditor::updateSelectionActionsAvailability);
     connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &TextEditor::updatePasteActionAvailability);
-    connect(m_document->document(), &QTextDocument::contentsChanged, this, &TextEditor::updateSelectAllActionAvailability);
+    connect(m_document->internalDocument(), &QTextDocument::contentsChanged, this, &TextEditor::updateSelectAllActionAvailability);
 
     m_widget->viewport()->installEventFilter(this);
 }
@@ -43,34 +43,37 @@ TextEditor::TextEditor(TextDocument *document, QObject *parent) :
 TextEditor::~TextEditor()
 {
     delete m_widget;
+    delete m_document;
 }
 
 bool TextEditor::isActionAvailable(Action action) const
 {
+    bool readOnly = m_widget->isReadOnly();
+
     switch (action) {
     case Undo:
-        return m_document->document()->isUndoAvailable();
+        return !readOnly && m_document->internalDocument()->isUndoAvailable();
 
     case Redo:
-        return m_document->document()->isRedoAvailable();
+        return !readOnly && m_document->internalDocument()->isRedoAvailable();
 
     case Cut:
-        return m_widget->textCursor().hasSelection();
+        return !readOnly && m_widget->textCursor().hasSelection();
 
     case Copy:
         return m_widget->textCursor().hasSelection();
 
     case Paste:
-        return m_widget->canPaste();
+        return !readOnly && m_widget->canPaste();
 
     case Delete:
-        return m_widget->textCursor().hasSelection();
+        return !readOnly && m_widget->textCursor().hasSelection();
 
     case SelectAll:
-        return !m_document->document()->isEmpty();
+        return !m_document->internalDocument()->isEmpty();
 
     case ToggleCase:
-        return m_widget->textCursor().hasSelection();
+        return !readOnly && m_widget->textCursor().hasSelection();
     }
 
     Q_ASSERT(false);
@@ -91,13 +94,13 @@ bool TextEditor::isWordWrapping() const
 // slot
 void TextEditor::undo()
 {
-    m_document->document()->undo();
+    m_document->internalDocument()->undo();
 }
 
 // slot
 void TextEditor::redo()
 {
-    m_document->document()->redo();
+    m_document->internalDocument()->redo();
 }
 
 // slot
@@ -202,14 +205,16 @@ bool TextEditor::eventFilter(QObject *object, QEvent *event)
                 }
             }
 
-            menu->addSeparator();
+            if (!m_widget->isReadOnly()) {
+                menu->addSeparator();
 
-            QAction *actionToggleCase = menu->addAction(QIcon(":/icons/16x16/toggle-case.png"), "Toggle Case");
+                QAction *actionToggleCase = menu->addAction(QIcon(":/icons/16x16/toggle-case.png"), "Toggle Case");
 
-            actionToggleCase->setShortcut(QKeySequence("Ctrl+U"));
-            actionToggleCase->setEnabled(isActionAvailable(ToggleCase));
+                actionToggleCase->setShortcut(QKeySequence("Ctrl+U"));
+                actionToggleCase->setEnabled(isActionAvailable(ToggleCase));
 
-            connect(actionToggleCase, &QAction::triggered, this, &TextEditor::toggleCase);
+                connect(actionToggleCase, &QAction::triggered, this, &TextEditor::toggleCase);
+            }
 
             menu->setAttribute(Qt::WA_DeleteOnClose);
             menu->popup(contextMenuEvent->globalPos());
@@ -237,11 +242,12 @@ void TextEditor::updateRedoActionAvailability(bool available)
 void TextEditor::updateSelectionActionsAvailability()
 {
     bool available = m_widget->textCursor().hasSelection();
+    bool readOnly = m_widget->isReadOnly();
 
-    emit actionAvailabilityChanged(Cut, available);
+    emit actionAvailabilityChanged(Cut, available && !readOnly);
     emit actionAvailabilityChanged(Copy, available);
-    emit actionAvailabilityChanged(Delete, available);
-    emit actionAvailabilityChanged(ToggleCase, available);
+    emit actionAvailabilityChanged(Delete, available && !readOnly);
+    emit actionAvailabilityChanged(ToggleCase, available && !readOnly);
 }
 
 // private slot

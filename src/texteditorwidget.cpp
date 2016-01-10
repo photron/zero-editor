@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,16 +18,24 @@
 
 #include "texteditorwidget.h"
 
+#include "documentmanager.h"
 #include "editorcolors.h"
+#include "encodingdialog.h"
 #include "monospacefontmetrics.h"
 #include "textdocument.h"
 
-#include <QCoreApplication>
+#include <QApplication>
 #include <QDebug>
+#include <QFileInfo>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPainter>
 #include <QScrollBar>
 #include <QTextBlock>
+#include <QTextCodec>
+#include <QToolButton>
 
 class TextEditorExtraArea : public QWidget
 {
@@ -76,30 +84,139 @@ private:
     TextEditorWidget *m_editor;
 };
 
+class TextEditorInfoArea : public QWidget
+{
+public:
+    enum Mode {
+        Hidden,
+        DecodingError
+    };
+
+    TextEditorInfoArea(TextDocument *document, TextEditorWidget *editor) :
+        QWidget(editor),
+        m_document(document),
+        m_editor(editor),
+        m_mode(Hidden)
+    {
+        Q_ASSERT(document != NULL);
+        Q_ASSERT(editor != NULL);
+
+        QPalette palette = EditorColors::basicPalette();
+
+        palette.setColor(QPalette::Background, EditorColors::infoBackgroundColor());
+
+        setFont(QApplication::font());
+        setPalette(palette);
+        setAutoFillBackground(true);
+
+        QHBoxLayout *layout = new QHBoxLayout(this);
+
+        layout->setContentsMargins(6, 4, 4, 4);
+
+        m_label = new QLabel;
+        m_button = new QToolButton;
+
+        layout->addWidget(m_label);
+        layout->addWidget(m_button);
+
+        connect(m_button, &QToolButton::clicked, m_editor, &TextEditorWidget::performInfoAreaAction);
+
+        hide();
+    }
+
+    Mode mode() const { return m_mode; }
+
+    void setMode(Mode mode)
+    {
+        if (m_mode != mode) {
+            m_mode = mode;
+
+            switch (mode) {
+            case Hidden:
+                hide();
+
+                break;
+
+            case DecodingError:
+                m_label->setText(QString("<b>Error:</b> Could not decode %1 as %2. Editing is not possible.")
+                                 .arg(QFileInfo(m_document->filePath()).fileName())
+                                 .arg(QString(m_document->codec()->name())));
+                m_button->setText("Select Encoding");
+
+                show();
+
+                break;
+            }
+        }
+    }
+
+    QSize sizeHint() const
+    {
+        return QWidget::sizeHint() + QSize(0, 1); // +1 for the bottom line
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event)
+    {
+        m_editor->infoAreaPaintEvent(event);
+    }
+
+    void showEvent(QShowEvent *event)
+    {
+        QWidget::showEvent(event);
+
+        m_editor->updateViewportMargins();
+    }
+
+    void hideEvent(QHideEvent *event)
+    {
+        QWidget::hideEvent(event);
+
+        m_editor->updateViewportMargins();
+    }
+
+private:
+    TextDocument *m_document;
+    TextEditorWidget *m_editor;
+    Mode m_mode;
+    QLabel *m_label;
+    QToolButton *m_button;
+};
+
 TextEditorWidget::TextEditorWidget(TextDocument *document, QWidget *parent) :
     QPlainTextEdit(parent),
     m_document(document),
     m_extraArea(new TextEditorExtraArea(this)),
     m_extraAreaSelectionAnchorBlockNumber(-1),
+    m_infoArea(new TextEditorInfoArea(document, this)),
     m_lastCursorBlockNumber(-1),
     m_lastCursorPositionInBlock(-1),
     m_lastCursorSelectionStart(-1),
     m_lastCursorSelectionEnd(-1),
     m_highlightCurrentLine(false)
 {
-    setDocument(m_document->document());
+    Q_ASSERT(document != NULL);
+
+    setDocument(m_document->internalDocument());
     setFont(MonospaceFontMetrics::font());
     setPalette(EditorColors::basicPalette());
     setCursorWidth(2);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
+    connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateViewportMargins);
     connect(this, &QPlainTextEdit::updateRequest, this, &TextEditorWidget::redrawExtraAreaRect);
-    connect(this, &QPlainTextEdit::blockCountChanged, this, &TextEditorWidget::updateExtraAreaWidth);
     connect(this, &QPlainTextEdit::selectionChanged, this, &TextEditorWidget::updateExtraAreaSelectionHighlight);
     connect(this, &QPlainTextEdit::cursorPositionChanged, this, &TextEditorWidget::updateCurrentLineHighlight);
 
-    updateExtraAreaWidth();
+    updateViewportMargins();
     updateCurrentLineHighlight();
+
+    if (m_document->hasDecodingError()) {
+        setReadOnly(true);
+        m_infoArea->setMode(TextEditorInfoArea::DecodingError);
+    } else {
+        m_infoArea->hide();
+    }
 }
 
 int TextEditorWidget::extraAreaWidth() const
@@ -195,7 +312,6 @@ void TextEditorWidget::extraAreaMousePressEvent(QMouseEvent *event)
     setTextCursor(cursor);
 }
 
-// protected
 void TextEditorWidget::extraAreaMouseMoveEvent(QMouseEvent *event)
 {
     if ((event->buttons() & Qt::LeftButton) == 0) {
@@ -233,7 +349,6 @@ void TextEditorWidget::extraAreaMouseMoveEvent(QMouseEvent *event)
     }
 }
 
-// protected
 void TextEditorWidget::extraAreaMouseReleaseEvent(QMouseEvent *event)
 {
     Q_UNUSED(event)
@@ -246,16 +361,42 @@ void TextEditorWidget::extraAreaMouseReleaseEvent(QMouseEvent *event)
     m_extraAreaSelectionAnchorBlockNumber = -1;
 }
 
+int TextEditorWidget::infoAreaHeight() const
+{
+    if (m_infoArea->isVisible()) {
+        return m_infoArea->sizeHint().height();
+    } else {
+        return 0;
+    }
+}
+
+void TextEditorWidget::infoAreaPaintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event)
+
+    QPainter painter(m_infoArea);
+
+    painter.fillRect(0, m_infoArea->height() - 1, m_infoArea->width(), 1, palette().color(QPalette::Mid));
+}
+
 // protected
 void TextEditorWidget::resizeEvent(QResizeEvent *event)
 {
     QPlainTextEdit::resizeEvent(event);
 
-    QRect rect = contentsRect();
+    QRect extraAreaRect = contentsRect();
 
-    rect.setWidth(extraAreaWidth());
+    extraAreaRect.setTop(extraAreaRect.top() + infoAreaHeight());
+    extraAreaRect.setWidth(extraAreaWidth());
 
-    m_extraArea->setGeometry(rect);
+    m_extraArea->setGeometry(extraAreaRect);
+
+    QRect infoAreaRect = contentsRect();
+
+    infoAreaRect.setHeight(infoAreaHeight());
+    infoAreaRect.setRight(infoAreaRect.right() - verticalScrollBar()->width());
+
+    m_infoArea->setGeometry(infoAreaRect);
 }
 
 // protected
@@ -426,6 +567,37 @@ void TextEditorWidget::timerEvent(QTimerEvent *event)
     QPlainTextEdit::timerEvent(event);
 }
 
+// public slot
+void TextEditorWidget::updateViewportMargins()
+{
+    setViewportMargins(extraAreaWidth(), infoAreaHeight(), 0, 0);
+}
+
+// public slot
+void TextEditorWidget::performInfoAreaAction()
+{
+    if (m_infoArea->mode() == TextEditorInfoArea::DecodingError && m_document->hasDecodingError()) {
+        EncodingDialog dialog(m_document->codec(), m_document->byteOrderMark(), this);
+
+        if (dialog.exec() != QDialog::Accepted) {
+            return;
+        }
+
+        QTextCodec *codec = dialog.codec();
+        Document::Type type = codec != NULL ? Document::Text : Document::Binary;
+        QString error;
+
+        if (!DocumentManager::open(m_document->filePath(), type, codec, &error)) {
+            if (error.isEmpty()) {
+                error = QString("Could not change encoding for %1: Unknown error")
+                        .arg(QFileInfo(m_document->filePath()).fileName());
+            }
+
+            QMessageBox::critical(this, "Encoding Change Error", error);
+        }
+    }
+}
+
 // private slot
 void TextEditorWidget::redrawExtraAreaRect(const QRect &rect, int dy)
 {
@@ -435,12 +607,6 @@ void TextEditorWidget::redrawExtraAreaRect(const QRect &rect, int dy)
         // Project QPlainTextEdit::updateRequest() calls onto the full extra area width
         m_extraArea->update(0, rect.y(), m_extraArea->width(), rect.height());
     }
-}
-
-// private slot
-void TextEditorWidget::updateExtraAreaWidth()
-{
-    setViewportMargins(extraAreaWidth(), 0, 0, 0);
 }
 
 // private slot

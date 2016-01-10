@@ -86,11 +86,7 @@
           <property name="handleWidth">
            <number>6</number>
           </property>
-          <widget class="QStackedWidget" name="widgetStackedEditors">
-           <property name="currentIndex">
-            <number>-1</number>
-           </property>
-          </widget>
+          <widget class="QStackedWidget" name="widgetStackedEditors"/>
           <widget class="QStackedWidget" name="widgetStackedHelpers">
            <widget class="FindInFilesWidget" name="widgetFindInFiles"/>
            <widget class="FindAndReplaceWidget" name="widgetFindAndReplace"/>
@@ -197,22 +193,11 @@
      <addaction name="actionCR"/>
      <addaction name="actionCRLF"/>
     </widget>
-    <widget class="QMenu" name="menuEncoding">
-     <property name="title">
-      <string>Encoding</string>
-     </property>
-     <property name="icon">
-      <iconset resource="../icons/icons.qrc">
-       <normaloff>:/icons/16x16/encoding.png</normaloff>:/icons/16x16/encoding.png</iconset>
-     </property>
-     <addaction name="actionUnicodeBOM"/>
-     <addaction name="separator"/>
-    </widget>
     <addaction name="menuIndentation"/>
     <addaction name="separator"/>
     <addaction name="menuSyntax"/>
     <addaction name="separator"/>
-    <addaction name="menuEncoding"/>
+    <addaction name="actionEncoding"/>
     <addaction name="menuLineEndings"/>
     <addaction name="separator"/>
     <addaction name="actionWordWrapping"/>
@@ -806,12 +791,13 @@
     <string>Git Diff</string>
    </property>
   </action>
-  <action name="actionUnicodeBOM">
-   <property name="checkable">
-    <bool>true</bool>
+  <action name="actionEncoding">
+   <property name="icon">
+    <iconset resource="../icons/icons.qrc">
+     <normaloff>:/icons/16x16/encoding.png</normaloff>:/icons/16x16/encoding.png</iconset>
    </property>
    <property name="text">
-    <string>Unicode BOM</string>
+    <string>Encoding...</string>
    </property>
   </action>
  </widget>

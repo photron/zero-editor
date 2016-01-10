@@ -16,48 +16,37 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef TEXTDOCUMENT_H
-#define TEXTDOCUMENT_H
+#ifndef ENCODINGDIALOG_H
+#define ENCODINGDIALOG_H
 
-#include "document.h"
+#include <QDialog>
 
-class QTextCodec;
-class QTextDocument;
+class QListWidgetItem;
 
-class TextDocument : public Document
+namespace Ui {
+class EncodingDialog;
+}
+
+class EncodingDialog : public QDialog
 {
     Q_OBJECT
-    Q_DISABLE_COPY(TextDocument)
 
 public:
-    explicit TextDocument(QObject *parent = NULL);
-    ~TextDocument();
+    EncodingDialog(QTextCodec *codec, bool byteOrderMark, QWidget *parent = NULL);
+    ~EncodingDialog();
 
-    bool open(const QString &filePath, QTextCodec *codec, QString *error);
-
-    QTextDocument *internalDocument() const { return m_internalDocument; }
-
-    void setCodec(QTextCodec *codec);
     QTextCodec *codec() const { return m_codec; }
-
-    void setByteOrderMark(bool enable);
     bool byteOrderMark() const { return m_byteOrderMark; }
 
-    bool hasDecodingError() const { return m_hasDecodingError; }
-
 private slots:
-    void setContentsModified(bool modified);
+    void setCodec(QListWidgetItem *item);
+    void setCodecAndAccept(QListWidgetItem *item);
+    void setByteOrderMark(bool byteOrderMark);
 
 private:
-    void setEncodingModified(bool modified);
-
-    QTextDocument *m_internalDocument;
-    bool m_contentsModified;
-
+    Ui::EncodingDialog *m_ui;
     QTextCodec *m_codec;
-    bool m_byteOrderMark; // applies to Unicode codecs only
-    bool m_hasDecodingError;
-    bool m_encodingModified;
+    bool m_byteOrderMark;
 };
 
-#endif // TEXTDOCUMENT_H
+#endif // ENCODINGDIALOG_H

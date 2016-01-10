@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ public:
     static QColor currentLineHighlightColor() { return s_currentLineHighlightColor; }
     static QColor innerWrapMarkerColor() { return s_innerWrapMarkerColor; }
     static QColor outerWrapMarkerColor() { return s_outerWrapMarkerColor; }
+    static QColor infoBackgroundColor() { return s_infoBackgroundColor; }
 
 private:
     EditorColors();
@@ -39,6 +40,7 @@ private:
     static QColor s_currentLineHighlightColor;
     static QColor s_innerWrapMarkerColor;
     static QColor s_outerWrapMarkerColor;
+    static QColor s_infoBackgroundColor;
 };
 
 #endif // EDITORCOLORS_H

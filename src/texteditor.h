@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ private slots:
     void updateSelectAllActionAvailability();
 
 private:
-    QPointer<TextDocument> m_document; // owned by DocumentManager
+    TextDocument *m_document;
     QPointer<TextEditorWidget> m_widget; // owned by its parent widget if any
 
     bool m_pasteAvailable;

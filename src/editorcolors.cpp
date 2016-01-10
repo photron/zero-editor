@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ QPalette *EditorColors::s_basicPalette = NULL;
 QColor EditorColors::s_currentLineHighlightColor;
 QColor EditorColors::s_innerWrapMarkerColor;
 QColor EditorColors::s_outerWrapMarkerColor;
+QColor EditorColors::s_infoBackgroundColor;
 
 // static
 void EditorColors::initialize()
@@ -54,4 +55,5 @@ void EditorColors::initialize()
 
     s_innerWrapMarkerColor = QColor(194, 235, 194);
     s_outerWrapMarkerColor = QColor(235, 194, 194);
+    s_infoBackgroundColor = QColor(255, 255, 225);
 }
