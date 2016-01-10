@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,7 +29,11 @@ Document::Document(QObject *parent) :
 // protected
 void Document::setFilePath(const QString &filePath)
 {
-    m_filePath = filePath;
+    if (m_filePath != filePath) {
+        m_filePath = filePath;
+
+        emit filePathChanged(m_filePath);
+    }
 }
 
 // protected slot
