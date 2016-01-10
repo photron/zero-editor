@@ -1,6 +1,6 @@
 //
 // Zero Editor
-// Copyright (C) 2015 Matthias Bolte <matthias.bolte@googlemail.com>
+// Copyright (C) 2015-2016 Matthias Bolte <matthias.bolte@googlemail.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <QPlainTextDocumentLayout>
 
 TextDocument::TextDocument(QObject *parent) :
-    Document(parent),
+    Document(Text, parent),
     m_document(new QTextDocument)
 {
     m_document->setDocumentLayout(new QPlainTextDocumentLayout(m_document));

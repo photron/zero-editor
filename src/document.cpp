@@ -20,8 +20,9 @@
 
 #include <QDebug>
 
-Document::Document(QObject *parent) :
+Document::Document(Type type, QObject *parent) :
     QObject(parent),
+    m_type(type),
     m_modified(false)
 {
 }

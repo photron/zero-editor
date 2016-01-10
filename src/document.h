@@ -27,8 +27,14 @@ class Document : public QObject
     Q_DISABLE_COPY(Document)
 
 public:
-    explicit Document(QObject *parent = NULL);
+    enum Type {
+        Text,
+        Binary
+    };
 
+    explicit Document(Type type, QObject *parent = NULL);
+
+    Type type() const { return m_type; }
     QString filePath() const { return m_filePath; }
     bool isModified() const { return m_modified; }
 
@@ -43,6 +49,7 @@ protected slots:
     void setModified(bool modified);
 
 private:
+    Type m_type;
     QString m_filePath;
     bool m_modified;
 };
