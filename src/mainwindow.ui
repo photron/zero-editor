@@ -498,17 +498,17 @@
   </action>
   <action name="actionCRLF">
    <property name="text">
-    <string>CR + LF</string>
+    <string>\r\n</string>
    </property>
   </action>
   <action name="actionLF">
    <property name="text">
-    <string>Line Feed</string>
+    <string>\n</string>
    </property>
   </action>
   <action name="actionCR">
    <property name="text">
-    <string>Carriage Return</string>
+    <string>\r</string>
    </property>
   </action>
   <action name="actionGoToLine">
