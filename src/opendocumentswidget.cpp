@@ -47,8 +47,8 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     connect(m_ui->checkFilter, &QCheckBox::toggled, this, &OpenDocumentsWidget::setFilterEnabled);
     connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenDocumentsWidget::setFilterPattern);
     connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
-    connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateParentMarkers);
-    connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateParentMarkers);
+    connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateParentIndexMarkers);
+    connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateParentIndexMarkers);
 
     connect(DocumentManager::instance(), &DocumentManager::opened, this, &OpenDocumentsWidget::addDocument);
     connect(DocumentManager::instance(), &DocumentManager::aboutToBeClosed, this, &OpenDocumentsWidget::removeDocument);
@@ -88,8 +88,8 @@ void OpenDocumentsWidget::addDocument(Document *document)
     }
 
     // Find or create parent item
-    QModelIndexList parents = m_model.match(m_model.index(0, 0, QModelIndex()), AbsolutePathRole,
-                                            absolutePath, 1, Qt::MatchExactly);
+    const QModelIndexList &parents = m_model.match(m_model.index(0, 0, QModelIndex()), AbsolutePathRole,
+                                                   absolutePath, 1, Qt::MatchExactly);
     QStandardItem *parent;
 
     if (parents.isEmpty()) {
@@ -131,6 +131,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
 
     // Show modification marker, if necessary
     updateModificationMarker(document);
+    updateParentItemMarkers(parent);
 }
 
 // private slot
@@ -150,7 +151,7 @@ void OpenDocumentsWidget::removeDocument(Document *document)
     parent->removeRow(child->row());
 
     if (parent->rowCount() > 0) {
-        updateParentMarkers(parent->index());
+        updateParentItemMarkers(parent);
     } else {
         m_model.removeRow(parent->row());
     }
@@ -179,10 +180,13 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 {
     // Set current child and parent back to normal
     if (m_currentChild != NULL) {
-        markItemAsCurrent(m_currentChild->parent(), false);
         markItemAsCurrent(m_currentChild, false);
 
+        QStandardItem *parent = m_currentChild->parent();
+
         m_currentChild = NULL;
+
+        updateParentItemMarkers(parent);
     }
 
     // Mark new current child as current
@@ -191,13 +195,16 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 
         Q_ASSERT(child != NULL);
 
-        markItemAsCurrent(child, true);
+        QStandardItem *parent = child->parent();
 
-        m_ui->treeDocuments->expand(child->parent()->index());
+        m_ui->treeDocuments->expand(parent->index());
         m_ui->treeDocuments->scrollTo(child->index());
         m_ui->treeDocuments->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
 
         m_currentChild = child;
+
+        markItemAsCurrent(m_currentChild, true);
+        updateParentItemMarkers(parent);
     }
 }
 
@@ -208,29 +215,54 @@ void OpenDocumentsWidget::updateModifiedButton(int modificationCount)
 }
 
 // private slot
-void OpenDocumentsWidget::updateParentMarkers(const QModelIndex &index)
+void OpenDocumentsWidget::updateParentIndexMarkers(const QModelIndex &index)
 {
     Q_ASSERT(index.isValid());
 
-    QStandardItem *parent = m_model.itemFromIndex(index);
+    updateParentItemMarkers(m_model.itemFromIndex(index));
+}
 
-    if (parent->parent() != NULL) {
-        return; // Not a top-level item
-    }
+// private slot
+void OpenDocumentsWidget::updateParentItemMarkers(QStandardItem *item)
+{
+    Q_ASSERT(item != NULL);
+    Q_ASSERT(item->parent() == NULL);
 
-    if (m_ui->treeDocuments->isExpanded(index)) {
-        markItemAsCurrent(parent, false);
-        markItemAsModified(parent, false);
+    if (m_ui->treeDocuments->isExpanded(item->index())) {
+        // Check if this is the parent of the hidden current child
+        bool hasHiddenCurrentChild = false;
+
+        if (m_currentChild != NULL && m_currentChild->parent() == item) {
+            hasHiddenCurrentChild = m_ui->treeDocuments->isRowHidden(m_currentChild->row(), item->index());
+        }
+
+        markItemAsCurrent(item, hasHiddenCurrentChild);
+
+        // Check if this is a parent of hidden modified children
+        int childRowCount = item->rowCount();
+        bool hasHiddenModifiedChild = false;
+
+        for (int childRow = 0; childRow < childRowCount; ++childRow) {
+            QStandardItem *child = item->child(childRow);
+            Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
+
+            if (m_ui->treeDocuments->isRowHidden(childRow, item->index()) && document->isModified()) {
+                hasHiddenModifiedChild = true;
+                break;
+            }
+        }
+
+        markItemAsModified(item, hasHiddenModifiedChild);
     } else {
         // Check if this is the parent of the current child
-        markItemAsCurrent(parent, m_currentChild != NULL && m_currentChild->parent() == parent);
+        markItemAsCurrent(item, m_currentChild != NULL && m_currentChild->parent() == item);
 
         // Check if this is a parent of modified children
-        int childRowCount = parent->rowCount();
+        int childRowCount = item->rowCount();
         bool hasModifiedChild = false;
 
         for (int childRow = 0; childRow < childRowCount; ++childRow) {
-            QStandardItem *child = parent->child(childRow);
+            QStandardItem *child = item->child(childRow);
             Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
 
             if (document->isModified()) {
@@ -239,7 +271,7 @@ void OpenDocumentsWidget::updateParentMarkers(const QModelIndex &index)
             }
         }
 
-        markItemAsModified(parent, hasModifiedChild);
+        markItemAsModified(item, hasModifiedChild);
     }
 }
 
@@ -296,32 +328,12 @@ void OpenDocumentsWidget::updateModificationMarker(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    QStandardItem *child = m_children.value(document, NULL);
+    QStandardItem *item = m_children.value(document, NULL);
 
-    Q_ASSERT(child != NULL);
+    Q_ASSERT(item != NULL);
 
-    markItemAsModified(child, document->isModified());
-
-    QStandardItem *parent = child->parent();
-
-    if (!m_ui->treeDocuments->isExpanded(parent->index())) {
-        if (document->isModified()) {
-            markItemAsModified(parent, true);
-        } else {
-            int childRowCount = parent->rowCount();
-
-            for (int childRow = 0; childRow < childRowCount; ++childRow) {
-                QStandardItem *otherChild = parent->child(childRow);
-                Document *otherDocument = static_cast<Document *>(otherChild->data(DocumentPointerRole).value<void *>());
-
-                if (otherDocument->isModified()) {
-                    return;
-                }
-            }
-
-            markItemAsModified(parent, false);
-        }
-    }
+    markItemAsModified(item, document->isModified());
+    updateParentItemMarkers(item->parent());
 }
 
 // private
@@ -373,12 +385,10 @@ void OpenDocumentsWidget::applyFilter()
                 hideParent = false;
             }
 
-            if (child == m_currentChild && m_ui->treeDocuments->isExpanded(parent->index())) {
-                markItemAsCurrent(parent, hideChild);
-            }
-
             m_ui->treeDocuments->setRowHidden(childRow, parent->index(), hideChild);
         }
+
+        updateParentItemMarkers(parent);
 
         m_ui->treeDocuments->setRowHidden(parentRow, root->index(), hideParent);
     }
@@ -402,7 +412,7 @@ bool OpenDocumentsWidget::filterAcceptsChild(const QModelIndex &index) const
     }
 
     if (m_filterEnabled && m_filterRegularExpression.isValid() && !m_filterRegularExpression.pattern().isEmpty()) {
-        QString fileName(index.data(FileNameRole).value<QString>());
+        const QString &fileName = index.data(FileNameRole).value<QString>();
 
         return m_filterRegularExpression.match(fileName).hasMatch();
     }
