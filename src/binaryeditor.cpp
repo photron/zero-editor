@@ -28,4 +28,5 @@ BinaryEditor::BinaryEditor(BinaryDocument *document, QObject *parent) :
 BinaryEditor::~BinaryEditor()
 {
     delete m_widget;
+    delete m_document;
 }
