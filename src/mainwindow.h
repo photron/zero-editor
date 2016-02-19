@@ -24,7 +24,6 @@
 #include <QMainWindow>
 
 class Document;
-class DocumentManager;
 
 namespace Ui {
 class MainWindow;
@@ -74,7 +73,6 @@ private slots:
 
 private:
     Ui::MainWindow *m_ui;
-    DocumentManager *m_documentManager;
     Document *m_lastCurrentDocument; // owned by DocumentManager
 };
 

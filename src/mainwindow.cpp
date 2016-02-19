@@ -36,7 +36,6 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
-    m_documentManager(new DocumentManager(this)),
     m_lastCurrentDocument(NULL)
 {
     m_ui->setupUi(this);
@@ -174,7 +173,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete m_documentManager;
     delete m_ui;
 }
 

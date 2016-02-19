@@ -16,6 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "documentmanager.h"
 #include "editorcolors.h"
 #include "mainwindow.h"
 #include "monospacefontmetrics.h"
@@ -40,6 +41,7 @@ int main(int argc, char **argv)
     QApplication::setStyle(new Style(QApplication::style()));
     QIcon::setThemeName("zero-editor");
 
+    DocumentManager documentManager;
     MainWindow mainWindow;
 
     mainWindow.show();
