@@ -19,22 +19,21 @@
 #include "textdocument.h"
 
 #include "monospacefontmetrics.h"
+#include "textcodec.h"
 
 #include <QFile>
 #include <QDebug>
 #include <QDir>
 #include <QPlainTextDocumentLayout>
-#include <QTextCodec>
 #include <QTextDocument>
 
-TextDocument::TextDocument(QObject *parent) :
+TextDocument::TextDocument(TextCodec *codec, QObject *parent) :
     Document(Text, parent),
     m_internalDocument(new QTextDocument),
-    m_contentsModified(false),
-    m_codec(QTextCodec::codecForName("UTF-8")),
-    m_byteOrderMark(false),
+    m_isContentsModified(false),
+    m_codec(codec),
     m_hasDecodingError(false),
-    m_encodingModified(false)
+    m_isEncodingModified(false)
 {
     m_internalDocument->setDocumentLayout(new QPlainTextDocumentLayout(m_internalDocument));
 
@@ -55,53 +54,24 @@ TextDocument::~TextDocument()
     delete m_internalDocument;
 }
 
-// Returns true if the given file was successfully opened. If codec is non-null then it is used to decode the document
-// data, otherwise the encoding of the document is guessed based on the presence of a Unicode BOM. Returns false if an
-// error occurred while opening the file and sets error to a non-null QString describing the error.
-bool TextDocument::open(const QString &filePath, QTextCodec *codec, QString *error)
+bool TextDocument::load(const QByteArray &data, QString *error)
 {
-    Q_ASSERT(!filePath.isEmpty());
     Q_ASSERT(error != NULL);
+    Q_ASSERT(!filePath().isEmpty());
 
-    QFile file(filePath);
-
-    if (!file.open(QIODevice::ReadOnly)) {
-        *error = QString("Could not open '%1' for reading: %2").arg(QDir::toNativeSeparators(filePath),
-                                                                    file.errorString());
-
-        return false;
-    }
-
-    // FIXME: do this in chunks to avoid blocking the UI if the file is big
-    QByteArray data = file.readAll();
-
-    if (file.error() != QFile::NoError) {
-        *error = QString("Could not read '%1': %2").arg(QDir::toNativeSeparators(filePath), file.errorString());
-
-        return false;
-    }
-
-    if (codec != NULL) {
-        m_codec = codec;
-        m_byteOrderMark = false;
-    } else {
-        m_codec = QTextCodec::codecForUtfText(data, NULL);
-        m_byteOrderMark = false;
+    if (m_codec == NULL) {
+        m_codec = TextCodec::fromByteOrderMark(data);
 
         if (m_codec == NULL) {
-            m_codec = QTextCodec::codecForName("UTF-8");
-        } else {
-            // QTextCodec::codecForUtfText() detects the encoding based on the Unicode BOM. If it can detect the
-            // encoding then a Unicode BOM is present.
-            m_byteOrderMark = true;
+            m_codec = TextCodec::fromName("UTF-8");
         }
     }
 
     // FIXME: do this in chunks to avoid blocking the UI if the file is big
-    QTextCodec::ConverterState state;
-    QString text = m_codec->toUnicode(data.constData(), data.length(), &state);
+    TextCodecState state;
+    const QString &text = m_codec->decode(data.constData(), data.length(), &state);
 
-    m_hasDecodingError = state.invalidChars != 0 || state.remainingChars != 0;
+    m_hasDecodingError = state.hasError();
 
     disconnect(m_internalDocument, &QTextDocument::modificationChanged, this, &TextDocument::setContentsModified);
 
@@ -110,12 +80,33 @@ bool TextDocument::open(const QString &filePath, QTextCodec *codec, QString *err
 
     connect(m_internalDocument, &QTextDocument::modificationChanged, this, &TextDocument::setContentsModified);
 
-    setFilePath(filePath);
+    return true;
+}
+
+bool TextDocument::save(QByteArray *data, QString *error)
+{
+    Q_ASSERT(data != NULL);
+    Q_ASSERT(error != NULL);
+    Q_ASSERT(m_codec != NULL);
+
+    const QString &text = m_internalDocument->toPlainText();
+    TextCodecState state;
+
+    // FIXME: do this in chunks to avoid blocking the UI if the file is big
+    *data = m_codec->encode(text.constData(), text.length(), &state);
+
+    if (state.hasError()) {
+        *error = QString("Can not encode contents for file %1 as %2").arg(QDir::toNativeSeparators(filePath()),
+                                                                          QString(m_codec->name()));
+
+        return false;
+    }
 
     return true;
 }
 
-void TextDocument::setCodec(QTextCodec *codec)
+// FIXME: this needs to be recorded as part of the undo history
+void TextDocument::setCodec(TextCodec *codec)
 {
     Q_ASSERT(codec != NULL);
 
@@ -126,31 +117,22 @@ void TextDocument::setCodec(QTextCodec *codec)
     }
 }
 
-void TextDocument::setByteOrderMark(bool enable)
-{
-    if (m_byteOrderMark != enable) {
-        m_byteOrderMark = enable;
-
-        setEncodingModified(true);
-    }
-}
-
 // private slot
 void TextDocument::setContentsModified(bool modified)
 {
-    if (m_contentsModified != modified) {
-        m_contentsModified = modified;
+    if (m_isContentsModified != modified) {
+        m_isContentsModified = modified;
 
-        setModified(m_contentsModified || m_encodingModified);
+        setModified(m_isContentsModified || m_isEncodingModified);
     }
 }
 
 // private
 void TextDocument::setEncodingModified(bool modified)
 {
-    if (m_encodingModified != modified) {
-        m_encodingModified = modified;
+    if (m_isEncodingModified != modified) {
+        m_isEncodingModified = modified;
 
-        setModified(m_contentsModified || m_encodingModified);
+        setModified(m_isContentsModified || m_isEncodingModified);
     }
 }

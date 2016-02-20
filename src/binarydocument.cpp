@@ -26,40 +26,28 @@ BinaryDocument::BinaryDocument(QObject *parent) :
 {
 }
 
-// Returns true if the given file was successfully opened. Returns false if an error occurred while opening the file
-// and sets error to a non-null QString describing the error.
-bool BinaryDocument::open(const QString &filePath, QString *error)
+bool BinaryDocument::load(const QByteArray &data, QString *error)
 {
-    Q_ASSERT(!filePath.isEmpty());
     Q_ASSERT(error != NULL);
-
-    QFile file(filePath);
-
-    if (!file.open(QIODevice::ReadOnly)) {
-        *error = QString("Could not open '%1' for reading: %2").arg(QDir::toNativeSeparators(filePath),
-                                                                    file.errorString());
-
-        return false;
-    }
-
-    // FIXME: do this in chunks to avoid blocking the UI if the file is big
-    QByteArray data = file.readAll();
-
-    if (file.error() != QFile::NoError) {
-        *error = QString("Could not read '%1': %2").arg(QDir::toNativeSeparators(filePath), file.errorString());
-
-        return false;
-    }
+    Q_ASSERT(!filePath().isEmpty());
 
     if (data.length() == 0) {
-        *error = QString("Can not open empty file '%1' in binary mode.").arg(QDir::toNativeSeparators(filePath));
+        *error = QString("Can not open empty file %1 in binary mode").arg(QDir::toNativeSeparators(filePath()));
 
         return false;
     }
 
     m_data = data;
 
-    setFilePath(filePath);
+    return true;
+}
+
+bool BinaryDocument::save(QByteArray *data, QString *error)
+{
+    Q_ASSERT(data != NULL);
+    Q_ASSERT(error != NULL);
+
+    *data  = m_data;
 
     return true;
 }

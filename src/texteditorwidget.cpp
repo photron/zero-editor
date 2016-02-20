@@ -22,6 +22,7 @@
 #include "editorcolors.h"
 #include "encodingdialog.h"
 #include "monospacefontmetrics.h"
+#include "textcodec.h"
 #include "textdocument.h"
 
 #include <QApplication>
@@ -30,11 +31,9 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMenu>
-#include <QMessageBox>
 #include <QPainter>
 #include <QScrollBar>
 #include <QTextBlock>
-#include <QTextCodec>
 #include <QToolButton>
 
 class TextEditorExtraArea : public QWidget
@@ -577,24 +576,7 @@ void TextEditorWidget::updateViewportMargins()
 void TextEditorWidget::performInfoAreaAction()
 {
     if (m_infoArea->mode() == TextEditorInfoArea::DecodingError && m_document->hasDecodingError()) {
-        EncodingDialog dialog(m_document->codec(), m_document->byteOrderMark(), this);
-
-        if (dialog.exec() != QDialog::Accepted) {
-            return;
-        }
-
-        QTextCodec *codec = dialog.codec();
-        Document::Type type = codec != NULL ? Document::Text : Document::Binary;
-        QString error;
-
-        if (!DocumentManager::open(m_document->filePath(), type, codec, &error)) {
-            if (error.isEmpty()) {
-                error = QString("Could not change encoding for %1: Unknown error")
-                        .arg(QFileInfo(m_document->filePath()).fileName());
-            }
-
-            QMessageBox::critical(this, "Encoding Change Error", error);
-        }
+        DocumentManager::changeEncoding(m_document);
     }
 }
 

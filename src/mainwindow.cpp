@@ -22,7 +22,7 @@
 #include "document.h"
 #include "documentmanager.h"
 #include "editor.h"
-#include "encodingdialog.h"
+#include "textdocument.h"
 
 #include <QContextMenuEvent>
 #include <QDebug>
@@ -33,11 +33,15 @@
 #include <QToolButton>
 #include <QWidgetAction>
 
+MainWindow *MainWindow::s_instance = NULL;
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow),
     m_lastCurrentDocument(NULL)
 {
+    s_instance = this;
+
     m_ui->setupUi(this);
 
     // File menu
@@ -65,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
     // Options menu
+    m_ui->actionEncoding->setEnabled(false);
     m_ui->actionWordWrapping->setEnabled(false);
     m_ui->actionWordWrapping->setChecked(false);
 
@@ -89,6 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
     connect(m_ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
 
+    connect(m_ui->actionEncoding, &QAction::triggered, this, &MainWindow::showEncodingDialog);
     connect(m_ui->actionWordWrapping, &QAction::triggered, this, &MainWindow::setWordWrapping);
 
     connect(m_ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
@@ -235,9 +241,18 @@ void MainWindow::openFile()
     QString error;
 
     foreach (const QString &filePath, filePaths) {
-        if (!DocumentManager::open(filePath, Document::Text, NULL, &error)) {
+        Document *document = DocumentManager::find(filePath);
+
+        if (document != NULL) {
+            DocumentManager::setCurrent(document);
+            continue;
+        }
+
+        document = DocumentManager::open(filePath, Document::Text, NULL, &error);
+
+        if (document == NULL) {
             if (error.isEmpty()) {
-                error = QString("Could not open '%1': Unknown error").arg(QDir::toNativeSeparators(filePath));
+                error = QString("Could not open %1: Unknown error").arg(QDir::toNativeSeparators(filePath));
             }
 
             QMessageBox::critical(this, "File Open Error", error);
@@ -352,6 +367,16 @@ void MainWindow::showFindInFilesWidget()
 }
 
 // private slot
+void MainWindow::showEncodingDialog()
+{
+    Document *document = DocumentManager::current();
+
+    Q_ASSERT(document != NULL);
+
+    DocumentManager::changeEncoding(document);
+}
+
+// private slot
 void MainWindow::setWordWrapping(bool enable)
 {
     Editor *editor = DocumentManager::editor(DocumentManager::current());
@@ -454,6 +479,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
         // Options menu
+        m_ui->actionEncoding->setEnabled(false);
         m_ui->actionWordWrapping->setEnabled(false);
         m_ui->actionWordWrapping->setChecked(false);
     } else {
@@ -505,6 +531,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionToggleCase_Tool->setEnabled(editor->isActionAvailable(Editor::ToggleCase));
 
         // Options menu
+        m_ui->actionEncoding->setEnabled(true);
         m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
         m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
 

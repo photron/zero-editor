@@ -38,6 +38,8 @@ public:
     explicit MainWindow(QWidget *parent = NULL);
     ~MainWindow();
 
+    static MainWindow *instance() { return s_instance; }
+
 protected:
     bool eventFilter(QObject *object, QEvent *event);
 
@@ -58,6 +60,7 @@ private slots:
     void showFindAndReplaceWidget();
     void showFindInFilesWidget();
 
+    void showEncodingDialog();
     void setWordWrapping(bool enable);
 
     void openTerminal();
@@ -72,6 +75,8 @@ private slots:
     void updateEditMenuAction(Editor::Action action, bool available);
 
 private:
+    static MainWindow *s_instance;
+
     Ui::MainWindow *m_ui;
     Document *m_lastCurrentDocument; // owned by DocumentManager
 };

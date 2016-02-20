@@ -27,7 +27,6 @@ Document::Document(Type type, QObject *parent) :
 {
 }
 
-// protected
 void Document::setFilePath(const QString &filePath)
 {
     if (m_filePath != filePath) {
@@ -37,7 +36,7 @@ void Document::setFilePath(const QString &filePath)
     }
 }
 
-// protected slot
+// slot
 void Document::setModified(bool modified)
 {
     if (m_modified != modified) {

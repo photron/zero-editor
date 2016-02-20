@@ -21,8 +21,9 @@
 
 #include "document.h"
 
-class QTextCodec;
 class QTextDocument;
+
+class TextCodec;
 
 class TextDocument : public Document
 {
@@ -30,18 +31,16 @@ class TextDocument : public Document
     Q_DISABLE_COPY(TextDocument)
 
 public:
-    explicit TextDocument(QObject *parent = NULL);
+    explicit TextDocument(TextCodec *codec, QObject *parent = NULL);
     ~TextDocument();
 
-    bool open(const QString &filePath, QTextCodec *codec, QString *error);
+    bool load(const QByteArray &data, QString *error);
+    bool save(QByteArray *data, QString *error);
 
     QTextDocument *internalDocument() const { return m_internalDocument; }
 
-    void setCodec(QTextCodec *codec);
-    QTextCodec *codec() const { return m_codec; }
-
-    void setByteOrderMark(bool enable);
-    bool byteOrderMark() const { return m_byteOrderMark; }
+    void setCodec(TextCodec *codec);
+    TextCodec *codec() const { return m_codec; }
 
     bool hasDecodingError() const { return m_hasDecodingError; }
 
@@ -52,12 +51,11 @@ private:
     void setEncodingModified(bool modified);
 
     QTextDocument *m_internalDocument;
-    bool m_contentsModified;
+    bool m_isContentsModified;
 
-    QTextCodec *m_codec;
-    bool m_byteOrderMark; // applies to Unicode codecs only
+    TextCodec *m_codec;
     bool m_hasDecodingError;
-    bool m_encodingModified;
+    bool m_isEncodingModified;
 };
 
 #endif // TEXTDOCUMENT_H

@@ -23,6 +23,8 @@
 
 class QListWidgetItem;
 
+class TextCodec;
+
 namespace Ui {
 class EncodingDialog;
 }
@@ -32,21 +34,18 @@ class EncodingDialog : public QDialog
     Q_OBJECT
 
 public:
-    EncodingDialog(QTextCodec *codec, bool byteOrderMark, QWidget *parent = NULL);
+    explicit EncodingDialog(TextCodec *codec, QWidget *parent = NULL);
     ~EncodingDialog();
 
-    QTextCodec *codec() const { return m_codec; }
-    bool byteOrderMark() const { return m_byteOrderMark; }
+    TextCodec *codec() const { return m_codec; }
 
 private slots:
     void setCodec(QListWidgetItem *item);
     void setCodecAndAccept(QListWidgetItem *item);
-    void setByteOrderMark(bool byteOrderMark);
 
 private:
     Ui::EncodingDialog *m_ui;
-    QTextCodec *m_codec;
-    bool m_byteOrderMark;
+    TextCodec *m_codec;
 };
 
 #endif // ENCODINGDIALOG_H

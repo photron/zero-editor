@@ -19,6 +19,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/opendocumentswidget.cpp \
                src/recentfileswidget.cpp \
                src/style.cpp \
+               src/textcodec.cpp \
                src/texteditor.cpp \
                src/texteditorwidget.cpp \
                src/textdocument.cpp \
@@ -40,6 +41,7 @@ HEADERS     += src/binaryeditor.h \
                src/opendocumentswidget.h \
                src/recentfileswidget.h \
                src/style.h \
+               src/textcodec.h \
                src/texteditor.h \
                src/texteditorwidget.h \
                src/textdocument.h \

@@ -31,7 +31,8 @@ class BinaryDocument : public Document
 public:
     explicit BinaryDocument(QObject *parent = NULL);
 
-    bool open(const QString &filePath, QString *error);
+    bool load(const QByteArray &data, QString *error);
+    bool save(QByteArray *data, QString *error);
 
     int length() const { return m_data.length(); }
 

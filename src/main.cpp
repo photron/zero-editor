@@ -21,6 +21,7 @@
 #include "mainwindow.h"
 #include "monospacefontmetrics.h"
 #include "style.h"
+#include "textcodec.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -36,6 +37,7 @@ int main(int argc, char **argv)
         qDebug() << "main: Loading DejaVuSansMono.ttf failed";
     }
 
+    TextCodec::initialize();
     MonospaceFontMetrics::initialize();
     EditorColors::initialize();
     QApplication::setStyle(new Style(QApplication::style()));

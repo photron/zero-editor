@@ -35,17 +35,20 @@ public:
     explicit Document(Type type, QObject *parent = NULL);
 
     Type type() const { return m_type; }
+
+    virtual bool load(const QByteArray &data, QString *error) = 0;
+    virtual bool save(QByteArray *data, QString *error) = 0;
+
     QString filePath() const { return m_filePath; }
+    void setFilePath(const QString &filePath);
+
     bool isModified() const { return m_modified; }
 
 signals:
     void filePathChanged(const QString &filePath);
     void modificationChanged(bool modified);
 
-protected:
-    void setFilePath(const QString &filePath);
-
-protected slots:
+public slots:
     void setModified(bool modified);
 
 private:

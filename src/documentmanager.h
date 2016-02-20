@@ -25,6 +25,7 @@
 #include "document.h"
 
 class Editor;
+class TextCodec;
 
 class DocumentManager : public QObject
 {
@@ -38,8 +39,11 @@ public:
     static DocumentManager *instance() { return s_instance; }
 
     static void create();
-    static bool open(const QString &filePath, Document::Type type, QTextCodec *codec, QString *error);
+    static Document *open(const QString &filePath, Document::Type type, TextCodec *codec, QString *error);
+    static Document *load(const QString &filePath, Document::Type type, const QByteArray &data, TextCodec *codec,
+                          QString *error);
     static void close(Document *document);
+    static Document *find(const QString &filePath);
 
     static Editor *editor(Document *document);
 
@@ -47,6 +51,8 @@ public:
     static void setCurrent(Document *document);
 
     static int modificationCount() { return s_instance->m_modificationCount; }
+
+    static void changeEncoding(Document *document);
 
 signals:
     void opened(Document *document);
@@ -60,7 +66,7 @@ private slots:
 private:
     static DocumentManager *s_instance;
 
-    QList<Document *> m_documents;
+    QList<Document *> m_documents; // owned by their editors
     QHash<Document *, Editor *> m_editors;
     Document *m_current; // can be NULL if there is no current document
     int m_modificationCount;

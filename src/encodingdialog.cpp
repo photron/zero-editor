@@ -19,23 +19,25 @@
 #include "encodingdialog.h"
 #include "ui_encodingdialog.h"
 
-#include <QDebug>
-#include <QTextCodec>
+#include "textcodec.h"
 
-EncodingDialog::EncodingDialog(QTextCodec *codec, bool byteOrderMark, QWidget *parent) :
+#include <QDebug>
+
+EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
     QDialog(parent),
-    m_ui(new Ui::EncodingDialog)
+    m_ui(new Ui::EncodingDialog),
+    m_codec(codec)
 {
     m_ui->setupUi(this);
 
     QListWidgetItem *current = NULL;
 
-    foreach (int mib, QTextCodec::availableMibs()) {
-        QTextCodec *other = QTextCodec::codecForMib(mib);
+    foreach (qint64 number, TextCodec::knownNumbers()) {
+        TextCodec *other = TextCodec::fromNumber(number);
         QString name = ((QByteArrayList() << other->name()) + other->aliases()).join(" | ");
         QListWidgetItem *item = new QListWidgetItem(name);
 
-        if (current == NULL && mib == codec->mibEnum()) {
+        if (current == NULL && codec != NULL && codec->number() == number) {
             current = item;
 
             QFont font(item->font());
@@ -45,24 +47,34 @@ EncodingDialog::EncodingDialog(QTextCodec *codec, bool byteOrderMark, QWidget *p
             item->setFont(font);
         }
 
-        item->setData(Qt::UserRole, qVariantFromValue(mib));
+        item->setData(Qt::UserRole, qVariantFromValue(number));
 
         m_ui->listCodecs->addItem(item);
     }
 
     m_ui->listCodecs->sortItems();
-    m_ui->listCodecs->insertItem(0, new QListWidgetItem("None"));
+
+    QListWidgetItem *item = new QListWidgetItem("Binary");
+
+    if (current == NULL && codec == NULL) {
+        current = item;
+
+        QFont font(item->font());
+
+        font.setUnderline(true);
+
+        item->setFont(font);
+    }
+
+    m_ui->listCodecs->insertItem(0, item);
 
     if (current != NULL) {
         m_ui->listCodecs->scrollToItem(current);
         current->setSelected(true);
     }
 
-    m_ui->checkUnicodeBOM->setChecked(byteOrderMark);
-
     connect(m_ui->listCodecs, &QListWidget::currentItemChanged, this, EncodingDialog::setCodec);
     connect(m_ui->listCodecs, &QListWidget::itemActivated, this, EncodingDialog::setCodecAndAccept);
-    connect(m_ui->checkUnicodeBOM, &QCheckBox::toggled, this, EncodingDialog::setByteOrderMark);
     connect(m_ui->buttonSelect, &QPushButton::clicked, this, EncodingDialog::accept);
     connect(m_ui->buttonCancel, &QPushButton::clicked, this, EncodingDialog::reject);
 }
@@ -76,16 +88,12 @@ EncodingDialog::~EncodingDialog()
 void EncodingDialog::setCodec(QListWidgetItem *item)
 {
     bool ok;
-    int mib = item->data(Qt::UserRole).toInt(&ok);
+    qint64 number = item->data(Qt::UserRole).toLongLong(&ok);
 
     if (!ok) {
         m_codec = NULL;
     } else {
-        QTextCodec *codec = QTextCodec::codecForMib(mib);
-
-        if (codec != NULL) {
-            m_codec = codec;
-        }
+        m_codec = TextCodec::fromNumber(number);
     }
 }
 
@@ -94,10 +102,4 @@ void EncodingDialog::setCodecAndAccept(QListWidgetItem *item)
 {
     setCodec(item);
     accept();
-}
-
-// private slot
-void EncodingDialog::setByteOrderMark(bool byteOrderMark)
-{
-    m_byteOrderMark = byteOrderMark;
 }
