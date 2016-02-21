@@ -122,7 +122,22 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->widgetStackedHelpers->hide();
 
     m_ui->actionRevert->setText("Revert \"brickd.c\"");
-    m_ui->actionRevert_Tool->setToolTip("Revert \"brickd.c\"");
+    m_ui->actionRevert_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionRevert));
+
+    // Setup toolbar tooltips
+    foreach (QAction *toolBarAction, m_ui->toolBar->actions()) {
+        QString name = toolBarAction->objectName();
+
+        if (name.endsWith("_Tool")) {
+            name.chop(5);
+        }
+
+        QAction *menuAction = findChild<QAction *>(name, Qt::FindDirectChildrenOnly);
+
+        Q_ASSERT(menuAction != NULL);
+
+        toolBarAction->setToolTip(formatToolBarActionToolTip(menuAction));
+    }
 
     // Setup toolbar go-to-line edit
     QLineEdit *editGoToLine = new QLineEdit;
@@ -456,7 +471,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionSave->setEnabled(false);
         m_ui->actionSave->setText("Save");
         m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
-        m_ui->actionSave_Tool->setToolTip(m_ui->actionSave->text());
+        m_ui->actionSave_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionSave));
 
         m_ui->actionSaveAs->setEnabled(false);
         m_ui->actionSaveAs->setText("Save As...");
@@ -464,7 +479,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionClose->setEnabled(false);
         m_ui->actionClose->setText("Close");
         m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
-        m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
+        m_ui->actionClose_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionClose));
 
         // Edit menu
         m_ui->actionUndo->setEnabled(false);
@@ -498,7 +513,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionSave->setEnabled(document->isModified());
         m_ui->actionSave->setText(QString("Save \"%1\"").arg(fileName));
         m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
-        m_ui->actionSave_Tool->setToolTip(m_ui->actionSave->text());
+        m_ui->actionSave_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionSave));
 
         m_ui->actionSaveAs->setEnabled(true);
         m_ui->actionSaveAs->setText(QString("Save \"%1\" As...").arg(fileName));
@@ -506,7 +521,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionClose->setEnabled(true);
         m_ui->actionClose->setText(QString("Close \"%1\"").arg(fileName));
         m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
-        m_ui->actionClose_Tool->setToolTip(m_ui->actionClose->text());
+        m_ui->actionClose_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionClose));
 
         // Edit menu
         m_ui->actionUndo->setEnabled(editor->isActionAvailable(Editor::Undo));
@@ -539,7 +554,7 @@ void MainWindow::updateSaveAllAction(int modificationCount)
     m_ui->actionSaveAll->setEnabled(modificationCount > 0);
     m_ui->actionSaveAll->setText(modificationCount > 0 ? QString("Save All (%1)").arg(modificationCount) : "Save All");
     m_ui->actionSaveAll_Tool->setEnabled(m_ui->actionSaveAll->isEnabled());
-    m_ui->actionSaveAll_Tool->setToolTip(m_ui->actionSaveAll->text());
+    m_ui->actionSaveAll_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionSaveAll));
 }
 
 // private slot
@@ -578,5 +593,22 @@ void MainWindow::updateEditMenuAction(Editor::Action action, bool available)
         m_ui->actionToggleCase->setEnabled(available);
         m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
         break;
+    }
+}
+
+// private static
+QString MainWindow::formatToolBarActionToolTip(QAction *menuAction)
+{
+    const QKeySequence &shortcut = menuAction->shortcut();
+    QString name = menuAction->text();
+
+    if (name.endsWith("...")) {
+        name.chop(3);
+    }
+
+    if (shortcut.isEmpty()) {
+        return name;
+    } else {
+        return name + "<br><small><b>" + shortcut.toString(QKeySequence::NativeText) + "</b></small>";
     }
 }

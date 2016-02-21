@@ -75,6 +75,8 @@ private slots:
     void updateEditMenuAction(Editor::Action action, bool available);
 
 private:
+    static QString formatToolBarActionToolTip(QAction *menuAction);
+
     static MainWindow *s_instance;
 
     Ui::MainWindow *m_ui;
