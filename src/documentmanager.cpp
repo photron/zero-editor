@@ -27,7 +27,6 @@
 #include "texteditor.h"
 
 #include <QDebug>
-#include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
 
@@ -65,24 +64,23 @@ void DocumentManager::create()
     setCurrent(document);
 }
 
-
 // static
-Document *DocumentManager::open(const QString &filePath, Document::Type type, TextCodec *codec, QString *error)
+Document *DocumentManager::open(const Location &location, Document::Type type, TextCodec *codec, QString *error)
 {
-    Q_ASSERT(!filePath.isEmpty());
+    Q_ASSERT(!location.isEmpty());
     Q_ASSERT(type == Document::Text || codec == NULL);
     Q_ASSERT(error != NULL);
 
-    if (find(filePath) != NULL) {
-        *error = QString("%1 is already open").arg(QDir::toNativeSeparators(filePath));
+    if (find(location) != NULL) {
+        *error = QString("%1 is already open").arg(location.displayFilePath());
 
         return NULL;
     }
 
-    QFile file(filePath);
+    QFile file(location.internalFilePath());
 
     if (!file.open(QIODevice::ReadOnly)) {
-        *error = QString("Could not open %1 for reading: %2").arg(QDir::toNativeSeparators(filePath),
+        *error = QString("Could not open %1 for reading: %2").arg(location.displayFilePath(),
                                                                   file.errorString());
 
         return NULL;
@@ -92,24 +90,23 @@ Document *DocumentManager::open(const QString &filePath, Document::Type type, Te
     const QByteArray &data = file.readAll();
 
     if (file.error() != QFile::NoError) {
-        *error = QString("Could not read %1: %2").arg(QDir::toNativeSeparators(filePath), file.errorString());
+        *error = QString("Could not read %1: %2").arg(location.displayFilePath(), file.errorString());
 
         return NULL;
     }
 
-    return load(filePath, type, data, codec, error);
+    return load(location, type, data, codec, error);
 }
 
 // static
-Document *DocumentManager::load(const QString &filePath, Document::Type type, const QByteArray &data, TextCodec *codec,
+Document *DocumentManager::load(const Location &location, Document::Type type, const QByteArray &data, TextCodec *codec,
                                 QString *error)
 {
-    Q_ASSERT(!filePath.isEmpty());
     Q_ASSERT(type == Document::Text || codec == NULL);
     Q_ASSERT(error != NULL);
 
-    if (find(filePath) != NULL) {
-        *error = QString("%1 is already open").arg(QDir::toNativeSeparators(filePath));
+    if (!location.isEmpty() && find(location) != NULL) {
+        *error = QString("%1 is already open").arg(location.displayFilePath());
 
         return NULL;
     }
@@ -120,7 +117,7 @@ Document *DocumentManager::load(const QString &filePath, Document::Type type, co
     if (type == Document::Text) {
         TextDocument *textDocument = new TextDocument(codec, s_instance);
 
-        textDocument->setFilePath(filePath);
+        textDocument->setLocation(location);
 
         if (!textDocument->load(data, error)) {
             delete textDocument;
@@ -133,7 +130,7 @@ Document *DocumentManager::load(const QString &filePath, Document::Type type, co
     } else if (type == Document::Binary) {
         BinaryDocument *binaryDocument = new BinaryDocument(s_instance);
 
-        binaryDocument->setFilePath(filePath);
+        binaryDocument->setLocation(location);
 
         if (!binaryDocument->load(data, error)) {
             delete binaryDocument;
@@ -190,16 +187,16 @@ void DocumentManager::close(Document *document)
 }
 
 // static
-Document *DocumentManager::find(const QString &filePath)
+Document *DocumentManager::find(const Location &location)
 {
-    Q_ASSERT(!filePath.isEmpty());
+    Q_ASSERT(!location.isEmpty());
 
     // Use QFileInfo for file path comparison to avoid treating file paths as different if they only differ in case but
     // are located on a caseless file system and are actually identical. QFileInfo handles this case correctly.
-    QFileInfo fileInfo(filePath);
+    QFileInfo fileInfo(location.internalFilePath());
 
     foreach (Document *document, s_instance->m_documents) {
-        if (QFileInfo(document->filePath()) == fileInfo) {
+        if (QFileInfo(document->location().internalFilePath()) == fileInfo) {
             return document;
         }
     }
@@ -255,16 +252,16 @@ void DocumentManager::changeEncoding(Document *document)
         // If the TextDocument has a decoding error then it was never correctly loaded in the first place and doesn't
         // contain the actual text from the underlying file in a reusable way. In this case reopen the file with the
         // selected codec. There are no unsaved changes to be lost.
-        QString filePath = document->filePath();
+        const Location &location = document->location();
         Document::Type type = codec != NULL ? Document::Text : Document::Binary;
         QString error;
 
         close(document);
 
-        if (open(filePath, type, codec, &error) == NULL) {
+        if (open(location, type, codec, &error) == NULL) {
             if (error.isEmpty()) {
                 error = QString("Could not change encoding for %1: Unknown error")
-                        .arg(QDir::toNativeSeparators(filePath));
+                        .arg(location.displayFilePath());
             }
 
             QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -277,7 +274,7 @@ void DocumentManager::changeEncoding(Document *document)
             // then this will be detected the next time the document is saved and an error will be reported.
             textDocument->setCodec(codec);
         } else {
-            QString filePath = document->filePath();
+            const Location &location = document->location();
             bool modified = textDocument->isModified();
             QByteArray data;
             QString error;
@@ -285,7 +282,7 @@ void DocumentManager::changeEncoding(Document *document)
             if (!document->save(&data, &error)) {
                 if (error.isEmpty()) {
                     error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(QDir::toNativeSeparators(filePath));
+                            .arg(location.displayFilePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -296,12 +293,12 @@ void DocumentManager::changeEncoding(Document *document)
             close(document);
 
             error = QString();
-            document = load(filePath, Document::Binary, data, NULL, &error);
+            document = load(location, Document::Binary, data, NULL, &error);
 
             if (document == NULL) {
                 if (error.isEmpty()) {
                     error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(QDir::toNativeSeparators(filePath));
+                            .arg(location.displayFilePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -311,7 +308,7 @@ void DocumentManager::changeEncoding(Document *document)
         }
     } else if (document->type() == Document::Binary) {
         if (codec != NULL) {
-            QString filePath = document->filePath();
+            const Location &location = document->location();
             bool modified = document->isModified();
             QByteArray data;
             QString error;
@@ -319,7 +316,7 @@ void DocumentManager::changeEncoding(Document *document)
             if (!document->save(&data, &error)) {
                 if (error.isEmpty()) {
                     error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(QDir::toNativeSeparators(filePath));
+                            .arg(location.displayFilePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -329,12 +326,12 @@ void DocumentManager::changeEncoding(Document *document)
 
             close(document);
 
-            document = load(filePath, Document::Text, data, codec, &error);
+            document = load(location, Document::Text, data, codec, &error);
 
             if (document == NULL) {
                 if (error.isEmpty()) {
                     error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(QDir::toNativeSeparators(filePath));
+                            .arg(location.displayFilePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);

@@ -57,7 +57,6 @@ TextDocument::~TextDocument()
 bool TextDocument::load(const QByteArray &data, QString *error)
 {
     Q_ASSERT(error != NULL);
-    Q_ASSERT(!filePath().isEmpty());
 
     if (m_codec == NULL) {
         m_codec = TextCodec::fromByteOrderMark(data);
@@ -96,8 +95,8 @@ bool TextDocument::save(QByteArray *data, QString *error)
     *data = m_codec->encode(text.constData(), text.length(), &state);
 
     if (state.hasError()) {
-        *error = QString("Can not encode contents for file %1 as %2").arg(QDir::toNativeSeparators(filePath()),
-                                                                          QString(m_codec->name()));
+        *error = QString("Can not encode text for file %1 as %2").arg(location().displayFilePath(),
+                                                                      QString(m_codec->name()));
 
         return false;
     }

@@ -71,33 +71,22 @@ void OpenDocumentsWidget::addDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    QString absoluteFilePath;
-    QString absolutePath;
-    QString fileName;
-
-    if (document->filePath().isEmpty()) {
-        absoluteFilePath = "unnamed";
-        absolutePath = "unnamed";
-        fileName = "unnamed";
-    } else {
-        QFileInfo fileInfo(document->filePath());
-
-        absoluteFilePath = QDir::toNativeSeparators(fileInfo.absoluteFilePath());
-        absolutePath = QDir::toNativeSeparators(fileInfo.absolutePath());
-        fileName = fileInfo.fileName();
-    }
+    const Location &location = document->location();
+    const QString &filePath = location.displayFilePath();
+    const QString &directoryPath = location.displayDirectoryPath();
+    const QString &fileName = location.displayFileName();
 
     // Find or create parent item
-    const QModelIndexList &parents = m_model.match(m_model.index(0, 0, QModelIndex()), AbsolutePathRole,
-                                                   absolutePath, 1, Qt::MatchExactly);
+    const QModelIndexList &parents = m_model.match(m_model.index(0, 0, QModelIndex()), DirectoryPathRole,
+                                                   directoryPath, 1, Qt::MatchExactly);
     QStandardItem *parent;
 
     if (parents.isEmpty()) {
-        parent = new QStandardItem(QIcon(":/icons/16x16/folder.png"), absolutePath);
+        parent = new QStandardItem(QIcon(":/icons/16x16/folder.png"), directoryPath);
 
-        parent->setToolTip(absolutePath);
-        parent->setData(absolutePath, AbsolutePathRole);
-        parent->setData(document->filePath().isEmpty() ? "" : absolutePath.toLower(), LowerCaseNameRole);
+        parent->setToolTip(directoryPath);
+        parent->setData(directoryPath, DirectoryPathRole);
+        parent->setData(location.isEmpty() ? "" : directoryPath.toLower(), LowerCaseNameRole);
 
         m_model.appendRow(parent);
         m_model.sort(0);
@@ -108,10 +97,10 @@ void OpenDocumentsWidget::addDocument(Document *document)
     // Create child item
     QStandardItem *child = new QStandardItem(QIcon(":/icons/16x16/file.png"), fileName);
 
-    child->setToolTip(absoluteFilePath);
+    child->setToolTip(filePath);
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
     child->setData(fileName, FileNameRole);
-    child->setData(document->filePath().isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
+    child->setData(location.isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
 
     m_children.insert(document, child);
 
@@ -352,7 +341,7 @@ void OpenDocumentsWidget::markItemAsModified(QStandardItem *item, bool mark) con
     QString text;
 
     if (item->parent() == NULL) {
-        text = item->data(AbsolutePathRole).value<QString>();
+        text = item->data(DirectoryPathRole).value<QString>();
     } else {
         text = item->data(FileNameRole).value<QString>();
     }

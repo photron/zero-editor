@@ -19,6 +19,8 @@
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
 
+#include "location.h"
+
 #include <QObject>
 
 class Document : public QObject
@@ -39,13 +41,13 @@ public:
     virtual bool load(const QByteArray &data, QString *error) = 0;
     virtual bool save(QByteArray *data, QString *error) = 0;
 
-    QString filePath() const { return m_filePath; }
-    void setFilePath(const QString &filePath);
+    Location location() const { return m_location; }
+    void setLocation(const Location &location);
 
     bool isModified() const { return m_modified; }
 
 signals:
-    void filePathChanged(const QString &filePath);
+    void locationChanged(const Location &location);
     void modificationChanged(bool modified);
 
 public slots:
@@ -53,7 +55,7 @@ public slots:
 
 private:
     Type m_type;
-    QString m_filePath;
+    Location m_location;
     bool m_modified;
 };
 

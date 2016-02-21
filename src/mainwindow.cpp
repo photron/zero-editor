@@ -483,20 +483,10 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionWordWrapping->setEnabled(false);
         m_ui->actionWordWrapping->setChecked(false);
     } else {
-        QString fileName;
+        const Location &location = document->location();
+        const QString &fileName = location.displayFileName();
 
-        if (document->filePath().isEmpty()) {
-            fileName = "unnamed";
-
-            setWindowTitle("unnamed - Zero Editor");
-        } else {
-            QFileInfo fileInfo(document->filePath());
-            QString absolutePath(QDir::toNativeSeparators(fileInfo.absolutePath()));
-
-            fileName = fileInfo.fileName();
-
-            setWindowTitle(fileName + " - " + absolutePath + " - Zero Editor");
-        }
+        setWindowTitle(fileName + " - " + location.displayDirectoryPath() + " - Zero Editor");
 
         Editor *editor = DocumentManager::editor(document);
 

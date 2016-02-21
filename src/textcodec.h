@@ -30,7 +30,7 @@ class TextCodecState
     Q_DISABLE_COPY(TextCodecState)
 
 public:
-    TextCodecState() : m_first(true) {}
+    TextCodecState() : m_first(true) { }
 
     bool hasError() const { return m_state.invalidChars != 0 || m_state.remainingChars != 0; }
 

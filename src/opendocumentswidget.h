@@ -57,7 +57,7 @@ private slots:
 private:
     enum {
         DocumentPointerRole = Qt::UserRole,
-        AbsolutePathRole, // for parents
+        DirectoryPathRole, // for parents
         FileNameRole, // for children
         LowerCaseNameRole // for sorting
     };

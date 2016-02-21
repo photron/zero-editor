@@ -13,6 +13,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
                src/gitdiffwidget.cpp \
+               src/location.cpp \
                src/main.cpp \
                src/mainwindow.cpp \
                src/monospacefontmetrics.cpp \
@@ -36,6 +37,7 @@ HEADERS     += src/binaryeditor.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
                src/gitdiffwidget.h \
+               src/location.h \
                src/mainwindow.h \
                src/monospacefontmetrics.h \
                src/opendocumentswidget.h \

@@ -27,12 +27,12 @@ Document::Document(Type type, QObject *parent) :
 {
 }
 
-void Document::setFilePath(const QString &filePath)
+void Document::setLocation(const Location &location)
 {
-    if (m_filePath != filePath) {
-        m_filePath = filePath;
+    if (m_location != location) {
+        m_location = location;
 
-        emit filePathChanged(m_filePath);
+        emit locationChanged(m_location);
     }
 }
 

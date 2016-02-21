@@ -18,9 +18,6 @@
 
 #include "binarydocument.h"
 
-#include <QFile>
-#include <QDir>
-
 BinaryDocument::BinaryDocument(QObject *parent) :
     Document(Binary, parent)
 {
@@ -29,10 +26,9 @@ BinaryDocument::BinaryDocument(QObject *parent) :
 bool BinaryDocument::load(const QByteArray &data, QString *error)
 {
     Q_ASSERT(error != NULL);
-    Q_ASSERT(!filePath().isEmpty());
 
     if (data.length() == 0) {
-        *error = QString("Can not open empty file %1 in binary mode").arg(QDir::toNativeSeparators(filePath()));
+        *error = QString("Can not open empty file %1 in binary mode").arg(location().displayFilePath());
 
         return false;
     }

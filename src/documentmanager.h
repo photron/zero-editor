@@ -39,11 +39,11 @@ public:
     static DocumentManager *instance() { return s_instance; }
 
     static void create();
-    static Document *open(const QString &filePath, Document::Type type, TextCodec *codec, QString *error);
-    static Document *load(const QString &filePath, Document::Type type, const QByteArray &data, TextCodec *codec,
+    static Document *open(const Location &location, Document::Type type, TextCodec *codec, QString *error);
+    static Document *load(const Location &location, Document::Type type, const QByteArray &data, TextCodec *codec,
                           QString *error);
     static void close(Document *document);
-    static Document *find(const QString &filePath);
+    static Document *find(const Location &location);
 
     static Editor *editor(Document *document);
 
