@@ -53,6 +53,9 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionSaveAll->setEnabled(false);
     m_ui->actionSaveAll_Tool->setEnabled(m_ui->actionSaveAll->isEnabled());
 
+    m_ui->actionRevert->setEnabled(false);
+    m_ui->actionRevert_Tool->setEnabled(m_ui->actionRevert->isEnabled());
+
     m_ui->actionClose->setEnabled(false);
     m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
 
@@ -120,9 +123,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_ui->widgetBookmarks->hide();
     m_ui->widgetStackedHelpers->hide();
-
-    m_ui->actionRevert->setText("Revert \"brickd.c\"");
-    m_ui->actionRevert_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionRevert));
 
     // Setup toolbar tooltips
     foreach (QAction *toolBarAction, m_ui->toolBar->actions()) {
@@ -476,6 +476,11 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionSaveAs->setEnabled(false);
         m_ui->actionSaveAs->setText("Save As...");
 
+        m_ui->actionRevert->setEnabled(false);
+        m_ui->actionRevert->setText("Revert");
+        m_ui->actionRevert_Tool->setEnabled(m_ui->actionRevert->isEnabled());
+        m_ui->actionRevert_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionRevert));
+
         m_ui->actionClose->setEnabled(false);
         m_ui->actionClose->setText("Close");
         m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
@@ -518,6 +523,11 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionSaveAs->setEnabled(true);
         m_ui->actionSaveAs->setText(QString("Save \"%1\" As...").arg(fileName));
 
+        m_ui->actionRevert->setEnabled(document->isModified());
+        m_ui->actionRevert->setText(QString("Revert \"%1\"").arg(fileName));
+        m_ui->actionRevert_Tool->setEnabled(m_ui->actionRevert->isEnabled());
+        m_ui->actionRevert_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionRevert));
+
         m_ui->actionClose->setEnabled(true);
         m_ui->actionClose->setText(QString("Close \"%1\"").arg(fileName));
         m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
@@ -542,6 +552,8 @@ void MainWindow::setCurrentDocument(Document *document)
 
         connect(document, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         connect(document, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
+        connect(document, &Document::modificationChanged, m_ui->actionRevert, &QAction::setEnabled);
+        connect(document, &Document::modificationChanged, m_ui->actionRevert_Tool, &QAction::setEnabled);
         connect(editor, &Editor::actionAvailabilityChanged, this, &MainWindow::updateEditMenuAction);
 
         m_lastCurrentDocument = document;
