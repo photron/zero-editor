@@ -28,7 +28,7 @@ bool BinaryDocument::load(const QByteArray &data, QString *error)
     Q_ASSERT(error != NULL);
 
     if (data.length() == 0) {
-        *error = QString("Can not open empty file %1 in binary mode").arg(location().displayFilePath());
+        *error = QString("Can not open empty file %1 in binary mode").arg(location().filePath());
 
         return false;
     }

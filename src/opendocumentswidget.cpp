@@ -72,9 +72,9 @@ void OpenDocumentsWidget::addDocument(Document *document)
     Q_ASSERT(document != NULL);
 
     const Location &location = document->location();
-    const QString &filePath = location.displayFilePath();
-    const QString &directoryPath = location.displayDirectoryPath();
-    const QString &fileName = location.displayFileName();
+    const QString &filePath = location.filePath();
+    const QString &directoryPath = location.directoryPath();
+    const QString &fileName = location.fileName();
 
     // Find or create parent item
     const QModelIndexList &parents = m_model.match(m_model.index(0, 0, QModelIndex()), DirectoryPathRole,
@@ -86,7 +86,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
 
         parent->setToolTip(directoryPath);
         parent->setData(directoryPath, DirectoryPathRole);
-        parent->setData(location.isEmpty() ? "" : directoryPath.toLower(), LowerCaseNameRole);
+        parent->setData(location.isUnnamed() ? "" : directoryPath.toLower(), LowerCaseNameRole);
 
         m_model.appendRow(parent);
         m_model.sort(0);
@@ -100,7 +100,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     child->setToolTip(filePath);
     child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
     child->setData(fileName, FileNameRole);
-    child->setData(location.isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
+    child->setData(location.isUnnamed() ? "" : fileName.toLower(), LowerCaseNameRole);
 
     m_children.insert(document, child);
 

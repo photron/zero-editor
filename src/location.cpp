@@ -21,28 +21,27 @@
 #include <QDir>
 #include <QFileInfo>
 
-LocationData::LocationData(const QString &filePath)
+LocationData::LocationData(const QString &filePath_)
 {
-    if (filePath.isEmpty()) {
-        internalFilePath = "";
-        displayFilePath = "unnamed";
-        displayDirectoryPath = "unnamed";
-        displayFileName = "unnamed";
-    } else {
-        QFileInfo fileInfo(filePath);
+    isUnnamed = filePath_.isEmpty();
 
-        internalFilePath = fileInfo.canonicalFilePath();
-        displayFilePath = QDir::toNativeSeparators(internalFilePath);
-        displayDirectoryPath = QDir::toNativeSeparators(fileInfo.canonicalPath());
-        displayFileName = fileInfo.fileName();
+    if (isUnnamed) {
+        filePath = QDir::toNativeSeparators(QDir::home().absoluteFilePath("unnamed"));
+        directoryPath = QDir::toNativeSeparators(QDir::homePath());
+        fileName = "unnamed";
+    } else {
+        QFileInfo fileInfo(filePath_);
+
+        filePath = QDir::toNativeSeparators(fileInfo.canonicalFilePath());
+        directoryPath = QDir::toNativeSeparators(fileInfo.canonicalPath());
+        fileName = fileInfo.fileName();
     }
 }
 
 LocationData::LocationData(const LocationData &other) :
     QSharedData(other),
-    internalFilePath(other.internalFilePath),
-    displayFilePath(other.displayFilePath),
-    displayDirectoryPath(other.displayDirectoryPath),
-    displayFileName(other.displayFileName)
+    filePath(other.filePath),
+    directoryPath(other.directoryPath),
+    fileName(other.fileName)
 {
 }

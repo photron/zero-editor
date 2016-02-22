@@ -27,10 +27,10 @@ public:
     LocationData(const QString &filePath);
     LocationData(const LocationData &other);
 
-    QString internalFilePath;
-    QString displayFilePath;
-    QString displayDirectoryPath;
-    QString displayFileName;
+    bool isUnnamed;
+    QString filePath;
+    QString directoryPath;
+    QString fileName;
 };
 
 class Location
@@ -39,14 +39,13 @@ public:
     Location() : d(new LocationData("")) { }
     Location(const QString &filePath) : d(new LocationData(filePath)) { }
 
-    bool isEmpty() const { return d->internalFilePath.isEmpty(); }
+    bool isUnnamed() const { return d->isUnnamed; }
 
-    QString internalFilePath() const { return d->internalFilePath; }
-    QString displayFilePath() const { return d->displayFilePath; }
-    QString displayDirectoryPath() const { return d->displayDirectoryPath; }
-    QString displayFileName() const { return d->displayFileName; }
+    QString filePath() const { return d->filePath; }
+    QString directoryPath() const { return d->directoryPath; }
+    QString fileName() const { return d->fileName; }
 
-    bool operator==(const Location &other) const { return d == other.d || d->internalFilePath == other.d->internalFilePath; }
+    bool operator==(const Location &other) const { return d == other.d || d->filePath == other.d->filePath; }
     bool operator!=(const Location &other) const { return !(*this == other); }
 
 private:

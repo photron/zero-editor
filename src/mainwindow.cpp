@@ -396,7 +396,7 @@ void MainWindow::setWordWrapping(bool enable)
 {
     Editor *editor = DocumentManager::editor(DocumentManager::current());
 
-    Q_ASSERT(editor);
+    Q_ASSERT(editor != NULL);
 
     editor->setWordWrapping(enable);
 }
@@ -504,7 +504,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionWordWrapping->setChecked(false);
     } else {
         const Location &location = document->location();
-        const QString &fileName = location.displayFileName();
+        const QString &fileName = location.fileName();
 
         setWindowTitle(fileName + " - " + location.displayDirectoryPath() + " - Zero Editor");
 
