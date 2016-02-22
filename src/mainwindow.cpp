@@ -505,8 +505,13 @@ void MainWindow::setCurrentDocument(Document *document)
     } else {
         const Location &location = document->location();
         const QString &fileName = location.fileName();
+        QString title = fileName + " - ";
 
-        setWindowTitle(fileName + " - " + location.displayDirectoryPath() + " - Zero Editor");
+        if (!location.isUnnamed()) {
+            title += location.directoryPath() + " - ";
+        }
+
+        setWindowTitle(title + "Zero Editor");
 
         Editor *editor = DocumentManager::editor(document);
 
