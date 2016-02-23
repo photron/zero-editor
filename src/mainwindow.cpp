@@ -267,7 +267,7 @@ void MainWindow::openFile()
 
         if (document == NULL) {
             if (error.isEmpty()) {
-                error = QString("Could not open %1: Unknown error").arg(QDir::toNativeSeparators(filePath));
+                error = QString("Could not open \"%1\": Unknown error").arg(QDir::toNativeSeparators(filePath));
             }
 
             QMessageBox::critical(this, "File Open Error", error);
@@ -504,10 +504,10 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionWordWrapping->setChecked(false);
     } else {
         const Location &location = document->location();
-        const QString &fileName = location.fileName();
+        const QString &fileName = location.fileName("unnamed");
         QString title = fileName + " - ";
 
-        if (!location.isUnnamed()) {
+        if (!location.isEmpty()) {
             title += location.directoryPath() + " - ";
         }
 

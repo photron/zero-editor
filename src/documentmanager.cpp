@@ -67,12 +67,12 @@ void DocumentManager::create()
 // static
 Document *DocumentManager::open(const Location &location, Document::Type type, TextCodec *codec, QString *error)
 {
-    Q_ASSERT(!location.isUnnamed());
+    Q_ASSERT(!location.isEmpty());
     Q_ASSERT(type == Document::Text || codec == NULL);
     Q_ASSERT(error != NULL);
 
     if (find(location) != NULL) {
-        *error = QString("%1 is already open").arg(location.filePath());
+        *error = QString("File \"%1\" is already open").arg(location.filePath());
 
         return NULL;
     }
@@ -80,8 +80,7 @@ Document *DocumentManager::open(const Location &location, Document::Type type, T
     QFile file(location.filePath());
 
     if (!file.open(QIODevice::ReadOnly)) {
-        *error = QString("Could not open %1 for reading: %2").arg(location.filePath(),
-                                                                  file.errorString());
+        *error = QString("Could not open \"%1\" for reading: %2").arg(location.filePath(), file.errorString());
 
         return NULL;
     }
@@ -90,7 +89,7 @@ Document *DocumentManager::open(const Location &location, Document::Type type, T
     const QByteArray &data = file.readAll();
 
     if (file.error() != QFile::NoError) {
-        *error = QString("Could not read %1: %2").arg(location.filePath(), file.errorString());
+        *error = QString("Could not read from \"%1\": %2").arg(location.filePath(), file.errorString());
 
         return NULL;
     }
@@ -105,8 +104,8 @@ Document *DocumentManager::load(const Location &location, Document::Type type, c
     Q_ASSERT(type == Document::Text || codec == NULL);
     Q_ASSERT(error != NULL);
 
-    if (!location.isUnnamed() && find(location) != NULL) {
-        *error = QString("%1 is already open").arg(location.filePath());
+    if (!location.isEmpty() && find(location) != NULL) {
+        *error = QString("File \"%1\" is already open").arg(location.filePath());
 
         return NULL;
     }
@@ -166,6 +165,7 @@ void DocumentManager::close(Document *document)
         foreach (Document *other, s_instance->m_documents) {
             if (other != document) {
                 setCurrent(other);
+
                 break;
             }
         }
@@ -189,7 +189,7 @@ void DocumentManager::close(Document *document)
 // static
 Document *DocumentManager::find(const Location &location)
 {
-    Q_ASSERT(!location.isUnnamed());
+    Q_ASSERT(!location.isEmpty());
 
     // Use QFileInfo for file path comparison to avoid treating file paths as different if they only differ in case but
     // are located on a caseless file system and are actually identical. QFileInfo handles this case correctly.
@@ -260,8 +260,7 @@ void DocumentManager::changeEncoding(Document *document)
 
         if (open(location, type, codec, &error) == NULL) {
             if (error.isEmpty()) {
-                error = QString("Could not change encoding for %1: Unknown error")
-                        .arg(location.filePath());
+                error = QString("Could not change encoding for \"%1\": Unknown error").arg(location.filePath());
             }
 
             QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -281,8 +280,7 @@ void DocumentManager::changeEncoding(Document *document)
 
             if (!document->save(&data, &error)) {
                 if (error.isEmpty()) {
-                    error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(location.filePath());
+                    error = QString("Could not change encoding for \"%1\": Unknown error").arg(location.filePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -297,8 +295,7 @@ void DocumentManager::changeEncoding(Document *document)
 
             if (document == NULL) {
                 if (error.isEmpty()) {
-                    error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(location.filePath());
+                    error = QString("Could not change encoding for \"%1\": Unknown error").arg(location.filePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -315,8 +312,7 @@ void DocumentManager::changeEncoding(Document *document)
 
             if (!document->save(&data, &error)) {
                 if (error.isEmpty()) {
-                    error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(location.filePath());
+                    error = QString("Could not change encoding for \"%1\": Unknown error").arg(location.filePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);
@@ -330,8 +326,7 @@ void DocumentManager::changeEncoding(Document *document)
 
             if (document == NULL) {
                 if (error.isEmpty()) {
-                    error = QString("Could not change encoding for %1: Unknown error")
-                            .arg(location.filePath());
+                    error = QString("Could not change encoding for \"%1\": Unknown error").arg(location.filePath());
                 }
 
                 QMessageBox::critical(MainWindow::instance(), "Encoding Change Error", error);

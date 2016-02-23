@@ -23,13 +23,7 @@
 
 LocationData::LocationData(const QString &filePath_)
 {
-    isUnnamed = filePath_.isEmpty();
-
-    if (isUnnamed) {
-        filePath = QDir::toNativeSeparators(QDir::home().absoluteFilePath("unnamed"));
-        directoryPath = QDir::toNativeSeparators(QDir::homePath());
-        fileName = "unnamed";
-    } else {
+    if (!filePath_.isEmpty()) {
         QFileInfo fileInfo(filePath_);
 
         filePath = QDir::toNativeSeparators(fileInfo.canonicalFilePath());
