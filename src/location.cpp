@@ -26,8 +26,15 @@ LocationData::LocationData(const QString &filePath_)
     if (!filePath_.isEmpty()) {
         QFileInfo fileInfo(filePath_);
 
-        filePath = QDir::toNativeSeparators(fileInfo.canonicalFilePath());
-        directoryPath = QDir::toNativeSeparators(fileInfo.canonicalPath());
+        // Canonical getters for QFileInfo only work with existing file paths
+        if (fileInfo.exists()) {
+            filePath = QDir::toNativeSeparators(fileInfo.canonicalFilePath());
+            directoryPath = QDir::toNativeSeparators(fileInfo.canonicalPath());
+        } else {
+            filePath = QDir::toNativeSeparators(fileInfo.absoluteFilePath());
+            directoryPath = QDir::toNativeSeparators(fileInfo.absolutePath());
+        }
+
         fileName = fileInfo.fileName();
     }
 }
