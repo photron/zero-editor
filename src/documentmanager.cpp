@@ -156,6 +156,68 @@ Document *DocumentManager::load(const Location &location, Document::Type type, c
 }
 
 // static
+void DocumentManager::save(Document *document)
+{
+    Q_ASSERT(document != NULL);
+    Q_ASSERT(!document->location().isEmpty());
+
+    if (!document->isModified()) {
+        return;
+    }
+
+    saveAs(document, document->location());
+}
+
+// static
+void DocumentManager::saveAs(Document *document, const Location &location)
+{
+    Q_ASSERT(document != NULL);
+    Q_ASSERT(!location.isEmpty());
+
+    QFile file(location.filePath());
+    QString error;
+
+    if (!file.open(QIODevice::WriteOnly)) {
+        error = QString("Could not open \"%1\" for writing: %2").arg(location.filePath(), file.errorString());
+
+        QMessageBox::critical(MainWindow::instance(), "Save File Error", error);
+
+        return;
+    }
+
+    QByteArray data;
+
+    if (!document->save(&data, &error)) {
+        if (error.isEmpty()) {
+            error = QString("Could not save \"%1\": Unknown error").arg(location.filePath());
+        }
+
+        QMessageBox::critical(MainWindow::instance(), "Save File Error", error);
+
+        return;
+    }
+
+    if (file.write(data) < data.length()) {
+        error = QString("Short write to \"%1\" occurred").arg(location.filePath());
+
+        QMessageBox::critical(MainWindow::instance(), "Save File Error", error);
+
+        return;
+    }
+
+    document->setModified(false);
+    document->setLocation(location);
+}
+
+// static
+void DocumentManager::saveAll()
+{
+    foreach (Document *document, s_instance->m_documents) {
+        save(document);
+    }
+}
+
+// static
 void DocumentManager::close(Document *document)
 {
     Q_ASSERT(document != NULL);

@@ -38,10 +38,14 @@ public:
 
     static DocumentManager *instance() { return s_instance; }
 
+    // FIXME: convert them to slots and avoid forwarding in MainWindow
     static void create();
     static Document *open(const Location &location, Document::Type type, TextCodec *codec, QString *error);
     static Document *load(const Location &location, Document::Type type, const QByteArray &data, TextCodec *codec,
                           QString *error);
+    static void save(Document *document);
+    static void saveAs(Document *document, const Location &location);
+    static void saveAll();
     static void close(Document *document);
     static Document *find(const Location &location);
 

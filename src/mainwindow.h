@@ -45,7 +45,10 @@ protected:
 
 private slots:
     void newDocument();
-    void openFile();
+    void openDocuments();
+    void saveDocument();
+    void saveDocumentAs();
+    void saveAllDocuments();
     void closeDocument();
 
     void undo();

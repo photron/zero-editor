@@ -70,6 +70,7 @@ void OpenDocumentsWidget::installLineEditEventFilter(QObject *filter)
 void OpenDocumentsWidget::addDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
+    Q_ASSERT(document != DocumentManager::current());
 
     const Location &location = document->location();
     const QString &filePath = location.filePath("unnamed");
@@ -107,6 +108,7 @@ void OpenDocumentsWidget::addDocument(Document *document)
     parent->appendRow(child);
     parent->sortChildren(0);
 
+    connect(document, &Document::locationChanged, this, &OpenDocumentsWidget::updateLocationOfSender);
     connect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateModificationMarkerOfSender);
 
     // Apply current filter
@@ -129,6 +131,7 @@ void OpenDocumentsWidget::removeDocument(Document *document)
     Q_ASSERT(document != NULL);
 
     disconnect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateModificationMarkerOfSender);
+    disconnect(document, &Document::locationChanged, this, &OpenDocumentsWidget::updateLocationOfSender);
 
     QStandardItem *child = m_children.value(document, NULL);
 
@@ -136,6 +139,8 @@ void OpenDocumentsWidget::removeDocument(Document *document)
     Q_ASSERT(child != m_currentChild);
 
     QStandardItem *parent = child->parent();
+
+    Q_ASSERT(parent != NULL);
 
     parent->removeRow(child->row());
 
@@ -186,6 +191,8 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 
         QStandardItem *parent = child->parent();
 
+        Q_ASSERT(parent != NULL);
+
         m_ui->treeDocuments->expand(parent->index());
         m_ui->treeDocuments->scrollTo(child->index());
         m_ui->treeDocuments->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
@@ -235,6 +242,8 @@ void OpenDocumentsWidget::updateParentItemMarkers(QStandardItem *item)
             QStandardItem *child = item->child(childRow);
             Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
 
+            Q_ASSERT(document != NULL);
+
             if (m_ui->treeDocuments->isRowHidden(childRow, item->index()) && document->isModified()) {
                 hasHiddenModifiedChild = true;
                 break;
@@ -254,6 +263,8 @@ void OpenDocumentsWidget::updateParentItemMarkers(QStandardItem *item)
             QStandardItem *child = item->child(childRow);
             Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
 
+            Q_ASSERT(document != NULL);
+
             if (document->isModified()) {
                 hasModifiedChild = true;
                 break;
@@ -261,6 +272,25 @@ void OpenDocumentsWidget::updateParentItemMarkers(QStandardItem *item)
         }
 
         markItemAsModified(item, hasModifiedChild);
+    }
+}
+
+// private slot
+void OpenDocumentsWidget::updateLocationOfSender()
+{
+    Document *document = qobject_cast<Document *>(sender());
+
+    Q_ASSERT(document != NULL);
+
+    if (document == DocumentManager::current()) {
+        DocumentManager::setCurrent(NULL);
+    }
+
+    removeDocument(document);
+    addDocument(document);
+
+    if (DocumentManager::current() == NULL) {
+        DocumentManager::setCurrent(document);
     }
 }
 
@@ -338,6 +368,8 @@ void OpenDocumentsWidget::markItemAsCurrent(QStandardItem *item, bool mark) cons
 // private
 void OpenDocumentsWidget::markItemAsModified(QStandardItem *item, bool mark) const
 {
+    Q_ASSERT(item != NULL);
+
     QString text;
 
     if (item->parent() == NULL) {

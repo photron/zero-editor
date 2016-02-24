@@ -59,6 +59,18 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionClose->setEnabled(false);
     m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
 
+    connect(m_ui->actionNew, &QAction::triggered, this, &MainWindow::newDocument);
+    connect(m_ui->actionNew_Tool, &QAction::triggered, this, &MainWindow::newDocument);
+    connect(m_ui->actionOpen, &QAction::triggered, this, &MainWindow::openDocuments);
+    connect(m_ui->actionOpen_Tool, &QAction::triggered, this, &MainWindow::openDocuments);
+    connect(m_ui->actionSave, &QAction::triggered, this, &MainWindow::saveDocument);
+    connect(m_ui->actionSave_Tool, &QAction::triggered, this, &MainWindow::saveDocument);
+    connect(m_ui->actionSaveAs, &QAction::triggered, this, &MainWindow::saveDocumentAs);
+    connect(m_ui->actionSaveAs, &QAction::triggered, this, &MainWindow::saveAllDocuments);
+    connect(m_ui->actionClose, &QAction::triggered, this, &MainWindow::closeDocument);
+    connect(m_ui->actionClose_Tool, &QAction::triggered, this, &MainWindow::closeDocument);
+    connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+
     // Edit menu
     m_ui->actionUndo->setEnabled(false);
     m_ui->actionRedo->setEnabled(false);
@@ -71,19 +83,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->actionToggleCase->setEnabled(false);
     m_ui->actionToggleCase_Tool->setEnabled(m_ui->actionToggleCase->isEnabled());
 
-    // Options menu
-    m_ui->actionEncoding->setEnabled(false);
-    m_ui->actionWordWrapping->setEnabled(false);
-    m_ui->actionWordWrapping->setChecked(false);
-
-    connect(m_ui->actionNew, &QAction::triggered, this, &MainWindow::newDocument);
-    connect(m_ui->actionNew_Tool, &QAction::triggered, this, &MainWindow::newDocument);
-    connect(m_ui->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
-    connect(m_ui->actionOpen_Tool, &QAction::triggered, this, &MainWindow::openFile);
-    connect(m_ui->actionClose, &QAction::triggered, this, &MainWindow::closeDocument);
-    connect(m_ui->actionClose_Tool, &QAction::triggered, this, &MainWindow::closeDocument);
-    connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
-
+    // FIXME: don't do all this forwading here, but directly connect the signals
     connect(m_ui->actionUndo, &QAction::triggered, this, &MainWindow::undo);
     connect(m_ui->actionRedo, &QAction::triggered, this, &MainWindow::redo);
     connect(m_ui->actionCut, &QAction::triggered, this, &MainWindow::cut);
@@ -94,12 +94,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->actionToggleCase, &QAction::triggered, this, &MainWindow::toggleCase);
     connect(m_ui->actionToggleCase_Tool, &QAction::triggered, this, &MainWindow::toggleCase);
 
+    // Search menu
     connect(m_ui->actionFindAndReplace, &QAction::triggered, this, &MainWindow::showFindAndReplaceWidget);
     connect(m_ui->actionFindInFiles, &QAction::triggered, this, &MainWindow::showFindInFilesWidget);
+
+    // Options menu
+    m_ui->actionEncoding->setEnabled(false);
+    m_ui->actionWordWrapping->setEnabled(false);
+    m_ui->actionWordWrapping->setChecked(false);
 
     connect(m_ui->actionEncoding, &QAction::triggered, this, &MainWindow::showEncodingDialog);
     connect(m_ui->actionWordWrapping, &QAction::triggered, this, &MainWindow::setWordWrapping);
 
+    // Tools menu
     connect(m_ui->actionTerminal, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionTerminal_Tool, &QAction::triggered, this, &MainWindow::openTerminal);
     connect(m_ui->actionUnsavedDiff, &QAction::triggered, this, &MainWindow::showUnsavedDiffWidget);
@@ -250,7 +257,7 @@ void MainWindow::newDocument()
 }
 
 // private slot
-void MainWindow::openFile()
+void MainWindow::openDocuments()
 {
     QStringList filePaths = QFileDialog::getOpenFileNames(this, "Open File");
     QString error;
@@ -273,6 +280,49 @@ void MainWindow::openFile()
             QMessageBox::critical(this, "File Open Error", error);
         }
     }
+}
+
+// private slot
+void MainWindow::saveDocument()
+{
+    Document *document = DocumentManager::current();
+
+    Q_ASSERT(document != NULL);
+
+    if (document->location().isEmpty()) {
+        saveDocumentAs();
+    } else {
+        DocumentManager::save(document);
+    }
+}
+
+// private slot
+void MainWindow::saveDocumentAs()
+{
+    Document *document = DocumentManager::current();
+
+    Q_ASSERT(document != NULL);
+
+    const Location &location = document->location();
+    QString suggestion;
+
+    if (location.isEmpty()) {
+        suggestion = QDir::home().absoluteFilePath("unnamed");
+    } else {
+        suggestion = location.filePath();
+    }
+
+    const QString &filePath = QFileDialog::getSaveFileName(this, "Save File", suggestion);
+
+    if (!filePath.isEmpty()) {
+        DocumentManager::saveAs(document, filePath);
+    }
+}
+
+// private slot
+void MainWindow::saveAllDocuments()
+{
+    DocumentManager::saveAll();
 }
 
 // private slot

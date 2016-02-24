@@ -49,6 +49,7 @@ private slots:
     void updateModifiedButton(int modificationCount);
     void updateParentIndexMarkers(const QModelIndex &index);
     void updateParentItemMarkers(QStandardItem *item);
+    void updateLocationOfSender();
     void updateModificationMarkerOfSender();
     void showModifiedDocumentsOnly(bool enable);
     void setFilterEnabled(bool enable);
