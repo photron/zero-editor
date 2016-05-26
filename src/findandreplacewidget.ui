@@ -75,6 +75,9 @@
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
+        <property name="toolTip">
+         <string>Interpret text to find as regular expression and allow placeholders in replacement text</string>
+        </property>
         <property name="text">
          <string>Regular Expression</string>
         </property>
@@ -85,6 +88,9 @@
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
+        <property name="toolTip">
+         <string>Find only whole words</string>
+        </property>
         <property name="text">
          <string>Whole Word</string>
         </property>
@@ -94,6 +100,9 @@
        <widget class="QCheckBox" name="checkCaseSensitive">
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Respect case of text to find</string>
         </property>
         <property name="text">
          <string>Case Sensitive</string>
@@ -118,6 +127,9 @@
    </item>
    <item>
     <widget class="QComboBox" name="comboFind">
+     <property name="toolTip">
+      <string>Text to find</string>
+     </property>
      <property name="editable">
       <bool>true</bool>
      </property>
@@ -125,6 +137,9 @@
    </item>
    <item>
     <widget class="QComboBox" name="comboReplace">
+     <property name="toolTip">
+      <string>Replacement text</string>
+     </property>
      <property name="editable">
       <bool>true</bool>
      </property>

@@ -78,6 +78,9 @@
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
+        <property name="toolTip">
+         <string>Show all open documents</string>
+        </property>
         <property name="text">
          <string>All</string>
         </property>
@@ -91,6 +94,9 @@
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
         </property>
+        <property name="toolTip">
+         <string>Show only modified open document</string>
+        </property>
         <property name="text">
          <string>Modified</string>
         </property>
@@ -100,6 +106,9 @@
        <widget class="QCheckBox" name="checkFilter">
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="toolTip">
+         <string>Filter open documents list</string>
         </property>
         <property name="text">
          <string>Filter</string>
@@ -111,6 +120,9 @@
    </item>
    <item>
     <widget class="QLineEdit" name="editFilter">
+     <property name="toolTip">
+      <string>Filter for file names to show (regular expression)</string>
+     </property>
      <property name="placeholderText">
       <string>Filter</string>
      </property>
