@@ -35,8 +35,11 @@ FindInFilesWidget::FindInFilesWidget(QWidget *parent) :
     m_ui->comboDirectory->lineEdit()->setClearButtonEnabled(true);
     m_ui->comboDirectory->lineEdit()->setPlaceholderText("Directory");
 
-    m_ui->comboFilter->lineEdit()->setClearButtonEnabled(true);
-    m_ui->comboFilter->lineEdit()->setPlaceholderText("Filter");
+    m_ui->comboIncludeFilter->lineEdit()->setClearButtonEnabled(true);
+    m_ui->comboIncludeFilter->lineEdit()->setPlaceholderText("Include Filter");
+
+    m_ui->comboExcludeFilter->lineEdit()->setClearButtonEnabled(true);
+    m_ui->comboExcludeFilter->lineEdit()->setPlaceholderText("Exclude Filter");
 }
 
 FindInFilesWidget::~FindInFilesWidget()
@@ -48,7 +51,8 @@ void FindInFilesWidget::installLineEditEventFilter(QObject *filter)
 {
     m_ui->comboFind->lineEdit()->installEventFilter(filter);
     m_ui->comboDirectory->lineEdit()->installEventFilter(filter);
-    m_ui->comboFilter->lineEdit()->installEventFilter(filter);
+    m_ui->comboIncludeFilter->lineEdit()->installEventFilter(filter);
+    m_ui->comboExcludeFilter->lineEdit()->installEventFilter(filter);
 }
 
 void FindInFilesWidget::prepareForShow()

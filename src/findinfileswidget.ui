@@ -208,12 +208,31 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboFilter">
+      <widget class="QComboBox" name="comboIncludeFilter">
        <property name="minimumSize">
         <size>
          <width>120</width>
          <height>0</height>
         </size>
+       </property>
+       <property name="toolTip">
+        <string>Filter for relative file paths to include (regular expression)</string>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboExcludeFilter">
+       <property name="minimumSize">
+        <size>
+         <width>120</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Filter for relative file paths to exclude (regular expression)</string>
        </property>
        <property name="editable">
         <bool>true</bool>
@@ -256,7 +275,8 @@
   <tabstop>comboFind</tabstop>
   <tabstop>comboScope</tabstop>
   <tabstop>comboDirectory</tabstop>
-  <tabstop>comboFilter</tabstop>
+  <tabstop>comboIncludeFilter</tabstop>
+  <tabstop>comboExcludeFilter</tabstop>
   <tabstop>buttonFind</tabstop>
   <tabstop>buttonPrevious</tabstop>
   <tabstop>buttonNext</tabstop>
