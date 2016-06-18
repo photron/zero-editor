@@ -13,6 +13,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
                src/gitdiffwidget.cpp \
+               src/lexer.cpp \
                src/location.cpp \
                src/main.cpp \
                src/mainwindow.cpp \
@@ -20,6 +21,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/opendocumentswidget.cpp \
                src/recentfileswidget.cpp \
                src/style.cpp \
+               src/syntaxhighlighter.cpp \
                src/textcodec.cpp \
                src/texteditor.cpp \
                src/texteditorwidget.cpp \
@@ -37,12 +39,14 @@ HEADERS     += src/binaryeditor.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
                src/gitdiffwidget.h \
+               src/lexer.h \
                src/location.h \
                src/mainwindow.h \
                src/monospacefontmetrics.h \
                src/opendocumentswidget.h \
                src/recentfileswidget.h \
                src/style.h \
+               src/syntaxhighlighter.h \
                src/textcodec.h \
                src/texteditor.h \
                src/texteditorwidget.h \

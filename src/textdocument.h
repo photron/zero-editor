@@ -23,6 +23,7 @@
 
 class QTextDocument;
 
+class SyntaxHighlighter;
 class TextCodec;
 
 class TextDocument : public Document
@@ -52,6 +53,7 @@ private:
 
     QTextDocument *m_internalDocument;
     bool m_isContentsModified;
+    SyntaxHighlighter *m_syntaxHighlighter;
 
     TextCodec *m_codec;
     bool m_hasDecodingError;

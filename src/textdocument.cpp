@@ -19,6 +19,7 @@
 #include "textdocument.h"
 
 #include "monospacefontmetrics.h"
+#include "syntaxhighlighter.h"
 #include "textcodec.h"
 
 #include <QFile>
@@ -31,6 +32,7 @@ TextDocument::TextDocument(TextCodec *codec, QObject *parent) :
     Document(Text, parent),
     m_internalDocument(new QTextDocument),
     m_isContentsModified(false),
+    m_syntaxHighlighter(NULL),
     m_codec(codec),
     m_hasDecodingError(false),
     m_isEncodingModified(false)
@@ -47,10 +49,18 @@ TextDocument::TextDocument(TextCodec *codec, QObject *parent) :
     m_internalDocument->setDefaultTextOption(option);
 
     connect(m_internalDocument, &QTextDocument::modificationChanged, this, &TextDocument::setContentsModified);
+
+    m_syntaxHighlighter = new SyntaxHighlighter(m_internalDocument);
 }
 
 TextDocument::~TextDocument()
 {
+    // Disconnect all signals before deleting the syntax highlighter. Otherwise the syntax highlighter might trigger
+    // a QTextDocument::contentsChanged signal emission that makes the TextEditor access this TextDocument object while
+    // it is being deleted, resulting in a segfault.
+    m_internalDocument->disconnect();
+
+    delete m_syntaxHighlighter;
     delete m_internalDocument;
 }
 
