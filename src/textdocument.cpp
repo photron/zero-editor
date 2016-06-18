@@ -72,8 +72,11 @@ bool TextDocument::load(const QByteArray &data, QString *error)
 
     m_hasDecodingError = state.hasError();
 
+    // FIXME: detect line ending
+
     disconnect(m_internalDocument, &QTextDocument::modificationChanged, this, &TextDocument::setContentsModified);
 
+    // QTextDocument::setPlainText replaces "\r" and "\r\n" with "\n"
     m_internalDocument->setPlainText(text);
     m_internalDocument->setModified(false);
 
@@ -88,7 +91,11 @@ bool TextDocument::save(QByteArray *data, QString *error)
     Q_ASSERT(error != NULL);
     Q_ASSERT(m_codec != NULL);
 
+    // QTextDocument::toPlainText only outputs "\n" as line ending
     const QString &text = m_internalDocument->toPlainText();
+
+    // FIXME: replace "\n" with actually selected line ending for this document
+
     TextCodecState state;
 
     // FIXME: do this in chunks to avoid blocking the UI if the file is big
