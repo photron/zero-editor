@@ -16,8 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef OPENDOCUMENTSWIDGET_H
-#define OPENDOCUMENTSWIDGET_H
+#ifndef OPENFILESWIDGET_H
+#define OPENFILESWIDGET_H
 
 #include <QHash>
 #include <QRegularExpression>
@@ -27,17 +27,17 @@
 class Document;
 
 namespace Ui {
-class OpenDocumentsWidget;
+class OpenFilesWidget;
 }
 
-class OpenDocumentsWidget : public QWidget
+class OpenFilesWidget : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(OpenDocumentsWidget)
+    Q_DISABLE_COPY(OpenFilesWidget)
 
 public:
-    explicit OpenDocumentsWidget(QWidget *parent = NULL);
-    ~OpenDocumentsWidget();
+    explicit OpenFilesWidget(QWidget *parent = NULL);
+    ~OpenFilesWidget();
 
     void installLineEditEventFilter(QObject *filter);
 
@@ -69,16 +69,16 @@ private:
     void applyFilter();
     bool filterAcceptsChild(const QModelIndex &index) const;
 
-    Ui::OpenDocumentsWidget *m_ui;
+    Ui::OpenFilesWidget *m_ui;
 
     QStandardItemModel m_model;
     QHash<Document *, QStandardItem *> m_children; // values owned by QStandardItemModel
     QStandardItem *m_currentChild;
 
-    bool m_showModifiedDocumentsOnly;
+    bool m_showModifiedFilesOnly;
 
     bool m_filterEnabled;
     QRegularExpression m_filterRegularExpression;
 };
 
-#endif // OPENDOCUMENTSWIDGET_H
+#endif // OPENFILESWIDGET_H

@@ -58,7 +58,7 @@
            <number>6</number>
           </property>
           <widget class="BookmarksWidget" name="widgetBookmarks" native="true"/>
-          <widget class="OpenDocumentsWidget" name="widgetOpenDocuments" native="true"/>
+          <widget class="OpenFilesWidget" name="widgetOpenFiles" native="true"/>
           <widget class="RecentFilesWidget" name="widgetRecentFiles" native="true"/>
          </widget>
         </item>
@@ -804,21 +804,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>OpenDocumentsWidget</class>
+   <class>OpenFilesWidget</class>
    <extends>QWidget</extends>
-   <header>src/opendocumentswidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>RecentFilesWidget</class>
-   <extends>QWidget</extends>
-   <header>src/recentfileswidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FindInFilesWidget</class>
-   <extends>QWidget</extends>
-   <header>src/findinfileswidget.h</header>
+   <header>src/openfileswidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -842,6 +830,18 @@
    <class>BookmarksWidget</class>
    <extends>QWidget</extends>
    <header>src/bookmarkswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>RecentFilesWidget</class>
+   <extends>QWidget</extends>
+   <header>src/recentfileswidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>FindInFilesWidget</class>
+   <extends>QWidget</extends>
+   <header>src/findinfileswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

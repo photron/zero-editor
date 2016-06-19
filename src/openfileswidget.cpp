@@ -16,8 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "opendocumentswidget.h"
-#include "ui_opendocumentswidget.h"
+#include "openfileswidget.h"
+#include "ui_openfileswidget.h"
 
 #include "document.h"
 #include "documentmanager.h"
@@ -27,11 +27,11 @@
 #include <QDir>
 #include <QFileInfo>
 
-OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
+OpenFilesWidget::OpenFilesWidget(QWidget *parent) :
     QWidget(parent),
-    m_ui(new Ui::OpenDocumentsWidget),
+    m_ui(new Ui::OpenFilesWidget),
     m_currentChild(NULL),
-    m_showModifiedDocumentsOnly(false),
+    m_showModifiedFilesOnly(false),
     m_filterEnabled(false)
 {
     m_ui->setupUi(this);
@@ -41,33 +41,33 @@ OpenDocumentsWidget::OpenDocumentsWidget(QWidget *parent) :
     m_model.setSortRole(LowerCaseNameRole);
 
     m_ui->editFilter->setVisible(m_ui->checkFilter->isChecked());
-    m_ui->treeDocuments->setModel(&m_model);
+    m_ui->treeFiles->setModel(&m_model);
 
-    connect(m_ui->radioModified, &QRadioButton::toggled, this, &OpenDocumentsWidget::showModifiedDocumentsOnly);
-    connect(m_ui->checkFilter, &QCheckBox::toggled, this, &OpenDocumentsWidget::setFilterEnabled);
-    connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenDocumentsWidget::setFilterPattern);
-    connect(m_ui->treeDocuments, &QTreeView::activated, this, &OpenDocumentsWidget::setCurrentDocument);
-    connect(m_ui->treeDocuments, &QTreeView::expanded, this, &OpenDocumentsWidget::updateParentIndexMarkers);
-    connect(m_ui->treeDocuments, &QTreeView::collapsed, this, &OpenDocumentsWidget::updateParentIndexMarkers);
+    connect(m_ui->radioModified, &QRadioButton::toggled, this, &OpenFilesWidget::showModifiedDocumentsOnly);
+    connect(m_ui->checkFilter, &QCheckBox::toggled, this, &OpenFilesWidget::setFilterEnabled);
+    connect(m_ui->editFilter, &QLineEdit::textChanged, this, &OpenFilesWidget::setFilterPattern);
+    connect(m_ui->treeFiles, &QTreeView::activated, this, &OpenFilesWidget::setCurrentDocument);
+    connect(m_ui->treeFiles, &QTreeView::expanded, this, &OpenFilesWidget::updateParentIndexMarkers);
+    connect(m_ui->treeFiles, &QTreeView::collapsed, this, &OpenFilesWidget::updateParentIndexMarkers);
 
-    connect(DocumentManager::instance(), &DocumentManager::opened, this, &OpenDocumentsWidget::addDocument);
-    connect(DocumentManager::instance(), &DocumentManager::aboutToBeClosed, this, &OpenDocumentsWidget::removeDocument);
-    connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &OpenDocumentsWidget::setCurrentChild);
-    connect(DocumentManager::instance(), &DocumentManager::modificationCountChanged, this, &OpenDocumentsWidget::updateModifiedButton);
+    connect(DocumentManager::instance(), &DocumentManager::opened, this, &OpenFilesWidget::addDocument);
+    connect(DocumentManager::instance(), &DocumentManager::aboutToBeClosed, this, &OpenFilesWidget::removeDocument);
+    connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &OpenFilesWidget::setCurrentChild);
+    connect(DocumentManager::instance(), &DocumentManager::modificationCountChanged, this, &OpenFilesWidget::updateModifiedButton);
 }
 
-OpenDocumentsWidget::~OpenDocumentsWidget()
+OpenFilesWidget::~OpenFilesWidget()
 {
     delete m_ui;
 }
 
-void OpenDocumentsWidget::installLineEditEventFilter(QObject *filter)
+void OpenFilesWidget::installLineEditEventFilter(QObject *filter)
 {
     m_ui->editFilter->installEventFilter(filter);
 }
 
 // private slot
-void OpenDocumentsWidget::addDocument(Document *document)
+void OpenFilesWidget::addDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
     Q_ASSERT(document != DocumentManager::current());
@@ -108,15 +108,15 @@ void OpenDocumentsWidget::addDocument(Document *document)
     parent->appendRow(child);
     parent->sortChildren(0);
 
-    connect(document, &Document::locationChanged, this, &OpenDocumentsWidget::updateLocationOfSender);
-    connect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateModificationMarkerOfSender);
+    connect(document, &Document::locationChanged, this, &OpenFilesWidget::updateLocationOfSender);
+    connect(document, &Document::modificationChanged, this, &OpenFilesWidget::updateModificationMarkerOfSender);
 
     // Apply current filter
     if (!filterAcceptsChild(child->index())) {
-        m_ui->treeDocuments->setRowHidden(child->row(), parent->index(), true);
+        m_ui->treeFiles->setRowHidden(child->row(), parent->index(), true);
 
         if (parent->rowCount() == 1) {
-            m_ui->treeDocuments->setRowHidden(parent->row(), m_model.invisibleRootItem()->index(), true);
+            m_ui->treeFiles->setRowHidden(parent->row(), m_model.invisibleRootItem()->index(), true);
         }
     }
 
@@ -126,12 +126,12 @@ void OpenDocumentsWidget::addDocument(Document *document)
 }
 
 // private slot
-void OpenDocumentsWidget::removeDocument(Document *document)
+void OpenFilesWidget::removeDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    disconnect(document, &Document::modificationChanged, this, &OpenDocumentsWidget::updateModificationMarkerOfSender);
-    disconnect(document, &Document::locationChanged, this, &OpenDocumentsWidget::updateLocationOfSender);
+    disconnect(document, &Document::modificationChanged, this, &OpenFilesWidget::updateModificationMarkerOfSender);
+    disconnect(document, &Document::locationChanged, this, &OpenFilesWidget::updateLocationOfSender);
 
     QStandardItem *child = m_children.value(document, NULL);
 
@@ -153,12 +153,12 @@ void OpenDocumentsWidget::removeDocument(Document *document)
     m_children.remove(document);
 
     if (m_currentChild != NULL) {
-        m_ui->treeDocuments->selectionModel()->select(m_currentChild->index(), QItemSelectionModel::ClearAndSelect);
+        m_ui->treeFiles->selectionModel()->select(m_currentChild->index(), QItemSelectionModel::ClearAndSelect);
     }
 }
 
 // private slot
-void OpenDocumentsWidget::setCurrentDocument(const QModelIndex &index)
+void OpenFilesWidget::setCurrentDocument(const QModelIndex &index)
 {
     Q_ASSERT(index.isValid());
 
@@ -170,7 +170,7 @@ void OpenDocumentsWidget::setCurrentDocument(const QModelIndex &index)
 }
 
 // private slot
-void OpenDocumentsWidget::setCurrentChild(Document *document)
+void OpenFilesWidget::setCurrentChild(Document *document)
 {
     // Set current child and parent back to normal
     if (m_currentChild != NULL) {
@@ -193,9 +193,9 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 
         Q_ASSERT(parent != NULL);
 
-        m_ui->treeDocuments->expand(parent->index());
-        m_ui->treeDocuments->scrollTo(child->index());
-        m_ui->treeDocuments->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
+        m_ui->treeFiles->expand(parent->index());
+        m_ui->treeFiles->scrollTo(child->index());
+        m_ui->treeFiles->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
 
         m_currentChild = child;
 
@@ -205,13 +205,13 @@ void OpenDocumentsWidget::setCurrentChild(Document *document)
 }
 
 // private slot
-void OpenDocumentsWidget::updateModifiedButton(int modificationCount)
+void OpenFilesWidget::updateModifiedButton(int modificationCount)
 {
     m_ui->radioModified->setText(modificationCount ? QString("Modified (%1)").arg(modificationCount) : "Modified");
 }
 
 // private slot
-void OpenDocumentsWidget::updateParentIndexMarkers(const QModelIndex &index)
+void OpenFilesWidget::updateParentIndexMarkers(const QModelIndex &index)
 {
     Q_ASSERT(index.isValid());
 
@@ -219,17 +219,17 @@ void OpenDocumentsWidget::updateParentIndexMarkers(const QModelIndex &index)
 }
 
 // private slot
-void OpenDocumentsWidget::updateParentItemMarkers(QStandardItem *item)
+void OpenFilesWidget::updateParentItemMarkers(QStandardItem *item)
 {
     Q_ASSERT(item != NULL);
     Q_ASSERT(item->parent() == NULL);
 
-    if (m_ui->treeDocuments->isExpanded(item->index())) {
+    if (m_ui->treeFiles->isExpanded(item->index())) {
         // Check if this is the parent of the hidden current child
         bool hasHiddenCurrentChild = false;
 
         if (m_currentChild != NULL && m_currentChild->parent() == item) {
-            hasHiddenCurrentChild = m_ui->treeDocuments->isRowHidden(m_currentChild->row(), item->index());
+            hasHiddenCurrentChild = m_ui->treeFiles->isRowHidden(m_currentChild->row(), item->index());
         }
 
         markItemAsCurrent(item, hasHiddenCurrentChild);
@@ -244,7 +244,7 @@ void OpenDocumentsWidget::updateParentItemMarkers(QStandardItem *item)
 
             Q_ASSERT(document != NULL);
 
-            if (m_ui->treeDocuments->isRowHidden(childRow, item->index()) && document->isModified()) {
+            if (m_ui->treeFiles->isRowHidden(childRow, item->index()) && document->isModified()) {
                 hasHiddenModifiedChild = true;
                 break;
             }
@@ -276,7 +276,7 @@ void OpenDocumentsWidget::updateParentItemMarkers(QStandardItem *item)
 }
 
 // private slot
-void OpenDocumentsWidget::updateLocationOfSender()
+void OpenFilesWidget::updateLocationOfSender()
 {
     Document *document = qobject_cast<Document *>(sender());
 
@@ -295,23 +295,23 @@ void OpenDocumentsWidget::updateLocationOfSender()
 }
 
 // private slot
-void OpenDocumentsWidget::updateModificationMarkerOfSender()
+void OpenFilesWidget::updateModificationMarkerOfSender()
 {
     updateModificationMarker(qobject_cast<Document *>(sender()));
 }
 
 // private slot
-void OpenDocumentsWidget::showModifiedDocumentsOnly(bool enable)
+void OpenFilesWidget::showModifiedDocumentsOnly(bool enable)
 {
-    if (m_showModifiedDocumentsOnly != enable) {
-        m_showModifiedDocumentsOnly = enable;
+    if (m_showModifiedFilesOnly != enable) {
+        m_showModifiedFilesOnly = enable;
 
         applyFilter();
     }
 }
 
 // private slot
-void OpenDocumentsWidget::setFilterEnabled(bool enable)
+void OpenFilesWidget::setFilterEnabled(bool enable)
 {
     if (m_filterEnabled != enable) {
         m_filterEnabled = enable;
@@ -327,7 +327,7 @@ void OpenDocumentsWidget::setFilterEnabled(bool enable)
 }
 
 // private slot
-void OpenDocumentsWidget::setFilterPattern(const QString &pattern)
+void OpenFilesWidget::setFilterPattern(const QString &pattern)
 {
     if (m_filterRegularExpression.pattern() != pattern) {
         bool wasValid = m_filterRegularExpression.isValid();
@@ -343,7 +343,7 @@ void OpenDocumentsWidget::setFilterPattern(const QString &pattern)
 }
 
 // private
-void OpenDocumentsWidget::updateModificationMarker(Document *document)
+void OpenFilesWidget::updateModificationMarker(Document *document)
 {
     Q_ASSERT(document != NULL);
 
@@ -356,7 +356,7 @@ void OpenDocumentsWidget::updateModificationMarker(Document *document)
 }
 
 // private
-void OpenDocumentsWidget::markItemAsCurrent(QStandardItem *item, bool mark) const
+void OpenFilesWidget::markItemAsCurrent(QStandardItem *item, bool mark) const
 {
     QFont font(item->font());
 
@@ -366,7 +366,7 @@ void OpenDocumentsWidget::markItemAsCurrent(QStandardItem *item, bool mark) cons
 }
 
 // private
-void OpenDocumentsWidget::markItemAsModified(QStandardItem *item, bool mark) const
+void OpenFilesWidget::markItemAsModified(QStandardItem *item, bool mark) const
 {
     Q_ASSERT(item != NULL);
 
@@ -388,7 +388,7 @@ void OpenDocumentsWidget::markItemAsModified(QStandardItem *item, bool mark) con
 }
 
 // private
-void OpenDocumentsWidget::applyFilter()
+void OpenFilesWidget::applyFilter()
 {
     QStandardItem *root = m_model.invisibleRootItem();
     int parentRowCount = root->rowCount();
@@ -406,21 +406,21 @@ void OpenDocumentsWidget::applyFilter()
                 hideParent = false;
             }
 
-            m_ui->treeDocuments->setRowHidden(childRow, parent->index(), hideChild);
+            m_ui->treeFiles->setRowHidden(childRow, parent->index(), hideChild);
         }
 
         updateParentItemMarkers(parent);
 
-        m_ui->treeDocuments->setRowHidden(parentRow, root->index(), hideParent);
+        m_ui->treeFiles->setRowHidden(parentRow, root->index(), hideParent);
     }
 }
 
 // private
-bool OpenDocumentsWidget::filterAcceptsChild(const QModelIndex &index) const
+bool OpenFilesWidget::filterAcceptsChild(const QModelIndex &index) const
 {
     Q_ASSERT(index.isValid());
 
-    if (!m_showModifiedDocumentsOnly && !m_filterEnabled) {
+    if (!m_showModifiedFilesOnly && !m_filterEnabled) {
         return true;
     }
 
@@ -428,7 +428,7 @@ bool OpenDocumentsWidget::filterAcceptsChild(const QModelIndex &index) const
 
     Q_ASSERT(document != NULL);
 
-    if (m_showModifiedDocumentsOnly && !document->isModified()) {
+    if (m_showModifiedFilesOnly && !document->isModified()) {
         return false;
     }
 

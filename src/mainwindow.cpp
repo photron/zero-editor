@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &MainWindow::setCurrentDocument);
     connect(DocumentManager::instance(), &DocumentManager::modificationCountChanged, this, &MainWindow::updateSaveAllAction);
 
-    m_ui->widgetOpenDocuments->installLineEditEventFilter(this);
+    m_ui->widgetOpenFiles->installLineEditEventFilter(this);
     m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
     m_ui->widgetFindInFiles->installLineEditEventFilter(this);
 

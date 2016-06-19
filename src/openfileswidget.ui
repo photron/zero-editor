@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OpenDocumentsWidget</class>
- <widget class="QWidget" name="OpenDocumentsWidget">
+ <class>OpenFilesWidget</class>
+ <widget class="QWidget" name="OpenFilesWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Open Documents</string>
+   <string>Open Files</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -69,7 +69,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Open Documents</string>
+         <string>Open Files</string>
         </property>
        </widget>
       </item>
@@ -132,7 +132,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeDocuments">
+    <widget class="QTreeView" name="treeFiles">
      <property name="verticalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOn</enum>
      </property>

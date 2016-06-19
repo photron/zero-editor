@@ -18,7 +18,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/main.cpp \
                src/mainwindow.cpp \
                src/monospacefontmetrics.cpp \
-               src/opendocumentswidget.cpp \
+               src/openfileswidget.cpp \
                src/recentfileswidget.cpp \
                src/style.cpp \
                src/syntaxhighlighter.cpp \
@@ -43,7 +43,7 @@ HEADERS     += src/binaryeditor.h \
                src/location.h \
                src/mainwindow.h \
                src/monospacefontmetrics.h \
-               src/opendocumentswidget.h \
+               src/openfileswidget.h \
                src/recentfileswidget.h \
                src/style.h \
                src/syntaxhighlighter.h \
@@ -58,7 +58,7 @@ FORMS       += src/bookmarkswidget.ui \
                src/findinfileswidget.ui \
                src/gitdiffwidget.ui \
                src/mainwindow.ui \
-               src/opendocumentswidget.ui \
+               src/openfileswidget.ui \
                src/recentfileswidget.ui \
                src/unsaveddiffwidget.ui
 RESOURCES   += fonts/fonts.qrc \
