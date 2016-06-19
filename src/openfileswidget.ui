@@ -79,7 +79,7 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="toolTip">
-         <string>Show all open documents</string>
+         <string>Show all open files</string>
         </property>
         <property name="text">
          <string>All</string>
@@ -95,7 +95,7 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="toolTip">
-         <string>Show only modified open document</string>
+         <string>Show only modified open files</string>
         </property>
         <property name="text">
          <string>Modified</string>
@@ -108,7 +108,7 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="toolTip">
-         <string>Filter open documents list</string>
+         <string>Filter open files list</string>
         </property>
         <property name="text">
          <string>Filter</string>
@@ -132,23 +132,25 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeFiles">
-     <property name="verticalScrollBarPolicy">
-      <enum>Qt::ScrollBarAlwaysOn</enum>
+    <widget class="FilesWidget" name="widgetFiles" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>1</verstretch>
+      </sizepolicy>
      </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
-     <property name="textElideMode">
-      <enum>Qt::ElideLeft</enum>
-     </property>
-     <attribute name="headerVisible">
-      <bool>false</bool>
-     </attribute>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FilesWidget</class>
+   <extends>QWidget</extends>
+   <header>src/fileswidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../icons/icons.qrc"/>
  </resources>

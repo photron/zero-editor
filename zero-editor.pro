@@ -10,6 +10,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/editor.cpp \
                src/editorcolors.cpp \
                src/encodingdialog.cpp \
+               src/fileswidget.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
                src/gitdiffwidget.cpp \
@@ -36,6 +37,7 @@ HEADERS     += src/binaryeditor.h \
                src/editor.h \
                src/editorcolors.h \
                src/encodingdialog.h \
+               src/fileswidget.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
                src/gitdiffwidget.h \

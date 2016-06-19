@@ -19,12 +19,7 @@
 #ifndef OPENFILESWIDGET_H
 #define OPENFILESWIDGET_H
 
-#include <QHash>
-#include <QRegularExpression>
-#include <QStandardItemModel>
 #include <QWidget>
-
-class Document;
 
 namespace Ui {
 class OpenFilesWidget;
@@ -42,43 +37,12 @@ public:
     void installLineEditEventFilter(QObject *filter);
 
 private slots:
-    void addDocument(Document *document);
-    void removeDocument(Document *document);
-    void setCurrentDocument(const QModelIndex &index);
-    void setCurrentChild(Document *document);
-    void updateModifiedButton(int modificationCount);
-    void updateParentIndexMarkers(const QModelIndex &index);
-    void updateParentItemMarkers(QStandardItem *item);
-    void updateLocationOfSender();
-    void updateModificationMarkerOfSender();
-    void showModifiedDocumentsOnly(bool enable);
-    void setFilterEnabled(bool enable);
-    void setFilterPattern(const QString &pattern);
+    void setFilterVisible(bool visible);
+    void markFilterAsValid(bool mark);
+    void updateModifiedText(int modificationCount);
 
 private:
-    enum {
-        DocumentPointerRole = Qt::UserRole,
-        DirectoryPathRole, // for parents
-        FileNameRole, // for children
-        LowerCaseNameRole // for sorting
-    };
-
-    void updateModificationMarker(Document *document);
-    void markItemAsCurrent(QStandardItem *item, bool mark) const;
-    void markItemAsModified(QStandardItem *item, bool mark) const;
-    void applyFilter();
-    bool filterAcceptsChild(const QModelIndex &index) const;
-
     Ui::OpenFilesWidget *m_ui;
-
-    QStandardItemModel m_model;
-    QHash<Document *, QStandardItem *> m_children; // values owned by QStandardItemModel
-    QStandardItem *m_currentChild;
-
-    bool m_showModifiedFilesOnly;
-
-    bool m_filterEnabled;
-    QRegularExpression m_filterRegularExpression;
 };
 
 #endif // OPENFILESWIDGET_H
