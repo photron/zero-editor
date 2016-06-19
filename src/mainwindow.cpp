@@ -26,7 +26,6 @@
 
 #include <QContextMenuEvent>
 #include <QDebug>
-#include <QFileDialog>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QProcess>
@@ -260,27 +259,7 @@ void MainWindow::newDocument()
 // private slot
 void MainWindow::openDocuments()
 {
-    QStringList filePaths = QFileDialog::getOpenFileNames(this, "Open File");
-    QString error;
-
-    foreach (const QString &filePath, filePaths) {
-        Document *document = DocumentManager::find(filePath);
-
-        if (document != NULL) {
-            DocumentManager::setCurrent(document);
-            continue;
-        }
-
-        document = DocumentManager::open(filePath, Document::Text, NULL, &error);
-
-        if (document == NULL) {
-            if (error.isEmpty()) {
-                error = QString("Could not open \"%1\": Unknown error").arg(QDir::toNativeSeparators(filePath));
-            }
-
-            QMessageBox::critical(this, "File Open Error", error);
-        }
-    }
+    DocumentManager::showOpenDialog();
 }
 
 // private slot
@@ -290,11 +269,7 @@ void MainWindow::saveDocument()
 
     Q_ASSERT(document != NULL);
 
-    if (document->location().isEmpty()) {
-        saveDocumentAs();
-    } else {
-        DocumentManager::save(document);
-    }
+    DocumentManager::save(document);
 }
 
 // private slot
@@ -304,20 +279,7 @@ void MainWindow::saveDocumentAs()
 
     Q_ASSERT(document != NULL);
 
-    const Location &location = document->location();
-    QString suggestion;
-
-    if (location.isEmpty()) {
-        suggestion = QDir::home().absoluteFilePath("unnamed");
-    } else {
-        suggestion = location.filePath();
-    }
-
-    const QString &filePath = QFileDialog::getSaveFileName(this, "Save File", suggestion);
-
-    if (!filePath.isEmpty()) {
-        DocumentManager::saveAs(document, filePath);
-    }
+    DocumentManager::showSaveAsDialog(document);
 }
 
 // private slot
@@ -439,7 +401,7 @@ void MainWindow::showEncodingDialog()
 
     Q_ASSERT(document != NULL);
 
-    DocumentManager::changeEncoding(document);
+    DocumentManager::showEncodingDialog(document);
 }
 
 // private slot

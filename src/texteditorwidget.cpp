@@ -575,7 +575,7 @@ void TextEditorWidget::updateViewportMargins()
 void TextEditorWidget::performInfoAreaAction()
 {
     if (m_infoArea->mode() == TextEditorInfoArea::DecodingError && m_document->hasDecodingError()) {
-        DocumentManager::changeEncoding(m_document);
+        DocumentManager::showEncodingDialog(m_document);
     }
 }
 

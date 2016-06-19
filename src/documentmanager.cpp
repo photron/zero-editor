@@ -27,6 +27,7 @@
 #include "texteditor.h"
 
 #include <QDebug>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
 
@@ -159,13 +160,16 @@ Document *DocumentManager::load(const Location &location, Document::Type type, c
 void DocumentManager::save(Document *document)
 {
     Q_ASSERT(document != NULL);
-    Q_ASSERT(!document->location().isEmpty());
 
     if (!document->isModified()) {
         return;
     }
 
-    saveAs(document, document->location());
+    if (document->location().isEmpty()) {
+        showSaveAsDialog(document);
+    } else {
+        saveAs(document, document->location());
+    }
 }
 
 // static
@@ -288,7 +292,60 @@ void DocumentManager::setCurrent(Document *document)
 }
 
 // static
-void DocumentManager::changeEncoding(Document *document)
+void DocumentManager::showOpenDialog()
+{
+    QStringList filePaths = QFileDialog::getOpenFileNames(MainWindow::instance(), "Open Files");
+    QString error;
+
+    foreach (const QString &filePath, filePaths) {
+        Document *document = find(filePath);
+
+        if (document != NULL) {
+            setCurrent(document);
+
+            continue;
+        }
+
+        document = open(filePath, Document::Text, NULL, &error);
+
+        if (document == NULL) {
+            if (error.isEmpty()) {
+                error = QString("Could not open \"%1\": Unknown error").arg(QDir::toNativeSeparators(filePath));
+            }
+
+            QMessageBox::critical(MainWindow::instance(), "File Open Error", error);
+        }
+    }
+}
+
+// static
+void DocumentManager::showSaveAsDialog(Document *document)
+{
+    Q_ASSERT(document != NULL);
+
+    // Ensure that the open files widget shows this document as current, so that the user knows for which document the
+    // "Save File" dialog showed up. Because this method might be called for a non-current document for example by the
+    // saveAll method.
+    setCurrent(document);
+
+    const Location &location = document->location();
+    QString suggestion;
+
+    if (location.isEmpty()) {
+        suggestion = QDir::home().absoluteFilePath("unnamed");
+    } else {
+        suggestion = location.filePath();
+    }
+
+    const QString &filePath = QFileDialog::getSaveFileName(MainWindow::instance(), "Save File", suggestion);
+
+    if (!filePath.isEmpty()) {
+        saveAs(document, filePath);
+    }
+}
+
+// static
+void DocumentManager::showEncodingDialog(Document *document)
 {
     Q_ASSERT(document != NULL);
 

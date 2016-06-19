@@ -56,7 +56,9 @@ public:
 
     static int modificationCount() { return s_instance->m_modificationCount; }
 
-    static void changeEncoding(Document *document);
+    static void showOpenDialog();
+    static void showSaveAsDialog(Document *document);
+    static void showEncodingDialog(Document *document);
 
 signals:
     void opened(Document *document);
