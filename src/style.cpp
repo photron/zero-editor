@@ -27,13 +27,13 @@ Style::Style(QStyle *style) :
 {
 }
 
-QPixmap Style::standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option, const QWidget *widget) const
+QIcon Style::standardIcon(StandardPixmap standardIcon, const QStyleOption *option, const QWidget *widget) const
 {
     // Override default line edit clear button icon
-    if (standardPixmap == QStyle::SP_LineEditClearButton) {
-        return QPixmap(":/icons/14x14/clear.png");
+    if (standardIcon == QStyle::SP_LineEditClearButton) {
+        return QIcon(":/icons/14x14/clear.png");
     } else {
-        return QProxyStyle::standardPixmap(standardPixmap, option, widget);
+        return QProxyStyle::standardIcon(standardIcon, option, widget);
     }
 }
 

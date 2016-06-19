@@ -26,8 +26,8 @@ class Style : public QProxyStyle
 public:
     explicit Style(QStyle *style);
 
-    QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption *option = NULL,
-                           const QWidget *widget = NULL) const;
+    QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption *option = NULL,
+                       const QWidget *widget = NULL) const;
     void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
                        const QWidget *widget = NULL) const;
     void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option, QPainter *painter,
