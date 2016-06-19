@@ -66,7 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_ui->actionSave, &QAction::triggered, this, &MainWindow::saveDocument);
     connect(m_ui->actionSave_Tool, &QAction::triggered, this, &MainWindow::saveDocument);
     connect(m_ui->actionSaveAs, &QAction::triggered, this, &MainWindow::saveDocumentAs);
-    connect(m_ui->actionSaveAs, &QAction::triggered, this, &MainWindow::saveAllDocuments);
+    connect(m_ui->actionSaveAll, &QAction::triggered, this, &MainWindow::saveAllDocuments);
+    connect(m_ui->actionSaveAll_Tool, &QAction::triggered, this, &MainWindow::saveAllDocuments);
     connect(m_ui->actionClose, &QAction::triggered, this, &MainWindow::closeDocument);
     connect(m_ui->actionClose_Tool, &QAction::triggered, this, &MainWindow::closeDocument);
     connect(m_ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
