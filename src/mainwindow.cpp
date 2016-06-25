@@ -265,21 +265,13 @@ void MainWindow::openDocuments()
 // private slot
 void MainWindow::saveDocument()
 {
-    Document *document = DocumentManager::current();
-
-    Q_ASSERT(document != NULL);
-
-    DocumentManager::save(document);
+    DocumentManager::save(DocumentManager::current());
 }
 
 // private slot
 void MainWindow::saveDocumentAs()
 {
-    Document *document = DocumentManager::current();
-
-    Q_ASSERT(document != NULL);
-
-    DocumentManager::showSaveAsDialog(document);
+    DocumentManager::showSaveAsDialog(DocumentManager::current());
 }
 
 // private slot
@@ -291,11 +283,7 @@ void MainWindow::saveAllDocuments()
 // private slot
 void MainWindow::closeDocument()
 {
-    Document *document = DocumentManager::current();
-
-    Q_ASSERT(document != NULL);
-
-    DocumentManager::close(document);
+    DocumentManager::close(DocumentManager::current());
 }
 
 // private slot
@@ -397,11 +385,7 @@ void MainWindow::showFindInFilesWidget()
 // private slot
 void MainWindow::showEncodingDialog()
 {
-    Document *document = DocumentManager::current();
-
-    Q_ASSERT(document != NULL);
-
-    DocumentManager::showEncodingDialog(document);
+    DocumentManager::showEncodingDialog(DocumentManager::current());
 }
 
 // private slot
@@ -441,8 +425,6 @@ void MainWindow::showGitDiffWidget()
 // private slot
 void MainWindow::addEditor(Document *document)
 {
-    Q_ASSERT(document != NULL);
-
     Editor *editor = DocumentManager::editor(document);
 
     Q_ASSERT(editor != NULL);
@@ -453,8 +435,6 @@ void MainWindow::addEditor(Document *document)
 // private slot
 void MainWindow::removeEditor(Document *document)
 {
-    Q_ASSERT(document != NULL);
-
     Editor *editor = DocumentManager::editor(document);
 
     Q_ASSERT(editor != NULL);

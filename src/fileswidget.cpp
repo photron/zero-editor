@@ -156,6 +156,7 @@ void FilesWidget::addDocument(Document *document)
 void FilesWidget::removeDocument(Document *document)
 {
     Q_ASSERT(document != NULL);
+    Q_ASSERT(document != DocumentManager::current());
 
     disconnect(document, &Document::modificationChanged, this, &FilesWidget::updateModificationMarkerOfSender);
     disconnect(document, &Document::locationChanged, this, &FilesWidget::updateLocationOfSender);
