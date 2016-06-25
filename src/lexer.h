@@ -114,8 +114,7 @@ class Lexer
     Q_DISABLE_COPY(Lexer)
 
 public:
-    enum Option
-    {
+    enum Option {
         CTrigraph,
         CDigraph,
         CPlusPlusAlternativeNotation, // does not include the common C trigraphs and digraphs
@@ -201,8 +200,7 @@ public:
         LastOption
     };
 
-    enum State
-    {
+    enum State {
         InNothing,
         InCStringLiteralToken, // can be multiline due to C line continuation
         InPascalStringLiteralToken, // FIXME: can be multiline?
@@ -222,8 +220,7 @@ public:
     void scan(Token *token);
 
 private:
-    enum SkipResult
-    {
+    enum SkipResult {
         NothingSkipped,
         PartiallySkipped,
         FullySkipped
