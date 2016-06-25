@@ -190,11 +190,15 @@ void FilesWidget::setCurrentDocument(const QModelIndex &index)
 {
     Q_ASSERT(index.isValid());
 
+    if (!index.parent().isValid()) {
+        return; // ignore activation of parent item
+    }
+
     Document *document = static_cast<Document *>(index.data(DocumentPointerRole).value<void *>());
 
-    if (document != NULL) {
-        DocumentManager::setCurrent(document);
-    }
+    Q_ASSERT(document != NULL);
+
+    DocumentManager::setCurrent(document);
 }
 
 // private slot
