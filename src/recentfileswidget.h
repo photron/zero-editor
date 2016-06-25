@@ -25,6 +25,8 @@ namespace Ui {
 class RecentFilesWidget;
 }
 
+class QActionGroup;
+
 class RecentFilesWidget : public QWidget
 {
     Q_OBJECT
@@ -34,8 +36,21 @@ public:
     explicit RecentFilesWidget(QWidget *parent = NULL);
     ~RecentFilesWidget();
 
+private slots:
+    void showOpenedFiles();
+    void showViewedFiles();
+    void showModifiedFiles();
+    void showClosedFiles();
+    void updateModeMenuAndTitle();
+
 private:
     Ui::RecentFilesWidget *m_ui;
+
+    QActionGroup *m_actionGroup;
+    QAction *m_actionOpened;
+    QAction *m_actionViewed;
+    QAction *m_actionModified;
+    QAction *m_actionClosed;
 };
 
 #endif // RECENTFILESWIDGET_H

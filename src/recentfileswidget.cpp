@@ -19,6 +19,7 @@
 #include "recentfileswidget.h"
 #include "ui_recentfileswidget.h"
 
+#include <QActionGroup>
 #include <QMenu>
 
 RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
@@ -29,12 +30,33 @@ RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
 
     QMenu *menuMode = new QMenu;
 
-    menuMode->addAction("Recently Opened Files");
-    menuMode->addAction("Recently Viewed Files");
-    menuMode->addAction("Recently Modified Files");
-    menuMode->addAction("Recently Closed Files");
+    m_actionOpened = menuMode->addAction("Recently Opened Files");
+    m_actionViewed = menuMode->addAction("Recently Viewed Files");
+    m_actionModified = menuMode->addAction("Recently Modified Files");
+    m_actionClosed = menuMode->addAction("Recently Closed Files");
+
+    m_actionOpened->setCheckable(true);
+    m_actionViewed->setCheckable(true);
+    m_actionModified->setCheckable(true);
+    m_actionClosed->setCheckable(true);
+
+    connect(m_actionOpened, &QAction::triggered, this, &RecentFilesWidget::showOpenedFiles);
+    connect(m_actionViewed, &QAction::triggered, this, &RecentFilesWidget::showViewedFiles);
+    connect(m_actionModified, &QAction::triggered, this, &RecentFilesWidget::showModifiedFiles);
+    connect(m_actionClosed, &QAction::triggered, this, &RecentFilesWidget::showClosedFiles);
 
     m_ui->buttonMode->setMenu(menuMode);
+
+    m_actionGroup = new QActionGroup(this);
+
+    m_actionGroup->addAction(m_actionOpened);
+    m_actionGroup->addAction(m_actionViewed);
+    m_actionGroup->addAction(m_actionModified);
+    m_actionGroup->addAction(m_actionClosed);
+
+    connect(m_ui->stackedWidget, &QStackedWidget::currentChanged, this, &RecentFilesWidget::updateModeMenuAndTitle);
+
+    showViewedFiles();
 
     // FIXME: the recently viewed mode always shows the currently viewed document at the top. dbl clicking an item
     // in the list makes it the currently view document and moves the item to the top of the list. the go to previous
@@ -53,4 +75,48 @@ RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
 RecentFilesWidget::~RecentFilesWidget()
 {
     delete m_ui;
+}
+
+// private slot
+void RecentFilesWidget::showOpenedFiles()
+{
+    m_ui->stackedWidget->setCurrentWidget(m_ui->widgetOpenedFiles);
+}
+
+// private slot
+void RecentFilesWidget::showViewedFiles()
+{
+    m_ui->stackedWidget->setCurrentWidget(m_ui->widgetViewedFiles);
+}
+
+// private slot
+void RecentFilesWidget::showModifiedFiles()
+{
+    m_ui->stackedWidget->setCurrentWidget(m_ui->widgetModifiedFiles);
+}
+
+// private slot
+void RecentFilesWidget::showClosedFiles()
+{
+    m_ui->stackedWidget->setCurrentWidget(m_ui->widgetClosedFiles);
+}
+
+// private slot
+void RecentFilesWidget::updateModeMenuAndTitle()
+{
+    QWidget *currentWidget = m_ui->stackedWidget->currentWidget();
+
+    if (currentWidget == m_ui->widgetOpenedFiles) {
+        m_actionOpened->setChecked(true);
+        m_ui->labelTitle->setText(m_actionOpened->text());
+    } else if (currentWidget == m_ui->widgetViewedFiles) {
+        m_actionViewed->setChecked(true);
+        m_ui->labelTitle->setText(m_actionViewed->text());
+    } else if (currentWidget == m_ui->widgetModifiedFiles) {
+        m_actionModified->setChecked(true);
+        m_ui->labelTitle->setText(m_actionModified->text());
+    } else if (currentWidget == m_ui->widgetClosedFiles) {
+        m_actionClosed->setChecked(true);
+        m_ui->labelTitle->setText(m_actionClosed->text());
+    }
 }
