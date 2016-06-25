@@ -170,18 +170,36 @@ void FilesWidget::removeDocument(Document *document)
 
     Q_ASSERT(parent != NULL);
 
+    // Save currently selected item, because the QStandardItem::removeRow call seems to affect the selection even
+    // if the DocumentManager takes care of not closing the current document. This problem only occurs if the
+    // current document is selected before its closing is triggered. If the current document is not before its
+    // closing is triggered then the selection behaves as expected and is not affected by the removeRow call.
+    const QItemSelection &selection = m_treeFiles->selectionModel()->selection();
+    QStandardItem *selectedItem = NULL;
+
+    if (!selection.isEmpty()) {
+        selectedItem = m_model.itemFromIndex(selection.first().indexes().first());
+
+        Q_ASSERT(selectedItem != NULL);
+        Q_ASSERT(selectedItem != child);
+    }
+
     parent->removeRow(child->row());
 
     if (parent->rowCount() > 0) {
         updateParentItemMarkers(parent);
     } else {
+        if (selectedItem == parent) {
+            selectedItem = NULL;
+        }
+
         m_model.removeRow(parent->row());
     }
 
     m_children.remove(document);
 
-    if (m_currentChild != NULL) {
-        m_treeFiles->selectionModel()->select(m_currentChild->index(), QItemSelectionModel::ClearAndSelect);
+    if (selectedItem != NULL) {
+        m_treeFiles->selectionModel()->select(selectedItem->index(), QItemSelectionModel::ClearAndSelect);
     }
 }
 
@@ -209,6 +227,9 @@ void FilesWidget::setCurrentChild(Document *document)
         markItemAsCurrent(m_currentChild, false);
 
         QStandardItem *parent = m_currentChild->parent();
+
+        m_treeFiles->scrollTo(parent->index());
+        m_treeFiles->selectionModel()->select(parent->index(), QItemSelectionModel::ClearAndSelect);
 
         m_currentChild = NULL;
 
