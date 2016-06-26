@@ -66,6 +66,23 @@ void DocumentManager::create()
 }
 
 // static
+Document *DocumentManager::open(const Location &location, Document::Type type, TextCodec *codec)
+{
+    QString error;
+    Document *document = open(location, type, codec, &error);
+
+    if (document == NULL) {
+        if (error.isEmpty()) {
+            error = QString("Could not open \"%1\": Unknown error").arg(location.filePath());
+        }
+
+        QMessageBox::critical(MainWindow::instance(), "File Open Error", error);
+    }
+
+    return document;
+}
+
+// static
 Document *DocumentManager::open(const Location &location, Document::Type type, TextCodec *codec, QString *error)
 {
     Q_ASSERT(!location.isEmpty());
@@ -177,6 +194,8 @@ void DocumentManager::saveAs(Document *document, const Location &location)
 {
     Q_ASSERT(document != NULL);
     Q_ASSERT(!location.isEmpty());
+
+    // FIXME: need to deal with saving A as B while B already exists and is already open
 
     QFile file(location.filePath());
     QString error;
@@ -294,8 +313,7 @@ void DocumentManager::setCurrent(Document *document)
 // static
 void DocumentManager::showOpenDialog()
 {
-    QStringList filePaths = QFileDialog::getOpenFileNames(MainWindow::instance(), "Open Files");
-    QString error;
+    const QStringList &filePaths = QFileDialog::getOpenFileNames(MainWindow::instance(), "Open Files");
 
     foreach (const QString &filePath, filePaths) {
         Document *document = find(filePath);
@@ -306,15 +324,7 @@ void DocumentManager::showOpenDialog()
             continue;
         }
 
-        document = open(filePath, Document::Text, NULL, &error);
-
-        if (document == NULL) {
-            if (error.isEmpty()) {
-                error = QString("Could not open \"%1\": Unknown error").arg(QDir::toNativeSeparators(filePath));
-            }
-
-            QMessageBox::critical(MainWindow::instance(), "File Open Error", error);
-        }
+        open(filePath, Document::Text, NULL);
     }
 }
 

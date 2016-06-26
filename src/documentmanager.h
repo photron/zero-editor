@@ -40,6 +40,7 @@ public:
 
     // FIXME: convert them to slots and avoid forwarding in MainWindow
     static void create();
+    static Document *open(const Location &location, Document::Type type, TextCodec *codec);
     static Document *open(const Location &location, Document::Type type, TextCodec *codec, QString *error);
     static Document *load(const Location &location, Document::Type type, const QByteArray &data, TextCodec *codec,
                           QString *error);

@@ -28,6 +28,11 @@ RecentFilesWidget::RecentFilesWidget(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    m_ui->widgetOpenedFiles->setOption(FilesWidget::KeepAfterClose, true);
+    m_ui->widgetViewedFiles->setOption(FilesWidget::KeepAfterClose, true);
+    m_ui->widgetModifiedFiles->setOption(FilesWidget::KeepAfterClose, true);
+    m_ui->widgetClosedFiles->setOption(FilesWidget::KeepAfterClose, true);
+
     QMenu *menuMode = new QMenu;
 
     m_actionOpened = menuMode->addAction("Recently Opened Files");

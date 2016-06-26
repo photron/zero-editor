@@ -21,6 +21,7 @@
 
 #include <QHash>
 #include <QList>
+#include <QMetaType>
 #include <QTextCodec>
 
 class TextCodec;
@@ -69,5 +70,7 @@ private:
 
     static QHash<qint64, TextCodec *> *s_codecs;
 };
+
+Q_DECLARE_METATYPE(TextCodec *)
 
 #endif // TEXTCODEC_H

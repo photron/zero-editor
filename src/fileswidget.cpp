@@ -20,6 +20,8 @@
 
 #include "document.h"
 #include "documentmanager.h"
+#include "textcodec.h"
+#include "textdocument.h"
 
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -100,40 +102,44 @@ void FilesWidget::addDocument(Document *document)
     Q_ASSERT(document != DocumentManager::current());
 
     const Location &location = document->location();
-    const QString &filePath = location.filePath("unnamed");
-    const QString &directoryPath = location.directoryPath("unnamed");
-    const QString &fileName = location.fileName("unnamed");
+    QStandardItem *child = m_closedChildren.value(location, NULL);
 
-    // Find or create parent item
-    const QModelIndexList &parents = m_model.match(m_model.index(0, 0, QModelIndex()), DirectoryPathRole,
-                                                   directoryPath, 1, Qt::MatchExactly);
+    Q_ASSERT(hasOption(KeepAfterClose) || child == NULL);
+
     QStandardItem *parent;
 
-    if (parents.isEmpty()) {
-        parent = new QStandardItem(QIcon(":/icons/16x16/folder.png"), directoryPath);
+    if (child != NULL) {
+        // Reopen closed child item
+        parent = child->parent();
 
-        parent->setToolTip(directoryPath);
-        parent->setData(directoryPath, DirectoryPathRole);
-        parent->setData(location.isEmpty() ? "" : directoryPath.toLower(), LowerCaseNameRole);
+        child->setData(qVariantFromValue(document), DocumentRole);
+        child->setData(QVariant(), FilePathRole);
+        child->setData(QVariant(), DocumentTypeRole);
+        child->setData(QVariant(), TextCodecRole);
 
-        m_model.appendRow(parent);
-        m_model.sort(0);
+        m_closedChildren.remove(location);
+        m_openChildren.insert(document, child);
+
+        markItemAsClosed(child, false);
     } else {
-        parent = m_model.itemFromIndex(parents.first());
+        // Find or create parent item
+        parent = findOrCreateParent(location);
+
+        // Create child item
+        const QString &fileName = location.fileName("unnamed");
+
+        child = new QStandardItem(QIcon(":/icons/16x16/file.png"), fileName);
+
+        child->setToolTip(location.filePath("unnamed"));
+        child->setData(qVariantFromValue(document), DocumentRole);
+        child->setData(fileName, FileNameRole);
+        child->setData(location.isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
+
+        m_openChildren.insert(document, child);
+
+        parent->appendRow(child);
+        parent->sortChildren(0);
     }
-
-    // Create child item
-    QStandardItem *child = new QStandardItem(QIcon(":/icons/16x16/file.png"), fileName);
-
-    child->setToolTip(filePath);
-    child->setData(qVariantFromValue((void *)document), DocumentPointerRole);
-    child->setData(fileName, FileNameRole);
-    child->setData(location.isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
-
-    m_children.insert(document, child);
-
-    parent->appendRow(child);
-    parent->sortChildren(0);
 
     connect(document, &Document::locationChanged, this, &FilesWidget::updateLocationOfSender);
     connect(document, &Document::modificationChanged, this, &FilesWidget::updateModificationMarkerOfSender);
@@ -161,45 +167,35 @@ void FilesWidget::removeDocument(Document *document)
     disconnect(document, &Document::modificationChanged, this, &FilesWidget::updateModificationMarkerOfSender);
     disconnect(document, &Document::locationChanged, this, &FilesWidget::updateLocationOfSender);
 
-    QStandardItem *child = m_children.value(document, NULL);
+    QStandardItem *child = m_openChildren.value(document, NULL);
 
     Q_ASSERT(child != NULL);
     Q_ASSERT(child != m_currentChild);
 
-    QStandardItem *parent = child->parent();
+    const Location &location = document->location();
 
-    Q_ASSERT(parent != NULL);
+    if (hasOption(KeepAfterClose) && !location.isEmpty()) {
+        child->setData(qVariantFromValue(NULL), DocumentRole);
+        child->setData(location.filePath(), FilePathRole);
+        child->setData(qVariantFromValue(document->type()), DocumentTypeRole);
 
-    // Save currently selected item, because the QStandardItem::removeRow call seems to affect the selection even
-    // if the DocumentManager takes care of not closing the current document. This problem only occurs if the
-    // current document is selected before its closing is triggered. If the current document is not before its
-    // closing is triggered then the selection behaves as expected and is not affected by the removeRow call.
-    const QItemSelection &selection = m_treeFiles->selectionModel()->selection();
-    QStandardItem *selectedItem = NULL;
-
-    if (!selection.isEmpty()) {
-        selectedItem = m_model.itemFromIndex(selection.first().indexes().first());
-
-        Q_ASSERT(selectedItem != NULL);
-        Q_ASSERT(selectedItem != child);
-    }
-
-    parent->removeRow(child->row());
-
-    if (parent->rowCount() > 0) {
-        updateParentItemMarkers(parent);
-    } else {
-        if (selectedItem == parent) {
-            selectedItem = NULL;
+        if (document->type() == Document::Text) {
+            child->setData(qVariantFromValue(static_cast<TextDocument *>(document)->codec()), TextCodecRole);
+        } else {
+            child->setData(qVariantFromValue(NULL), TextCodecRole);
         }
 
-        m_model.removeRow(parent->row());
-    }
+        m_openChildren.remove(document);
+        m_closedChildren.insert(location, child);
 
-    m_children.remove(document);
+        markItemAsClosed(child, true);
+        updateParentItemMarkers(child->parent());
+    } else {
+        takeChildFromParent(child);
 
-    if (selectedItem != NULL) {
-        m_treeFiles->selectionModel()->select(selectedItem->index(), QItemSelectionModel::ClearAndSelect);
+        m_openChildren.remove(document);
+
+        delete child;
     }
 }
 
@@ -212,11 +208,25 @@ void FilesWidget::setCurrentDocument(const QModelIndex &index)
         return; // ignore activation of parent item
     }
 
-    Document *document = static_cast<Document *>(index.data(DocumentPointerRole).value<void *>());
+    Document *document = index.data(DocumentRole).value<Document *>();
 
-    Q_ASSERT(document != NULL);
+    if (hasOption(KeepAfterClose)) {
+        if (document != NULL) {
+            DocumentManager::setCurrent(document);
+        } else {
+            const QString &filePath = index.data(FilePathRole).value<QString>();
+            Document::Type type = index.data(DocumentTypeRole).value<Document::Type>();
+            TextCodec *codec = index.data(TextCodecRole).value<TextCodec *>();
 
-    DocumentManager::setCurrent(document);
+            Q_ASSERT(type != Document::Text || codec != NULL);
+
+            DocumentManager::open(filePath, type, codec);
+        }
+    } else {
+        Q_ASSERT(document != NULL);
+
+        DocumentManager::setCurrent(document);
+    }
 }
 
 // private slot
@@ -238,7 +248,7 @@ void FilesWidget::setCurrentChild(Document *document)
 
     // Mark new current child as current
     if (document != NULL) {
-        QStandardItem *child = m_children.value(document, NULL);
+        QStandardItem *child = m_openChildren.value(document, NULL);
 
         Q_ASSERT(child != NULL);
 
@@ -266,59 +276,55 @@ void FilesWidget::updateParentIndexMarkers(const QModelIndex &index)
 }
 
 // private slot
-void FilesWidget::updateParentItemMarkers(QStandardItem *item)
+void FilesWidget::updateParentItemMarkers(QStandardItem *parent)
 {
-    Q_ASSERT(item != NULL);
-    Q_ASSERT(item->parent() == NULL);
+    Q_ASSERT(parent != NULL);
+    Q_ASSERT(parent->parent() == NULL);
 
-    if (m_treeFiles->isExpanded(item->index())) {
+    if (m_treeFiles->isExpanded(parent->index())) {
         // Check if this is the parent of the hidden current child
         bool hasHiddenCurrentChild = false;
 
-        if (m_currentChild != NULL && m_currentChild->parent() == item) {
-            hasHiddenCurrentChild = m_treeFiles->isRowHidden(m_currentChild->row(), item->index());
+        if (m_currentChild != NULL && m_currentChild->parent() == parent) {
+            hasHiddenCurrentChild = m_treeFiles->isRowHidden(m_currentChild->row(), parent->index());
         }
 
-        markItemAsCurrent(item, hasHiddenCurrentChild);
+        markItemAsCurrent(parent, hasHiddenCurrentChild);
 
         // Check if this is a parent of hidden modified children
-        int childRowCount = item->rowCount();
+        int childRowCount = parent->rowCount();
         bool hasHiddenModifiedChild = false;
 
         for (int childRow = 0; childRow < childRowCount; ++childRow) {
-            QStandardItem *child = item->child(childRow);
-            Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
+            QStandardItem *child = parent->child(childRow);
+            Document *document = child->data(DocumentRole).value<Document *>();
 
-            Q_ASSERT(document != NULL);
-
-            if (m_treeFiles->isRowHidden(childRow, item->index()) && document->isModified()) {
+            if (m_treeFiles->isRowHidden(childRow, parent->index()) && document != NULL && document->isModified()) {
                 hasHiddenModifiedChild = true;
                 break;
             }
         }
 
-        markItemAsModified(item, hasHiddenModifiedChild);
+        markItemAsModified(parent, hasHiddenModifiedChild);
     } else {
         // Check if this is the parent of the current child
-        markItemAsCurrent(item, m_currentChild != NULL && m_currentChild->parent() == item);
+        markItemAsCurrent(parent, m_currentChild != NULL && m_currentChild->parent() == parent);
 
-        // Check if this is a parent of modified children
-        int childRowCount = item->rowCount();
+        // Check if this is a parent of modified children or has only closed children
+        int childRowCount = parent->rowCount();
         bool hasModifiedChild = false;
 
         for (int childRow = 0; childRow < childRowCount; ++childRow) {
-            QStandardItem *child = item->child(childRow);
-            Document *document = static_cast<Document *>(child->data(DocumentPointerRole).value<void *>());
+            QStandardItem *child = parent->child(childRow);
+            Document *document = child->data(DocumentRole).value<Document *>();
 
-            Q_ASSERT(document != NULL);
-
-            if (document->isModified()) {
+            if (document != NULL && document->isModified()) {
                 hasModifiedChild = true;
                 break;
             }
         }
 
-        markItemAsModified(item, hasModifiedChild);
+        markItemAsModified(parent, hasModifiedChild);
     }
 }
 
@@ -329,16 +335,40 @@ void FilesWidget::updateLocationOfSender()
 
     Q_ASSERT(document != NULL);
 
-    if (document == DocumentManager::current()) {
-        DocumentManager::setCurrent(NULL);
+    QStandardItem *child = m_openChildren.value(document, NULL);
+
+    Q_ASSERT(child != NULL);
+
+    const Location &location = document->location();
+
+    Q_ASSERT(!location.isEmpty());
+
+    QStandardItem *parent = child->parent();
+
+    if (parent->data(DirectoryPathRole).value<QString>() != location.directoryPath()) {
+        takeChildFromParent(child);
+
+        parent = findOrCreateParent(location);
+
+        parent->appendRow(child);
+
+        updateParentItemMarkers(child->parent());
     }
 
-    removeDocument(document);
-    addDocument(document);
+    const QString &fileName = location.fileName();
 
-    if (DocumentManager::current() == NULL) {
-        DocumentManager::setCurrent(document);
-    }
+    child->setText(fileName);
+    child->setToolTip(location.filePath());
+    child->setData(fileName, FileNameRole);
+    child->setData(fileName.toLower(), LowerCaseNameRole);
+
+    parent->sortChildren(0);
+
+    m_treeFiles->expand(parent->index());
+    m_treeFiles->scrollTo(child->index());
+    m_treeFiles->selectionModel()->select(child->index(), QItemSelectionModel::ClearAndSelect);
+
+    applyFilter();
 }
 
 // private slot
@@ -352,12 +382,12 @@ void FilesWidget::updateModificationMarker(Document *document)
 {
     Q_ASSERT(document != NULL);
 
-    QStandardItem *item = m_children.value(document, NULL);
+    QStandardItem *child = m_openChildren.value(document, NULL);
 
-    Q_ASSERT(item != NULL);
+    Q_ASSERT(child != NULL);
 
-    markItemAsModified(item, document->isModified());
-    updateParentItemMarkers(item->parent());
+    markItemAsModified(child, document->isModified());
+    updateParentItemMarkers(child->parent());
 }
 
 // private
@@ -388,6 +418,18 @@ void FilesWidget::markItemAsModified(QStandardItem *item, bool mark) const
         item->setForeground(Qt::red);
     } else {
         item->setText(text);
+        item->setForeground(palette().color(QPalette::Text));
+    }
+}
+
+// private
+void FilesWidget::markItemAsClosed(QStandardItem *item, bool mark) const
+{
+    Q_ASSERT(item != NULL);
+
+    if (mark) {
+        item->setForeground(Qt::gray);
+    } else {
         item->setForeground(palette().color(QPalette::Text));
     }
 }
@@ -429,11 +471,9 @@ bool FilesWidget::filterAcceptsChild(const QModelIndex &index) const
         return true;
     }
 
-    Document *document = static_cast<Document *>(index.data(DocumentPointerRole).value<void *>());
+    Document *document = index.data(DocumentRole).value<Document *>();
 
-    Q_ASSERT(document != NULL);
-
-    if (m_showModifiedFilesOnly && !document->isModified()) {
+    if (m_showModifiedFilesOnly && (document == NULL || !document->isModified())) {
         return false;
     }
 
@@ -444,4 +484,69 @@ bool FilesWidget::filterAcceptsChild(const QModelIndex &index) const
     }
 
     return true;
+}
+
+// private
+QStandardItem *FilesWidget::findOrCreateParent(const Location &location)
+{
+    const QString &directoryPath = location.directoryPath("unnamed");
+    const QModelIndexList &parents = m_model.match(m_model.index(0, 0, QModelIndex()), DirectoryPathRole,
+                                                   directoryPath, 1, Qt::MatchExactly);
+    QStandardItem *parent;
+
+    if (parents.isEmpty()) {
+        parent = new QStandardItem(QIcon(":/icons/16x16/folder.png"), directoryPath);
+
+        parent->setToolTip(directoryPath);
+        parent->setData(directoryPath, DirectoryPathRole);
+        parent->setData(location.isEmpty() ? "" : directoryPath.toLower(), LowerCaseNameRole);
+
+        m_model.appendRow(parent);
+        m_model.sort(0);
+    } else {
+        parent = m_model.itemFromIndex(parents.first());
+    }
+
+    return parent;
+}
+
+// private
+void FilesWidget::takeChildFromParent(QStandardItem *child)
+{
+    Q_ASSERT(child != NULL);
+
+    QStandardItem *parent = child->parent();
+
+    Q_ASSERT(parent != NULL);
+
+    // Save currently selected item, because the QStandardItem::removeRow call seems to affect the selection even if
+    // the currently selected item is not the one being removed
+    const QItemSelection &selection = m_treeFiles->selectionModel()->selection();
+    QStandardItem *selectedItem = NULL;
+
+    if (!selection.isEmpty()) {
+        selectedItem = m_model.itemFromIndex(selection.first().indexes().first());
+
+        Q_ASSERT(selectedItem != NULL);
+
+        if (selectedItem == child) {
+            selectedItem = NULL;
+        }
+    }
+
+    parent->takeRow(child->row());
+
+    if (parent->rowCount() > 0) {
+        updateParentItemMarkers(parent);
+    } else {
+        if (selectedItem == parent) {
+            selectedItem = NULL;
+        }
+
+        m_model.removeRow(parent->row());
+    }
+
+    if (selectedItem != NULL) {
+        m_treeFiles->selectionModel()->select(selectedItem->index(), QItemSelectionModel::ClearAndSelect);
+    }
 }

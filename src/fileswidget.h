@@ -19,6 +19,9 @@
 #ifndef FILESWIDGET_H
 #define FILESWIDGET_H
 
+#include "location.h"
+
+#include <QFlags>
 #include <QHash>
 #include <QRegularExpression>
 #include <QStandardItemModel>
@@ -33,7 +36,19 @@ class FilesWidget : public QWidget
     Q_DISABLE_COPY(FilesWidget)
 
 public:
+    enum Option {
+        KeepAfterClose = (1 << 0)
+    };
+
+    Q_DECLARE_FLAGS(Options, Option)
+
     explicit FilesWidget(QWidget *parent = NULL);
+
+    void setOptions(const Options &options) { m_options = options; }
+    void setOption(Option option, bool enable) { m_options.setFlag(option, enable); }
+
+    Options options() const { return m_options; }
+    bool hasOption(Option option) const { return m_options.testFlag(option); }
 
 signals:
     void filterValidityChanged(bool valid);
@@ -49,13 +64,16 @@ private slots:
     void setCurrentDocument(const QModelIndex &index);
     void setCurrentChild(Document *document);
     void updateParentIndexMarkers(const QModelIndex &index);
-    void updateParentItemMarkers(QStandardItem *item);
+    void updateParentItemMarkers(QStandardItem *parent);
     void updateLocationOfSender();
     void updateModificationMarkerOfSender();
 
 private:
     enum {
-        DocumentPointerRole = Qt::UserRole,
+        DocumentRole = Qt::UserRole,
+        FilePathRole, // for reopening closed documents
+        DocumentTypeRole, // for reopening closed documents
+        TextCodecRole, // for reopening closed documents
         DirectoryPathRole, // for parents
         FileNameRole, // for children
         LowerCaseNameRole // for sorting
@@ -64,11 +82,17 @@ private:
     void updateModificationMarker(Document *document);
     void markItemAsCurrent(QStandardItem *item, bool mark) const;
     void markItemAsModified(QStandardItem *item, bool mark) const;
+    void markItemAsClosed(QStandardItem *item, bool mark) const;
     void applyFilter();
     bool filterAcceptsChild(const QModelIndex &index) const;
+    QStandardItem *findOrCreateParent(const Location &location);
+    void takeChildFromParent(QStandardItem *child);
+
+    Options m_options;
 
     QStandardItemModel m_model;
-    QHash<Document *, QStandardItem *> m_children; // values owned by QStandardItemModel
+    QHash<Document *, QStandardItem *> m_openChildren; // values owned by QStandardItemModel
+    QHash<Location, QStandardItem *> m_closedChildren; // values owned by QStandardItemModel
     QStandardItem *m_currentChild;
     QTreeView *m_treeFiles;
 
@@ -77,5 +101,7 @@ private:
     bool m_filterEnabled;
     QRegularExpression m_filterRegularExpression;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(FilesWidget::Options)
 
 #endif // FILESWIDGET_H

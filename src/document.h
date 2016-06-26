@@ -59,4 +59,6 @@ private:
     bool m_modified;
 };
 
+Q_DECLARE_METATYPE(Document::Type)
+
 #endif // DOCUMENT_H
