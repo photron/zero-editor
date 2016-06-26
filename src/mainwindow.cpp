@@ -452,6 +452,8 @@ void MainWindow::setCurrentDocument(Document *document)
 
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
+        disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionRevert, &QAction::setEnabled);
+        disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionRevert_Tool, &QAction::setEnabled);
         disconnect(editor, &Editor::actionAvailabilityChanged, this, &MainWindow::updateEditMenuAction);
 
         m_lastCurrentDocument = NULL;
