@@ -450,6 +450,7 @@ void MainWindow::setCurrentDocument(Document *document)
 
         Q_ASSERT(editor != NULL);
 
+        disconnect(m_lastCurrentDocument, &Document::locationChanged, this, &MainWindow::updateWindowTitle);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionRevert, &QAction::setEnabled);
@@ -499,14 +500,8 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionWordWrapping->setChecked(false);
     } else {
         const Location &location = document->location();
-        const QString &fileName = location.fileName("unnamed");
-        QString title = fileName + " - ";
 
-        if (!location.isEmpty()) {
-            title += location.directoryPath() + " - ";
-        }
-
-        setWindowTitle(title + "Zero Editor");
+        updateWindowTitle(location);
 
         Editor *editor = DocumentManager::editor(document);
 
@@ -515,6 +510,8 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->widgetStackedEditors->setCurrentWidget(editor->widget());
 
         // File menu
+        const QString &fileName = location.fileName("unnamed");
+
         m_ui->actionSave->setEnabled(document->isModified());
         m_ui->actionSave->setText(QString("Save \"%1\"").arg(fileName));
         m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
@@ -550,6 +547,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionWordWrapping->setEnabled(editor->hasFeature(Editor::WordWrapping));
         m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
 
+        connect(document, &Document::locationChanged, this, &MainWindow::updateWindowTitle);
         connect(document, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         connect(document, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
         connect(document, &Document::modificationChanged, m_ui->actionRevert, &QAction::setEnabled);
@@ -558,6 +556,19 @@ void MainWindow::setCurrentDocument(Document *document)
 
         m_lastCurrentDocument = document;
     }
+}
+
+// private slot
+void MainWindow::updateWindowTitle(const Location &location)
+{
+    const QString &fileName = location.fileName("unnamed");
+    QString title = fileName + " - ";
+
+    if (!location.isEmpty()) {
+        title += location.directoryPath() + " - ";
+    }
+
+    setWindowTitle(title + "Zero Editor");
 }
 
 // private slot

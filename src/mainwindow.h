@@ -24,6 +24,7 @@
 #include <QMainWindow>
 
 class Document;
+class Location;
 
 namespace Ui {
 class MainWindow;
@@ -74,6 +75,7 @@ private slots:
     void removeEditor(Document *document);
     void setCurrentDocument(Document *document);
 
+    void updateWindowTitle(const Location &location);
     void updateSaveAllAction(int modificationCount);
     void updateEditMenuAction(Editor::Action action, bool available);
 
