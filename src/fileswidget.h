@@ -42,6 +42,14 @@ public:
 
     Q_DECLARE_FLAGS(Options, Option)
 
+    enum Marker {
+        CurrentMarker = (1 << 0),
+        ModifiedMarker = (1 << 1),
+        ClosedMarker = (1 << 2)
+    };
+
+    Q_DECLARE_FLAGS(Markers, Marker)
+
     explicit FilesWidget(QWidget *parent = NULL);
 
     void setOptions(const Options &options) { m_options = options; }
@@ -66,7 +74,7 @@ private slots:
     void updateParentIndexMarkers(const QModelIndex &index);
     void updateParentItemMarkers(QStandardItem *parent);
     void updateLocationOfSender();
-    void updateModificationMarkerOfSender();
+    void updateModifiedMarkerOfSender();
 
 private:
     enum {
@@ -76,13 +84,12 @@ private:
         TextCodecRole, // for reopening closed documents
         DirectoryPathRole, // for parents
         FileNameRole, // for children
-        LowerCaseNameRole // for sorting
+        LowerCaseNameRole, // for sorting
+        MarkersRole
     };
 
-    void updateModificationMarker(Document *document);
-    void markItemAsCurrent(QStandardItem *item, bool mark) const;
-    void markItemAsModified(QStandardItem *item, bool mark) const;
-    void markItemAsClosed(QStandardItem *item, bool mark) const;
+    void updateModifiedMarker(Document *document);
+    void setMarker(QStandardItem *item, Marker marker, bool enable) const;
     void applyFilter();
     bool filterAcceptsChild(const QModelIndex &index) const;
     QStandardItem *findOrCreateParent(const Location &location);
@@ -103,5 +110,7 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(FilesWidget::Options)
+Q_DECLARE_OPERATORS_FOR_FLAGS(FilesWidget::Markers)
+Q_DECLARE_METATYPE(FilesWidget::Markers)
 
 #endif // FILESWIDGET_H

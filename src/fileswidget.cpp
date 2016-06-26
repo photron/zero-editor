@@ -120,7 +120,7 @@ void FilesWidget::addDocument(Document *document)
         m_closedChildren.remove(location);
         m_openChildren.insert(document, child);
 
-        markItemAsClosed(child, false);
+        setMarker(child, ClosedMarker, false);
     } else {
         // Find or create parent item
         parent = findOrCreateParent(location);
@@ -131,9 +131,10 @@ void FilesWidget::addDocument(Document *document)
         child = new QStandardItem(QIcon(":/icons/16x16/file.png"), fileName);
 
         child->setToolTip(location.filePath("unnamed"));
-        child->setData(qVariantFromValue(document), DocumentRole);
+        child->setData(QVariant::fromValue(document), DocumentRole);
         child->setData(fileName, FileNameRole);
         child->setData(location.isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
+        child->setData(QVariant::fromValue(Markers()), MarkersRole);
 
         m_openChildren.insert(document, child);
 
@@ -142,7 +143,7 @@ void FilesWidget::addDocument(Document *document)
     }
 
     connect(document, &Document::locationChanged, this, &FilesWidget::updateLocationOfSender);
-    connect(document, &Document::modificationChanged, this, &FilesWidget::updateModificationMarkerOfSender);
+    connect(document, &Document::modificationChanged, this, &FilesWidget::updateModifiedMarkerOfSender);
 
     // Apply current filter
     if (!filterAcceptsChild(child->index())) {
@@ -154,7 +155,7 @@ void FilesWidget::addDocument(Document *document)
     }
 
     // Show modification marker, if necessary
-    updateModificationMarker(document);
+    updateModifiedMarker(document);
     updateParentItemMarkers(parent);
 }
 
@@ -164,7 +165,7 @@ void FilesWidget::removeDocument(Document *document)
     Q_ASSERT(document != NULL);
     Q_ASSERT(document != DocumentManager::current());
 
-    disconnect(document, &Document::modificationChanged, this, &FilesWidget::updateModificationMarkerOfSender);
+    disconnect(document, &Document::modificationChanged, this, &FilesWidget::updateModifiedMarkerOfSender);
     disconnect(document, &Document::locationChanged, this, &FilesWidget::updateLocationOfSender);
 
     QStandardItem *child = m_openChildren.value(document, NULL);
@@ -175,20 +176,21 @@ void FilesWidget::removeDocument(Document *document)
     const Location &location = document->location();
 
     if (hasOption(KeepAfterClose) && !location.isEmpty()) {
-        child->setData(qVariantFromValue(NULL), DocumentRole);
+        child->setData(QVariant::fromValue(NULL), DocumentRole);
         child->setData(location.filePath(), FilePathRole);
-        child->setData(qVariantFromValue(document->type()), DocumentTypeRole);
+        child->setData(QVariant::fromValue(document->type()), DocumentTypeRole);
 
         if (document->type() == Document::Text) {
-            child->setData(qVariantFromValue(static_cast<TextDocument *>(document)->codec()), TextCodecRole);
+            child->setData(QVariant::fromValue(static_cast<TextDocument *>(document)->codec()), TextCodecRole);
         } else {
-            child->setData(qVariantFromValue(NULL), TextCodecRole);
+            child->setData(QVariant::fromValue(NULL), TextCodecRole);
         }
 
         m_openChildren.remove(document);
         m_closedChildren.insert(location, child);
 
-        markItemAsClosed(child, true);
+        setMarker(child, ModifiedMarker, false);
+        setMarker(child, ClosedMarker, true);
         updateParentItemMarkers(child->parent());
     } else {
         takeChildFromParent(child);
@@ -234,7 +236,7 @@ void FilesWidget::setCurrentChild(Document *document)
 {
     // Set current child and parent back to normal
     if (m_currentChild != NULL) {
-        markItemAsCurrent(m_currentChild, false);
+        setMarker(m_currentChild, CurrentMarker, false);
 
         QStandardItem *parent = m_currentChild->parent();
 
@@ -262,7 +264,7 @@ void FilesWidget::setCurrentChild(Document *document)
 
         m_currentChild = child;
 
-        markItemAsCurrent(m_currentChild, true);
+        setMarker(m_currentChild, CurrentMarker, true);
         updateParentItemMarkers(parent);
     }
 }
@@ -289,7 +291,7 @@ void FilesWidget::updateParentItemMarkers(QStandardItem *parent)
             hasHiddenCurrentChild = m_treeFiles->isRowHidden(m_currentChild->row(), parent->index());
         }
 
-        markItemAsCurrent(parent, hasHiddenCurrentChild);
+        setMarker(parent, CurrentMarker, hasHiddenCurrentChild);
 
         // Check if this is a parent of hidden modified children
         int childRowCount = parent->rowCount();
@@ -305,14 +307,16 @@ void FilesWidget::updateParentItemMarkers(QStandardItem *parent)
             }
         }
 
-        markItemAsModified(parent, hasHiddenModifiedChild);
+        setMarker(parent, ModifiedMarker, hasHiddenModifiedChild);
+        setMarker(parent, ClosedMarker, false);
     } else {
         // Check if this is the parent of the current child
-        markItemAsCurrent(parent, m_currentChild != NULL && m_currentChild->parent() == parent);
+        setMarker(parent, CurrentMarker, m_currentChild != NULL && m_currentChild->parent() == parent);
 
         // Check if this is a parent of modified children or has only closed children
         int childRowCount = parent->rowCount();
         bool hasModifiedChild = false;
+        bool hasClosedChild = false;
 
         for (int childRow = 0; childRow < childRowCount; ++childRow) {
             QStandardItem *child = parent->child(childRow);
@@ -320,11 +324,19 @@ void FilesWidget::updateParentItemMarkers(QStandardItem *parent)
 
             if (document != NULL && document->isModified()) {
                 hasModifiedChild = true;
+            }
+
+            if (document == NULL) {
+                hasClosedChild = true;
+            }
+
+            if (hasModifiedChild && hasClosedChild) {
                 break;
             }
         }
 
-        markItemAsModified(parent, hasModifiedChild);
+        setMarker(parent, ModifiedMarker, hasModifiedChild);
+        setMarker(parent, ClosedMarker, hasClosedChild);
     }
 }
 
@@ -372,13 +384,13 @@ void FilesWidget::updateLocationOfSender()
 }
 
 // private slot
-void FilesWidget::updateModificationMarkerOfSender()
+void FilesWidget::updateModifiedMarkerOfSender()
 {
-    updateModificationMarker(qobject_cast<Document *>(sender()));
+    updateModifiedMarker(qobject_cast<Document *>(sender()));
 }
 
 // private
-void FilesWidget::updateModificationMarker(Document *document)
+void FilesWidget::updateModifiedMarker(Document *document)
 {
     Q_ASSERT(document != NULL);
 
@@ -386,51 +398,60 @@ void FilesWidget::updateModificationMarker(Document *document)
 
     Q_ASSERT(child != NULL);
 
-    markItemAsModified(child, document->isModified());
+    setMarker(child, ModifiedMarker, document->isModified());
     updateParentItemMarkers(child->parent());
 }
 
 // private
-void FilesWidget::markItemAsCurrent(QStandardItem *item, bool mark) const
-{
-    QFont font(item->font());
-
-    font.setUnderline(mark);
-
-    item->setFont(font);
-}
-
-// private
-void FilesWidget::markItemAsModified(QStandardItem *item, bool mark) const
+void FilesWidget::setMarker(QStandardItem *item, Marker marker, bool enable) const
 {
     Q_ASSERT(item != NULL);
 
-    QString text;
+    Markers markers = item->data(MarkersRole).value<Markers>();
 
-    if (item->parent() == NULL) {
-        text = item->data(DirectoryPathRole).value<QString>();
-    } else {
-        text = item->data(FileNameRole).value<QString>();
+    if (markers.testFlag(marker) == enable) {
+        return;
     }
 
-    if (mark) {
-        item->setText(text + "*");
-        item->setForeground(Qt::red);
-    } else {
-        item->setText(text);
-        item->setForeground(palette().color(QPalette::Text));
-    }
-}
+    markers.setFlag(marker, enable);
 
-// private
-void FilesWidget::markItemAsClosed(QStandardItem *item, bool mark) const
-{
-    Q_ASSERT(item != NULL);
+    item->setData(QVariant::fromValue(markers), MarkersRole);
 
-    if (mark) {
-        item->setForeground(Qt::gray);
-    } else {
-        item->setForeground(palette().color(QPalette::Text));
+    if (marker == CurrentMarker) {
+        QFont font(item->font());
+
+        font.setUnderline(enable);
+
+        item->setFont(font);
+    } else if (marker == ModifiedMarker) {
+        QString text;
+
+        if (item->parent() == NULL) {
+            text = item->data(DirectoryPathRole).value<QString>();
+        } else {
+            text = item->data(FileNameRole).value<QString>();
+        }
+
+        if (enable) {
+            item->setText(text + "*");
+            item->setForeground(Qt::red);
+        } else {
+            item->setText(text);
+
+            if (markers.testFlag(ClosedMarker)) {
+                item->setForeground(Qt::darkGray);
+            } else {
+                item->setForeground(palette().color(QPalette::Text));
+            }
+        }
+    } else if (marker == ClosedMarker) {
+        if (!markers.testFlag(ModifiedMarker)) {
+            if (enable) {
+                item->setForeground(Qt::darkGray);
+            } else {
+                item->setForeground(palette().color(QPalette::Text));
+            }
+        }
     }
 }
 
@@ -500,6 +521,7 @@ QStandardItem *FilesWidget::findOrCreateParent(const Location &location)
         parent->setToolTip(directoryPath);
         parent->setData(directoryPath, DirectoryPathRole);
         parent->setData(location.isEmpty() ? "" : directoryPath.toLower(), LowerCaseNameRole);
+        parent->setData(QVariant::fromValue(Markers()), MarkersRole);
 
         m_model.appendRow(parent);
         m_model.sort(0);
