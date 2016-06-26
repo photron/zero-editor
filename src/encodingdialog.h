@@ -21,9 +21,9 @@
 
 #include <QDialog>
 
-class QListWidgetItem;
-
 class TextCodec;
+
+class QListWidgetItem;
 
 namespace Ui {
 class EncodingDialog;

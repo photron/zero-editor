@@ -21,11 +21,11 @@
 
 #include <QWidget>
 
+class QActionGroup;
+
 namespace Ui {
 class RecentFilesWidget;
 }
-
-class QActionGroup;
 
 class RecentFilesWidget : public QWidget
 {
