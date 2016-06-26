@@ -51,4 +51,9 @@ private:
     QSharedDataPointer<LocationData> d;
 };
 
+inline uint qHash(const Location &key, uint seed = 0)
+{
+    return qHash(key.filePath(), seed);
+}
+
 #endif // LOCATION_H
