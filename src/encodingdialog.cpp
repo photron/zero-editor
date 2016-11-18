@@ -73,10 +73,10 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
         current->setSelected(true);
     }
 
-    connect(m_ui->listCodecs, &QListWidget::currentItemChanged, this, EncodingDialog::setCodec);
-    connect(m_ui->listCodecs, &QListWidget::itemActivated, this, EncodingDialog::setCodecAndAccept);
-    connect(m_ui->buttonSelect, &QPushButton::clicked, this, EncodingDialog::accept);
-    connect(m_ui->buttonCancel, &QPushButton::clicked, this, EncodingDialog::reject);
+    connect(m_ui->listCodecs, &QListWidget::currentItemChanged, this, &EncodingDialog::setCodec);
+    connect(m_ui->listCodecs, &QListWidget::itemActivated, this, &EncodingDialog::setCodecAndAccept);
+    connect(m_ui->buttonSelect, &QPushButton::clicked, this, &EncodingDialog::accept);
+    connect(m_ui->buttonCancel, &QPushButton::clicked, this, &EncodingDialog::reject);
 }
 
 EncodingDialog::~EncodingDialog()
