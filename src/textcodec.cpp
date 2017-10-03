@@ -113,7 +113,7 @@ TextCodec *TextCodec::fromByteOrderMark(const QByteArray &data)
     }
 
     if (size >= 3) {
-        if (bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[1] == 0xBF) {
+        if (bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF) {
             return fromNumber(mibToNumber(IANA::UTF8, true)); // UTF-8-BOM
         }
     }
