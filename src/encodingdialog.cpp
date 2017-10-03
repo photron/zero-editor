@@ -34,8 +34,7 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
 
     foreach (qint64 number, TextCodec::knownNumbers()) {
         TextCodec *other = TextCodec::fromNumber(number);
-        QString name = ((QByteArrayList() << other->name()) + other->aliases()).join(" | ");
-        QListWidgetItem *item = new QListWidgetItem(name);
+        QListWidgetItem *item = new QListWidgetItem(other->name());
 
         if (current == NULL && codec != NULL && codec->number() == number) {
             current = item;
@@ -50,6 +49,14 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
         item->setData(Qt::UserRole, qVariantFromValue(number));
 
         m_ui->listCodecs->addItem(item);
+
+        foreach (const QByteArray &alias, other->aliases()) {
+            QListWidgetItem *item = new QListWidgetItem(alias + " \u2192 " + other->name());
+
+            item->setData(Qt::UserRole, qVariantFromValue(number));
+
+            m_ui->listCodecs->addItem(item);
+        }
     }
 
     m_ui->listCodecs->sortItems();
