@@ -47,7 +47,7 @@ class TextCodec
     Q_DISABLE_COPY(TextCodec)
 
 public:
-    qint64 number() const { return mibToNumber(m_codec->mibEnum(), m_byteOrderMarker); }
+    qint64 number() const { return mibToNumber(m_codec->mibEnum(), m_byteOrderMark); }
     QByteArray name() const;
     QList<QByteArray> aliases() const { return m_codec->aliases(); }
 
@@ -63,10 +63,10 @@ public:
 private:
     static qint64 mibToNumber(int mib, bool byteOrderMark);
 
-    TextCodec(QTextCodec *codec, bool byteOrderMarker);
+    TextCodec(QTextCodec *codec, bool byteOrderMark);
 
     QTextCodec *m_codec;
-    bool m_byteOrderMarker;
+    bool m_byteOrderMark;
 
     static QHash<qint64, TextCodec *> *s_codecs;
 };

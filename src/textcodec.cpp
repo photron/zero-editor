@@ -40,7 +40,7 @@ QByteArray TextCodec::name() const
 {
     QByteArray name = m_codec->name();
 
-    if (m_byteOrderMarker) {
+    if (m_byteOrderMark) {
         name += "-BOM";
     }
 
@@ -54,7 +54,7 @@ QString TextCodec::decode(const char *input, int length, TextCodecState *state) 
 
 QByteArray TextCodec::encode(const QChar *input, int length, TextCodecState *state) const
 {
-    if (state->m_first && !m_byteOrderMarker) {
+    if (state->m_first && !m_byteOrderMark) {
         state->m_state.flags |= QTextCodec::IgnoreHeader;
     }
 
@@ -128,8 +128,8 @@ qint64 TextCodec::mibToNumber(int mib, bool byteOrderMark)
 }
 
 // private
-TextCodec::TextCodec(QTextCodec *codec, bool byteOrderMarker) :
+TextCodec::TextCodec(QTextCodec *codec, bool byteOrderMark) :
     m_codec(codec),
-    m_byteOrderMarker(byteOrderMarker)
+    m_byteOrderMark(byteOrderMark)
 {
 }
