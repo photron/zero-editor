@@ -30,6 +30,8 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
     QListWidgetItem *current = NULL;
 
     foreach (qint64 number, TextCodec::knownNumbers()) {
