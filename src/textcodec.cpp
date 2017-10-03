@@ -80,8 +80,8 @@ void TextCodec::initialize()
 // static
 TextCodec *TextCodec::fromName(const QByteArray &name)
 {
-    bool byteOrderMark = name.startsWith("UTF") && name.endsWith("BOM");
-    QTextCodec *codec = QTextCodec::codecForName(name.mid(0, name.length() - (byteOrderMark ? 3 : 0)));
+    bool byteOrderMark = name.startsWith("UTF") && name.endsWith("-BOM");
+    QTextCodec *codec = QTextCodec::codecForName(name.mid(0, name.length() - (byteOrderMark ? 4 : 0)));
 
     if (codec == NULL) {
         return NULL;
