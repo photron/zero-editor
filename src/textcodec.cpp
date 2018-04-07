@@ -52,7 +52,11 @@ QStringList TextCodec::aliases() const
     QStringList aliases;
 
     foreach (const QByteArray &alias, m_codec->aliases()) {
-        aliases << alias;
+        if (m_byteOrderMark) {
+            aliases << alias + "-BOM";
+        } else {
+            aliases << alias;
+        }
     }
 
     return aliases;
