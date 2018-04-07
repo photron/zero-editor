@@ -22,6 +22,7 @@
 #include "documentmanager.h"
 #include "textcodec.h"
 #include "textdocument.h"
+#include "utils.h"
 
 #include <QTreeView>
 #include <QVBoxLayout>
@@ -418,11 +419,7 @@ void FilesWidget::setMarker(QStandardItem *item, Marker marker, bool enable) con
     item->setData(QVariant::fromValue(markers), MarkersRole);
 
     if (marker == CurrentMarker) {
-        QFont font(item->font());
-
-        font.setUnderline(enable);
-
-        item->setFont(font);
+        Utils::setFontUnderline(item, enable);
     } else if (marker == ModifiedMarker) {
         QString text;
 

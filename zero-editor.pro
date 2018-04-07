@@ -27,7 +27,8 @@ SOURCES     += src/binaryeditor.cpp \
                src/texteditor.cpp \
                src/texteditorwidget.cpp \
                src/textdocument.cpp \
-               src/unsaveddiffwidget.cpp
+               src/unsaveddiffwidget.cpp \
+               src/utils.cpp
 HEADERS     += src/binaryeditor.h \
                src/binaryeditorwidget.h \
                src/binarydocument.h \
@@ -53,7 +54,8 @@ HEADERS     += src/binaryeditor.h \
                src/texteditor.h \
                src/texteditorwidget.h \
                src/textdocument.h \
-               src/unsaveddiffwidget.h
+               src/unsaveddiffwidget.h \
+               src/utils.h
 FORMS       += src/bookmarkswidget.ui \
                src/encodingdialog.ui \
                src/findandreplacewidget.ui \

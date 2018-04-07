@@ -20,6 +20,7 @@
 #include "ui_encodingdialog.h"
 
 #include "textcodec.h"
+#include "utils.h"
 
 #include <QDebug>
 
@@ -41,11 +42,7 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
         if (current == NULL && codec != NULL && codec->number() == number) {
             current = item;
 
-            QFont font(item->font());
-
-            font.setUnderline(true);
-
-            item->setFont(font);
+            Utils::setFontUnderline(item, true);
         }
 
         item->setData(Qt::UserRole, qVariantFromValue(number));
@@ -68,11 +65,7 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
     if (current == NULL && codec == NULL) {
         current = item;
 
-        QFont font(item->font());
-
-        font.setUnderline(true);
-
-        item->setFont(font);
+        Utils::setFontUnderline(item, true);
     }
 
     m_ui->listCodecs->insertItem(0, item);
