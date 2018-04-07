@@ -139,7 +139,7 @@ TextCodec *TextCodec::fromByteOrderMark(const QByteArray &data)
 // static
 qint64 TextCodec::mibToNumber(int mib, bool byteOrderMark)
 {
-    return mib * 2 + (byteOrderMark ? 1 : 0);
+    return mib * 10 + (byteOrderMark ? 1 : 0);
 }
 
 // private
