@@ -36,15 +36,26 @@ enum {
 
 }
 
-QByteArray TextCodec::name() const
+QString TextCodec::name() const
 {
-    QByteArray name = m_codec->name();
+    QString name = m_codec->name();
 
     if (m_byteOrderMark) {
         name += "-BOM";
     }
 
     return name;
+}
+
+QStringList TextCodec::aliases() const
+{
+    QStringList aliases;
+
+    foreach (const QByteArray &alias, m_codec->aliases()) {
+        aliases << alias;
+    }
+
+    return aliases;
 }
 
 QString TextCodec::decode(const char *input, int length, TextCodecState *state) const
@@ -78,10 +89,10 @@ void TextCodec::initialize()
 }
 
 // static
-TextCodec *TextCodec::fromName(const QByteArray &name)
+TextCodec *TextCodec::fromName(const QString &name)
 {
     bool byteOrderMark = name.startsWith("UTF") && name.endsWith("-BOM");
-    QTextCodec *codec = QTextCodec::codecForName(name.mid(0, name.length() - (byteOrderMark ? 4 : 0)));
+    QTextCodec *codec = QTextCodec::codecForName(name.mid(0, name.length() - (byteOrderMark ? 4 : 0)).toUtf8());
 
     if (codec == NULL) {
         return NULL;

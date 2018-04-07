@@ -52,7 +52,7 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
 
         m_ui->listCodecs->addItem(item);
 
-        foreach (const QByteArray &alias, other->aliases()) {
+        foreach (const QString &alias, other->aliases()) {
             QListWidgetItem *item = new QListWidgetItem(alias + " \u2192 " + other->name());
 
             item->setData(Qt::UserRole, qVariantFromValue(number));

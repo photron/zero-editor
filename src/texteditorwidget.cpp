@@ -138,7 +138,7 @@ public:
             case DecodingError:
                 m_label->setText(QString("<b>Error:</b> Could not decode \"%1\" as %2. Editing is not possible.")
                                  .arg(m_document->location().fileName())
-                                 .arg(QString(m_document->codec()->name())));
+                                 .arg(m_document->codec()->name()));
                 m_button->setText("Select Encoding");
 
                 show();

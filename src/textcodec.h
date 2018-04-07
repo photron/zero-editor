@@ -48,8 +48,8 @@ class TextCodec
 
 public:
     qint64 number() const { return mibToNumber(m_codec->mibEnum(), m_byteOrderMark); }
-    QByteArray name() const;
-    QList<QByteArray> aliases() const { return m_codec->aliases(); }
+    QString name() const;
+    QStringList aliases() const;
 
     QString decode(const char *input, int length, TextCodecState *state = NULL) const;
     QByteArray encode(const QChar *input, int length, TextCodecState *state) const;
@@ -57,7 +57,7 @@ public:
     static void initialize();
     static QList<qint64> knownNumbers() { return s_codecs->keys(); }
     static TextCodec *fromNumber(qint64 number) { return s_codecs->value(number, NULL); }
-    static TextCodec *fromName(const QByteArray &name);
+    static TextCodec *fromName(const QString &name);
     static TextCodec *fromByteOrderMark(const QByteArray &data);
 
 private:
