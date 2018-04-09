@@ -451,6 +451,7 @@ void MainWindow::setCurrentDocument(Document *document)
         Q_ASSERT(editor != NULL);
 
         disconnect(m_lastCurrentDocument, &Document::locationChanged, this, &MainWindow::updateWindowTitle);
+        disconnect(m_lastCurrentDocument, &Document::locationChanged, this, &MainWindow::updateFileMenuText);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
         disconnect(m_lastCurrentDocument, &Document::modificationChanged, m_ui->actionRevert, &QAction::setEnabled);
@@ -510,25 +511,18 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->widgetStackedEditors->setCurrentWidget(editor->widget());
 
         // File menu
-        const QString &fileName = location.fileName("unnamed");
+        updateFileMenuText(location);
 
         m_ui->actionSave->setEnabled(document->isModified());
-        m_ui->actionSave->setText(QString("Save \"%1\"").arg(fileName));
         m_ui->actionSave_Tool->setEnabled(m_ui->actionSave->isEnabled());
-        m_ui->actionSave_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionSave));
 
         m_ui->actionSaveAs->setEnabled(true);
-        m_ui->actionSaveAs->setText(QString("Save \"%1\" As...").arg(fileName));
 
         m_ui->actionRevert->setEnabled(document->isModified());
-        m_ui->actionRevert->setText(QString("Revert \"%1\"").arg(fileName));
         m_ui->actionRevert_Tool->setEnabled(m_ui->actionRevert->isEnabled());
-        m_ui->actionRevert_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionRevert));
 
         m_ui->actionClose->setEnabled(true);
-        m_ui->actionClose->setText(QString("Close \"%1\"").arg(fileName));
         m_ui->actionClose_Tool->setEnabled(m_ui->actionClose->isEnabled());
-        m_ui->actionClose_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionClose));
 
         // Edit menu
         m_ui->actionUndo->setEnabled(editor->isActionAvailable(Editor::Undo));
@@ -548,6 +542,7 @@ void MainWindow::setCurrentDocument(Document *document)
         m_ui->actionWordWrapping->setChecked(editor->isWordWrapping());
 
         connect(document, &Document::locationChanged, this, &MainWindow::updateWindowTitle);
+        connect(document, &Document::locationChanged, this, &MainWindow::updateFileMenuText);
         connect(document, &Document::modificationChanged, m_ui->actionSave, &QAction::setEnabled);
         connect(document, &Document::modificationChanged, m_ui->actionSave_Tool, &QAction::setEnabled);
         connect(document, &Document::modificationChanged, m_ui->actionRevert, &QAction::setEnabled);
@@ -569,6 +564,23 @@ void MainWindow::updateWindowTitle(const Location &location)
     }
 
     setWindowTitle(title + "Zero Editor");
+}
+
+// private slot
+void MainWindow::updateFileMenuText(const Location &location)
+{
+    const QString &fileName = location.fileName("unnamed");
+
+    m_ui->actionSave->setText(QString("Save \"%1\"").arg(fileName));
+    m_ui->actionSave_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionSave));
+
+    m_ui->actionSaveAs->setText(QString("Save \"%1\" As...").arg(fileName));
+
+    m_ui->actionRevert->setText(QString("Revert \"%1\"").arg(fileName));
+    m_ui->actionRevert_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionRevert));
+
+    m_ui->actionClose->setText(QString("Close \"%1\"").arg(fileName));
+    m_ui->actionClose_Tool->setToolTip(formatToolBarActionToolTip(m_ui->actionClose));
 }
 
 // private slot
