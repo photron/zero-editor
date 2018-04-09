@@ -112,7 +112,7 @@ bool TextDocument::save(QByteArray *data, QString *error)
     *data = m_codec->encode(text.constData(), text.length(), &state);
 
     if (state.hasError()) {
-        *error = QString("Can not encode text for file \"%1\" as %2.").arg(location().filePath("unnamed"), m_codec->name());
+        *error = QString("Can not encode text for file \"%1\" as %2.").arg(location().path("unnamed"), m_codec->name());
 
         return false;
     }

@@ -19,16 +19,19 @@
 #ifndef LOCATION_H
 #define LOCATION_H
 
+#include <QDir>
+#include <QFileInfo>
 #include <QSharedData>
 
 class LocationData : public QSharedData
 {
 public:
-    LocationData(const QString &filePath);
+    LocationData(const QString &path);
     LocationData(const LocationData &other);
 
-    QString filePath;
-    QString directoryPath;
+    bool isDirectory;
+    QString path; // <directoryPath> + <fileName>
+    QString directoryPath; // Guaranteed to have a trailing separator
     QString fileName;
 };
 
@@ -36,15 +39,24 @@ class Location
 {
 public:
     Location() : d(new LocationData("")) { }
-    Location(const QString &filePath) : d(new LocationData(filePath)) { }
+    Location(const char *path) : d(new LocationData(path)) { }
+    Location(const QString &path) : d(new LocationData(path)) { }
 
-    bool isEmpty() const { return d->filePath.isEmpty(); }
+    bool isEmpty() const { return d->path.isEmpty(); }
+    bool isDirectory() const { return d->isDirectory; }
+    bool isFile() const { return !isEmpty() && !isDirectory(); }
 
-    QString filePath(const QString &empty = QString()) const { return isEmpty() ? empty : d->filePath; }
+    QString path(const QString &empty = QString()) const { return isEmpty() ? empty : d->path; }
     QString directoryPath(const QString &empty = QString()) const { return isEmpty() ? empty : d->directoryPath; }
     QString fileName(const QString &empty = QString()) const { return isEmpty() ? empty : d->fileName; }
 
-    bool operator==(const Location &other) const { return d == other.d || d->filePath == other.d->filePath; }
+    bool exists() const { return QFileInfo::exists(d->path); }
+
+    Location file(const QString &name) { return d->directoryPath + name; }
+
+    // Use QFileInfo for path comparison to avoid treating paths as different if they only differ in case but are
+    // located on a caseless file system and are actually identical. QFileInfo handles this case correctly.
+    bool operator==(const Location &other) const { return d == other.d || QFileInfo(d->path) == QFileInfo(other.d->path); }
     bool operator!=(const Location &other) const { return !(*this == other); }
 
 private:
@@ -53,7 +65,7 @@ private:
 
 inline uint qHash(const Location &key, uint seed = 0)
 {
-    return qHash(key.filePath(), seed);
+    return qHash(key.path(), seed);
 }
 
 #endif // LOCATION_H

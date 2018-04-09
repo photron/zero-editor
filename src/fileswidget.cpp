@@ -114,7 +114,7 @@ void FilesWidget::addDocument(Document *document)
         parent = child->parent();
 
         child->setData(qVariantFromValue(document), DocumentRole);
-        child->setData(QVariant(), FilePathRole);
+        child->setData(QVariant(), PathRole);
         child->setData(QVariant(), DocumentTypeRole);
         child->setData(QVariant(), TextCodecRole);
 
@@ -131,7 +131,7 @@ void FilesWidget::addDocument(Document *document)
 
         child = new QStandardItem(QIcon(":/icons/16x16/file.png"), fileName);
 
-        child->setToolTip(location.filePath("unnamed"));
+        child->setToolTip(location.path("unnamed"));
         child->setData(QVariant::fromValue(document), DocumentRole);
         child->setData(fileName, FileNameRole);
         child->setData(location.isEmpty() ? "" : fileName.toLower(), LowerCaseNameRole);
@@ -178,7 +178,7 @@ void FilesWidget::removeDocument(Document *document)
 
     if (hasOption(KeepAfterClose) && !location.isEmpty()) {
         child->setData(QVariant::fromValue(NULL), DocumentRole);
-        child->setData(location.filePath(), FilePathRole);
+        child->setData(location.path(), PathRole);
         child->setData(QVariant::fromValue(document->type()), DocumentTypeRole);
 
         if (document->type() == Document::Text) {
@@ -217,7 +217,7 @@ void FilesWidget::setCurrentDocument(const QModelIndex &index)
         if (document != NULL) {
             DocumentManager::setCurrent(document);
         } else {
-            const QString &filePath = index.data(FilePathRole).value<QString>();
+            const QString &filePath = index.data(PathRole).value<QString>();
             Document::Type type = index.data(DocumentTypeRole).value<Document::Type>();
             TextCodec *codec = index.data(TextCodecRole).value<TextCodec *>();
 
@@ -371,7 +371,7 @@ void FilesWidget::updateLocationOfSender()
     const QString &fileName = location.fileName();
 
     child->setText(fileName);
-    child->setToolTip(location.filePath());
+    child->setToolTip(location.path());
     child->setData(fileName, FileNameRole);
     child->setData(fileName.toLower(), LowerCaseNameRole);
 

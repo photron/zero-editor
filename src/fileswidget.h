@@ -79,7 +79,7 @@ private slots:
 private:
     enum {
         DocumentRole = Qt::UserRole,
-        FilePathRole, // for reopening closed documents
+        PathRole, // for reopening closed documents
         DocumentTypeRole, // for reopening closed documents
         TextCodecRole, // for reopening closed documents
         DirectoryPathRole, // for parents
