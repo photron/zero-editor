@@ -28,11 +28,11 @@ LocationData::LocationData(const QString &path_)
 
         isDirectory = path_.endsWith("/") || path_.endsWith("\\");
 
-        // Qt's QDir and QFileInfo are full of inconsistencies. For example, QDir::cleanPath strips trailing separators,
-        // but QFileInfo relies on the trailing separator to tell apart a file path from a directory path. Also, the
-        // QFileInfo absolute and canonical path methods are inconsistent in the way they split a path into the
-        // directory path and the file name part. Therefore, only use QDir::cleanPath do resolve dots and double-dots
-        // in the file path and do the rest by hand.
+        // Qt's QDir and QFileInfo are full of inconsistencies. For example, QDir::cleanPath() strips trailing
+        // separators (except from root directories), but QFileInfo relies on the trailing separator to tell apart a
+        // file path from a directory path. Also, the QFileInfo absolute and canonical path methods are inconsistent
+        // in the way they split a path into the directory path and the file name part. Therefore, only use
+        // QDir::cleanPath() do resolve dots and double-dots in the file path and do the rest by hand.
         path = QDir::toNativeSeparators(QDir::cleanPath(path_));
 
 #ifdef Q_OS_WIN
@@ -44,7 +44,11 @@ LocationData::LocationData(const QString &path_)
 #endif
 
         if (isDirectory) {
-            path += QDir::separator(); // Add trailing separator to indicate directory
+            // QDir::cleanPath() strips trailing separators from all paths, except from root directories
+            if (!path.endsWith(QDir::separator())) {
+                path += QDir::separator(); // Add trailing separator to indicate directory
+            }
+
             directoryPath = path;
             fileName = "";
         } else {
