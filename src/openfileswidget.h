@@ -34,8 +34,6 @@ public:
     explicit OpenFilesWidget(QWidget *parent = NULL);
     ~OpenFilesWidget();
 
-    void installLineEditEventFilter(QObject *filter);
-
 private slots:
     void setFilterVisible(bool visible);
     void markFilterAsValid(bool mark);

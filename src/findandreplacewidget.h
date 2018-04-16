@@ -34,8 +34,6 @@ public:
     explicit FindAndReplaceWidget(QWidget *parent = 0);
     ~FindAndReplaceWidget();
 
-    void installLineEditEventFilter(QObject *filter);
-
     void prepareForShow();
 
 signals:

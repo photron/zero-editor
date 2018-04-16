@@ -34,8 +34,6 @@ public:
     explicit FindInFilesWidget(QWidget *parent = NULL);
     ~FindInFilesWidget();
 
-    void installLineEditEventFilter(QObject *filter);
-
     void prepareForShow();
 
 signals:

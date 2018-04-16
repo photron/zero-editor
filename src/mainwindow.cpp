@@ -22,6 +22,7 @@
 #include "document.h"
 #include "documentmanager.h"
 #include "editor.h"
+#include "eventfilter.h"
 #include "textdocument.h"
 
 #include <QContextMenuEvent>
@@ -124,10 +125,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(DocumentManager::instance(), &DocumentManager::currentChanged, this, &MainWindow::setCurrentDocument);
     connect(DocumentManager::instance(), &DocumentManager::modificationCountChanged, this, &MainWindow::updateSaveAllAction);
 
-    m_ui->widgetOpenFiles->installLineEditEventFilter(this);
-    m_ui->widgetFindAndReplace->installLineEditEventFilter(this);
-    m_ui->widgetFindInFiles->installLineEditEventFilter(this);
-
     m_ui->widgetBookmarks->hide();
     m_ui->widgetStackedHelpers->hide();
 
@@ -149,7 +146,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Setup toolbar go-to-line edit
     QLineEdit *editGoToLine = new QLineEdit;
 
-    editGoToLine->installEventFilter(this);
+    editGoToLine->installEventFilter(EventFilter::instance());
     editGoToLine->setClearButtonEnabled(true);
     editGoToLine->setPlaceholderText("Line");
 
@@ -178,7 +175,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Setup toolbar find-quick edit
     QLineEdit *editFindQuick = new QLineEdit;
 
-    editFindQuick->installEventFilter(this);
+    editFindQuick->installEventFilter(EventFilter::instance());
     editFindQuick->setClearButtonEnabled(true);
     editFindQuick->setPlaceholderText("Find");
 
@@ -202,52 +199,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete m_ui;
-}
-
-// protected
-bool MainWindow::eventFilter(QObject *object, QEvent *event)
-{
-    if (event->type() == QEvent::ContextMenu) {
-        QLineEdit *edit = qobject_cast<QLineEdit *>(object);
-
-        if (edit != NULL) {
-            QContextMenuEvent *contextMenuEvent = static_cast<QContextMenuEvent *>(event);
-            QMenu *menu = edit->createStandardContextMenu();
-            QList<QAction *> actions = menu->actions();
-
-            for (int i = actions.length() - 1; i >= 0; --i) {
-                QAction *action = actions.at(i);
-                QString text(action->text().split('\t').first());
-
-                // Qt only sets shortcuts for the QLineEdit context menu QActions if there isn't another active
-                // shortcut with the same key sequence. But because as such shortcuts still work if the QLineEdit has
-                // focus there is no reason to not have them set for the context menu QActions.
-                if (text == "&Undo") {
-                    action->setShortcut(QKeySequence::Undo);
-                } else if (text == "&Redo") {
-                    action->setShortcut(QKeySequence::Redo);
-                } else if (text == "Cu&t") {
-                    action->setShortcut(QKeySequence::Cut);
-                } else if (text == "&Copy") {
-                    action->setShortcut(QKeySequence::Copy);
-                } else if (text == "&Paste") {
-                    action->setShortcut(QKeySequence::Paste);
-                } else if (text == "Select All") {
-                    action->setShortcut(QKeySequence::SelectAll);
-
-                    // Qt doesn't add an icon for the select all action. So it's set here.
-                    action->setIcon(QIcon(":/icons/16x16/select-all.png"));
-                }
-            }
-
-            menu->setAttribute(Qt::WA_DeleteOnClose);
-            menu->popup(contextMenuEvent->globalPos());
-
-            return true;
-        }
-    }
-
-    return QMainWindow::eventFilter(object, event);
 }
 
 // private slot

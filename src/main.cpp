@@ -18,6 +18,7 @@
 
 #include "documentmanager.h"
 #include "editorcolors.h"
+#include "eventfilter.h"
 #include "mainwindow.h"
 #include "monospacefontmetrics.h"
 #include "style.h"
@@ -43,6 +44,7 @@ int main(int argc, char **argv)
     QApplication::setStyle(new Style(QApplication::style()));
     QIcon::setThemeName("zero-editor");
 
+    EventFilter eventFilter;
     DocumentManager documentManager;
     MainWindow mainWindow;
 

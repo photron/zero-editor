@@ -41,9 +41,6 @@ public:
 
     static MainWindow *instance() { return s_instance; }
 
-protected:
-    bool eventFilter(QObject *object, QEvent *event);
-
 private slots:
     void newDocument();
     void openDocuments();

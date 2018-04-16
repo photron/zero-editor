@@ -20,6 +20,7 @@
 #include "ui_openfileswidget.h"
 
 #include "documentmanager.h"
+#include "eventfilter.h"
 
 OpenFilesWidget::OpenFilesWidget(QWidget *parent) :
     QWidget(parent),
@@ -27,6 +28,7 @@ OpenFilesWidget::OpenFilesWidget(QWidget *parent) :
 {
     m_ui->setupUi(this);
 
+    m_ui->editFilter->installEventFilter(EventFilter::instance());
     m_ui->editFilter->setVisible(m_ui->checkFilter->isChecked());
 
     connect(m_ui->radioModified, &QRadioButton::toggled, m_ui->widgetFiles, &FilesWidget::showModifiedDocumentsOnly);
@@ -40,11 +42,6 @@ OpenFilesWidget::OpenFilesWidget(QWidget *parent) :
 OpenFilesWidget::~OpenFilesWidget()
 {
     delete m_ui;
-}
-
-void OpenFilesWidget::installLineEditEventFilter(QObject *filter)
-{
-    m_ui->editFilter->installEventFilter(filter);
 }
 
 // private slot

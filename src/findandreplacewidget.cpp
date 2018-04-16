@@ -19,6 +19,8 @@
 #include "findandreplacewidget.h"
 #include "ui_findandreplacewidget.h"
 
+#include "eventfilter.h"
+
 #include <QLineEdit>
 
 FindAndReplaceWidget::FindAndReplaceWidget(QWidget *parent) :
@@ -29,9 +31,11 @@ FindAndReplaceWidget::FindAndReplaceWidget(QWidget *parent) :
 
     connect(m_ui->buttonHide, &QToolButton::clicked, this, &FindAndReplaceWidget::hideClicked);
 
+    m_ui->comboFind->lineEdit()->installEventFilter(EventFilter::instance());
     m_ui->comboFind->lineEdit()->setClearButtonEnabled(true);
     m_ui->comboFind->lineEdit()->setPlaceholderText("Find");
 
+    m_ui->comboReplace->lineEdit()->installEventFilter(EventFilter::instance());
     m_ui->comboReplace->lineEdit()->setClearButtonEnabled(true);
     m_ui->comboReplace->lineEdit()->setPlaceholderText("Replace");
 }
@@ -39,12 +43,6 @@ FindAndReplaceWidget::FindAndReplaceWidget(QWidget *parent) :
 FindAndReplaceWidget::~FindAndReplaceWidget()
 {
     delete m_ui;
-}
-
-void FindAndReplaceWidget::installLineEditEventFilter(QObject *filter)
-{
-    m_ui->comboFind->lineEdit()->installEventFilter(filter);
-    m_ui->comboReplace->lineEdit()->installEventFilter(filter);
 }
 
 void FindAndReplaceWidget::prepareForShow()

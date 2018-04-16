@@ -10,6 +10,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/editor.cpp \
                src/editorcolors.cpp \
                src/encodingdialog.cpp \
+               src/eventfilter.cpp \
                src/fileswidget.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
@@ -38,6 +39,7 @@ HEADERS     += src/binaryeditor.h \
                src/editor.h \
                src/editorcolors.h \
                src/encodingdialog.h \
+               src/eventfilter.h \
                src/fileswidget.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
