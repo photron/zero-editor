@@ -34,8 +34,6 @@ public:
     static QColor infoBackgroundColor() { return s_infoBackgroundColor; }
 
 private:
-    EditorColors();
-
     static QPalette *s_basicPalette;
     static QColor s_currentLineHighlightColor;
     static QColor s_innerWrapMarkerColor;
