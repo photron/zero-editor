@@ -32,6 +32,7 @@ class EncodingDialog;
 class EncodingDialog : public QDialog
 {
     Q_OBJECT
+    Q_DISABLE_COPY(EncodingDialog)
 
 public:
     explicit EncodingDialog(TextCodec *codec, QWidget *parent = NULL);
