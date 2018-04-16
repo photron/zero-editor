@@ -113,7 +113,7 @@ void FilesWidget::addDocument(Document *document)
         // Reopen closed child item
         parent = child->parent();
 
-        child->setData(qVariantFromValue(document), DocumentRole);
+        child->setData(QVariant::fromValue(document), DocumentRole);
         child->setData(QVariant(), PathRole);
         child->setData(QVariant(), DocumentTypeRole);
         child->setData(QVariant(), TextCodecRole);

@@ -45,14 +45,14 @@ EncodingDialog::EncodingDialog(TextCodec *codec, QWidget *parent) :
             Utils::setFontUnderline(item, true);
         }
 
-        item->setData(Qt::UserRole, qVariantFromValue(number));
+        item->setData(Qt::UserRole, QVariant::fromValue(number));
 
         m_ui->listCodecs->addItem(item);
 
         foreach (const QString &alias, other->aliases()) {
             QListWidgetItem *item = new QListWidgetItem(alias + " \u2192 " + other->name());
 
-            item->setData(Qt::UserRole, qVariantFromValue(number));
+            item->setData(Qt::UserRole, QVariant::fromValue(number));
 
             m_ui->listCodecs->addItem(item);
         }
