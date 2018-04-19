@@ -54,13 +54,10 @@ LocationData::LocationData(const QString &path_)
         } else {
             int index = path.lastIndexOf(QDir::separator());
 
-            if (index < 0) {
-                directoryPath = "";
-                fileName = path;
-            } else {
-                directoryPath = path.left(index + 1);
-                fileName = path.mid(index + 1);
-            }
+            Q_ASSERT(index >= 0);
+
+            directoryPath = path.left(index + 1);
+            fileName = path.mid(index + 1);
         }
     }
 }
