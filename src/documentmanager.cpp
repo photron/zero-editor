@@ -21,6 +21,7 @@
 #include "binarydocument.h"
 #include "binaryeditor.h"
 #include "encodingdialog.h"
+#include "filedialog.h"
 #include "mainwindow.h"
 #include "textdocument.h"
 #include "textcodec.h"
@@ -309,10 +310,11 @@ void DocumentManager::setCurrent(Document *document)
 // static
 void DocumentManager::showOpenDialog()
 {
-    const QStringList &filePaths = QFileDialog::getOpenFileNames(MainWindow::instance(), "Open Files");
+    const Location& suggestion = s_instance->m_current != NULL ? s_instance->m_current->location() : Location();
+    const QList<Location> &locations = FileDialog::getOpenLocations(MainWindow::instance(), suggestion);
 
-    foreach (const QString &filePath, filePaths) {
-        Document *document = find(filePath);
+    foreach (const Location &location, locations) {
+        Document *document = find(location);
 
         if (document != NULL) {
             setCurrent(document);
@@ -320,7 +322,7 @@ void DocumentManager::showOpenDialog()
             continue;
         }
 
-        open(filePath, Document::Text, NULL);
+        open(location, Document::Text, NULL);
     }
 }
 
@@ -334,19 +336,19 @@ void DocumentManager::showSaveAsDialog(Document *document)
     // can be called as part of the saveAll method.
     setCurrent(document);
 
-    const Location &location = document->location();
-    QString suggestion;
+    const Location &oldLocation = document->location();
+    Location suggestion;
 
-    if (location.isEmpty()) {
-        suggestion = QDir::home().absoluteFilePath("unnamed");
+    if (oldLocation.isEmpty()) {
+        suggestion = Location::home().file("unnamed");
     } else {
-        suggestion = location.filePath();
+        suggestion = oldLocation.path();
     }
 
-    const QString &filePath = QFileDialog::getSaveFileName(MainWindow::instance(), "Save File", suggestion);
+    const Location &newLocation = FileDialog::getSaveLocation(MainWindow::instance(), suggestion);
 
-    if (!filePath.isEmpty()) {
-        saveAs(document, filePath);
+    if (!newLocation.isEmpty()) {
+        saveAs(document, newLocation);
     }
 }
 

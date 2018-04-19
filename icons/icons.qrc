@@ -2,12 +2,14 @@
     <qresource prefix="/icons">
         <file>zero-editor.ico</file>
         <file>14x14/clear.png</file>
+        <file>16x16/add.png</file>
         <file>16x16/bookmarks.png</file>
         <file>16x16/clear.png</file>
         <file>16x16/close.png</file>
         <file>16x16/copy.png</file>
         <file>16x16/cut.png</file>
         <file>16x16/delete.png</file>
+        <file>16x16/down.png</file>
         <file>16x16/encoding.png</file>
         <file>16x16/exit.png</file>
         <file>16x16/file.png</file>
@@ -26,6 +28,8 @@
         <file>16x16/paste.png</file>
         <file>16x16/recent.png</file>
         <file>16x16/redo.png</file>
+        <file>16x16/remove.png</file>
+        <file>16x16/rename.png</file>
         <file>16x16/revert.png</file>
         <file>16x16/save.png</file>
         <file>16x16/save-all.png</file>
@@ -37,12 +41,15 @@
         <file>16x16/toggle-case.png</file>
         <file>16x16/undo.png</file>
         <file>16x16/unsaved-diff.png</file>
+        <file>16x16/up.png</file>
+        <file>24x24/add.png</file>
         <file>24x24/bookmarks.png</file>
         <file>24x24/clear.png</file>
         <file>24x24/close.png</file>
         <file>24x24/copy.png</file>
         <file>24x24/cut.png</file>
         <file>24x24/delete.png</file>
+        <file>24x24/down.png</file>
         <file>24x24/encoding.png</file>
         <file>24x24/exit.png</file>
         <file>24x24/file.png</file>
@@ -61,6 +68,8 @@
         <file>24x24/paste.png</file>
         <file>24x24/recent.png</file>
         <file>24x24/redo.png</file>
+        <file>24x24/remove.png</file>
+        <file>24x24/rename.png</file>
         <file>24x24/revert.png</file>
         <file>24x24/save.png</file>
         <file>24x24/save-all.png</file>
@@ -72,6 +81,7 @@
         <file>24x24/toggle-case.png</file>
         <file>24x24/undo.png</file>
         <file>24x24/unsaved-diff.png</file>
+        <file>24x24/up.png</file>
         <file alias="zero-editor/index.theme">zero-editor.theme</file>
         <file alias="zero-editor/16x16/edit-copy.png">16x16/copy.png</file>
         <file alias="zero-editor/16x16/edit-cut.png">16x16/cut.png</file>

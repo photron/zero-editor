@@ -52,4 +52,19 @@ void setFontUnderline(QStandardItem *item, bool underline)
     item->setFont(font);
 }
 
+QModelIndexList convertItemSelectionToIndexList(const QItemSelection &selection, int column)
+{
+    QModelIndexList indexes;
+
+    foreach (const QItemSelectionRange &range, selection) {
+        foreach (const QModelIndex &index, range.indexes()) {
+            if (index.column() == column) {
+                indexes << index;
+            }
+        }
+    }
+
+    return indexes;
+}
+
 }

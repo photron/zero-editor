@@ -16,25 +16,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
-#include <QAbstractItemModel>
+#include <QSettings>
 
-class QAbstractButton;
-class QItemSelection;
-class QListWidgetItem;
-class QStandardItem;
-
-namespace Utils
+class Settings
 {
+public:
+    static void initialize();
 
-void setFontUnderline(QAbstractButton *button, bool underline);
-void setFontUnderline(QListWidgetItem *item, bool underline);
-void setFontUnderline(QStandardItem *item, bool underline);
+    static QSettings *settings() { return s_settings; }
 
-QModelIndexList convertItemSelectionToIndexList(const QItemSelection &selection, int column);
+private:
+    static QSettings *s_settings;
+};
 
-}
-
-#endif // UTILS_H
+#endif // SETTINGS_H

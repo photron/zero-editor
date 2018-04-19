@@ -61,6 +61,8 @@ public:
     bool operator==(const Location &other) const { return d == other.d || QFileInfo(d->path) == QFileInfo(other.d->path); }
     bool operator!=(const Location &other) const { return !(*this == other); }
 
+    static Location home() { return QDir::homePath() + "/"; } // Add trailing separator to indicate directory
+
 private:
     QSharedDataPointer<LocationData> d;
 };

@@ -11,6 +11,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/editorcolors.cpp \
                src/encodingdialog.cpp \
                src/eventfilter.cpp \
+               src/filedialog.cpp \
                src/fileswidget.cpp \
                src/findandreplacewidget.cpp \
                src/findinfileswidget.cpp \
@@ -22,6 +23,7 @@ SOURCES     += src/binaryeditor.cpp \
                src/monospacefontmetrics.cpp \
                src/openfileswidget.cpp \
                src/recentfileswidget.cpp \
+               src/settings.cpp \
                src/style.cpp \
                src/syntaxhighlighter.cpp \
                src/textcodec.cpp \
@@ -40,6 +42,7 @@ HEADERS     += src/binaryeditor.h \
                src/editorcolors.h \
                src/encodingdialog.h \
                src/eventfilter.h \
+               src/filedialog.h \
                src/fileswidget.h \
                src/findandreplacewidget.h \
                src/findinfileswidget.h \
@@ -50,6 +53,7 @@ HEADERS     += src/binaryeditor.h \
                src/monospacefontmetrics.h \
                src/openfileswidget.h \
                src/recentfileswidget.h \
+               src/settings.h \
                src/style.h \
                src/syntaxhighlighter.h \
                src/textcodec.h \
@@ -60,6 +64,7 @@ HEADERS     += src/binaryeditor.h \
                src/utils.h
 FORMS       += src/bookmarkswidget.ui \
                src/encodingdialog.ui \
+               src/filedialog.ui \
                src/findandreplacewidget.ui \
                src/findinfileswidget.ui \
                src/gitdiffwidget.ui \

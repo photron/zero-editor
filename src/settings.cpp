@@ -16,25 +16,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef UTILS_H
-#define UTILS_H
+#include "settings.h"
 
-#include <QAbstractItemModel>
+// Use a QSettings pointer here to avoid potential static initialization order problems
+QSettings *Settings::s_settings = NULL;
 
-class QAbstractButton;
-class QItemSelection;
-class QListWidgetItem;
-class QStandardItem;
-
-namespace Utils
+// static
+void Settings::initialize()
 {
-
-void setFontUnderline(QAbstractButton *button, bool underline);
-void setFontUnderline(QListWidgetItem *item, bool underline);
-void setFontUnderline(QStandardItem *item, bool underline);
-
-QModelIndexList convertItemSelectionToIndexList(const QItemSelection &selection, int column);
-
+    s_settings = new QSettings("Majestic42", "ZeroEditor"); // FIXME: This leaks memory
 }
-
-#endif // UTILS_H

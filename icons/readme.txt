@@ -5,12 +5,14 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 
 14x14/clear.png               -> src/edit-clear.svg (modified)
 
+16x16/add.png                 -> 16x16/actions/list-add.png
 16x16/bookmarks.png           -> 16x16/places/user-bookmarks.png
 16x16/clear.png               -> 16x16/actions/edit-clear.png
 16x16/close.png               -> 16x16/actions/window-close.png
 16x16/copy.png                -> 16x16/actions/edit-copy.png
 16x16/cut.png                 -> 16x16/actions/edit-cut.png
 16x16/delete.png              -> 16x16/actions/edit-delete.png
+16x16/down.png                -> 16x16/actions/go-down.png
 16x16/encoding.png            -> 16x16/actions/document-properties.png
 16x16/exit.png                -> 16x16/actions/application-exit.png
 16x16/file.png                -> 16x16/mimetypes/text-x-generic.png
@@ -28,6 +30,8 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 16x16/paste.png               -> 16x16/actions/edit-paste.png
 16x16/recent.png              -> 16x16/actions/document-open-recent.png
 16x16/redo.png                -> 16x16/actions/edit-redo.png
+16x16/remove.png              -> 16x16/actions/list-remove.png
+16x16/rename.png              -> 16x16/apps/accessories-text-editor.png
 16x16/revert.png              -> 16x16/actions/document-revert.png
 16x16/save.png                -> 16x16/actions/document-save.png
 16x16/save-all.png            -> 16x16/actions/document-save.png (modified)
@@ -39,13 +43,16 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 16x16/toggle-case.png         -> 16x16/apps/preferences-desktop-font.png
 16x16/undo.png                -> 16x16/actions/edit-undo.png
 16x16/unsaved-diff.png        -> 16x16/actions/format-justify-fill.png (modified)
+16x16/up.png                  -> 16x16/actions/go-up.png
 
+24x24/add.png                 -> 24x24/actions/list-add.png
 24x24/bookmarks.png           -> 24x24/places/user-bookmarks.png
 24x24/clear.png               -> 24x24/actions/edit-clear.png
 24x24/close.png               -> 24x24/actions/window-close.png
 24x24/copy.png                -> 24x24/actions/edit-copy.png
 24x24/cut.png                 -> 24x24/actions/edit-cut.png
 24x24/delete.png              -> 24x24/actions/edit-delete.png
+24x24/down.png                -> 24x24/actions/go-down.png
 24x24/encoding.png            -> 24x24/actions/document-properties.png
 24x24/exit.png                -> 24x24/actions/application-exit.png
 24x24/file.png                -> 24x24/mimetypes/text-x-generic.png
@@ -63,6 +70,8 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 24x24/paste.png               -> 24x24/actions/edit-paste.png
 24x24/recent.png              -> 24x24/actions/document-open-recent.png
 24x24/redo.png                -> 24x24/actions/edit-redo.png
+24x24/remove.png              -> 24x24/actions/list-remove.png
+24x24/rename.png              -> 24x24/apps/accessories-text-editor.png
 24x24/revert.png              -> 24x24/actions/document-revert.png
 24x24/save.png                -> 24x24/actions/document-save.png
 24x24/save-all.png            -> 24x24/actions/document-save.png (modified)
@@ -74,6 +83,7 @@ zero-editor.ico               -> */apps/accessories-text-editor.png
 24x24/toggle-case.png         -> 24x24/apps/preferences-desktop-font.png
 24x24/undo.png                -> 24x24/actions/edit-undo.png
 24x24/unsaved-diff.png        -> 24x24/actions/format-justify-fill.png (modified)
+24x24/up.png                  -> 24x24/actions/go-up.png
 
 The following icon came from msysgit. The original git logo is licensed under
 the Creative Commons Attribution 3.0 Unported License:

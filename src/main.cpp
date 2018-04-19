@@ -21,6 +21,7 @@
 #include "eventfilter.h"
 #include "mainwindow.h"
 #include "monospacefontmetrics.h"
+#include "settings.h"
 #include "style.h"
 #include "textcodec.h"
 
@@ -38,6 +39,7 @@ int main(int argc, char **argv)
         qDebug() << "main: Loading DejaVuSansMono.ttf failed";
     }
 
+    Settings::initialize();
     TextCodec::initialize();
     MonospaceFontMetrics::initialize();
     EditorColors::initialize();
