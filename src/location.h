@@ -32,7 +32,8 @@ public:
     bool isDirectory;
     QString path; // <directoryPath> + <fileName>
     QString directoryPath; // Guaranteed to have a trailing separator
-    QString fileName;
+    QString directoryName; // Last part of <directoryPath>
+    QString fileName; // Last part of <path>
 };
 
 class Location
@@ -48,6 +49,7 @@ public:
 
     QString path(const QString &empty = QString()) const { return isEmpty() ? empty : d->path; }
     QString directoryPath(const QString &empty = QString()) const { return isEmpty() ? empty : d->directoryPath; }
+    QString directoryName(const QString &empty = QString()) const { return isEmpty() ? empty : d->directoryName; }
     QString fileName(const QString &empty = QString()) const { return isEmpty() ? empty : d->fileName; }
 
     bool exists() const { return QFileInfo::exists(d->path); }

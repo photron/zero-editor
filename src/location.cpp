@@ -59,6 +59,8 @@ LocationData::LocationData(const QString &path_)
             directoryPath = path.left(index + 1);
             fileName = path.mid(index + 1);
         }
+
+        directoryName = directoryPath.split(QDir::separator(), QString::SkipEmptyParts).last();
     }
 }
 
@@ -67,6 +69,7 @@ LocationData::LocationData(const LocationData &other) :
     isDirectory(other.isDirectory),
     path(other.path),
     directoryPath(other.directoryPath),
+    directoryName(other.directoryName),
     fileName(other.fileName)
 {
 }
